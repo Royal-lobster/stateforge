@@ -27,9 +27,10 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
     const to = stateMap.get(t.to);
     if (!from || !to) continue;
     if (t.from === t.to) {
-      const cx = from.x, cy = from.y - 50;
+      // Hit area: self-loop label area above state
+      const cx = from.x, cy = from.y - STATE_RADIUS - 18;
       const dx = wx - cx, dy = wy - cy;
-      if (dx * dx + dy * dy < 900) return t;
+      if (dx * dx + dy * dy < 1200) return t;
       continue;
     }
     const ax = from.x, ay = from.y, bx = to.x, by = to.y;

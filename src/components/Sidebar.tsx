@@ -19,6 +19,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const autoLayout = useStore(s => s.autoLayout);
   const clearAll = useStore(s => s.clearAll);
+  const addTrapState = useStore(s => s.addTrapState);
 
   if (!showSidebar) return null;
 
@@ -103,6 +104,14 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
         <div className="font-mono text-[11px] text-[var(--color-text-muted)] mt-2">
           {states.length} states · {transitions.length} transitions
         </div>
+        {(mode === 'dfa' || mode === 'nfa') && states.length > 0 && (
+          <button
+            onClick={addTrapState}
+            className="mt-2 w-full font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 px-2 py-1.5 transition-colors text-left"
+          >
+            + Add Trap State
+          </button>
+        )}
       </div>
 
       {/* Errors */}

@@ -59,6 +59,7 @@ interface StoreState {
   autoLayout: () => void;
   loadAutomaton: (states: State[], transitions: Transition[], mode: Mode) => void;
   clearAll: () => void;
+  addTrapState: () => void;
 
   // Actions - editor
   setTool: (tool: Tool) => void;
@@ -243,10 +244,13 @@ export const useStore = create<StoreState>()(
 
     addTransition: (from, to) => {
       const s = get();
-      // In PDA mode, allow multiple transitions between same states
+      // For DFA/NFA/Mealy/Moore, if transition exists, open it for editing instead of blocking
       if (s.mode !== 'pda' && s.mode !== 'tm') {
         const existing = s.transitions.find(t => t.from === from && t.to === to);
-        if (existing) return;
+        if (existing) {
+          set({ editingTransitionId: existing.id, tool: 'pointer' });
+          return;
+        }
       }
       s.pushUndo();
       const defaultSymbol = s.mode === 'tm' ? 'a → a, R'
@@ -326,6 +330,68 @@ export const useStore = create<StoreState>()(
       const s = get();
       s.pushUndo();
       set({ states: [], transitions: [], nextStateNum: 0, selectedIds: new Set(), redoStack: [] });
+    },
+
+    addTrapState: () => {
+      const s = get();
+      s.pushUndo();
+      // Collect alphabet
+      const alphabet = new Set<string>();
+      for (const t of s.transitions) {
+        for (const sym of t.symbols) {
+          if (sym !== 'ε') alphabet.add(sym);
+        }
+      }
+      if (alphabet.size === 0) return;
+
+      // Find missing transitions for each state
+      const stateIds = s.states.map(st => st.id);
+      let needTrap = false;
+      const missingTransitions: { from: string; symbols: string[] }[] = [];
+
+      for (const st of s.states) {
+        const covered = new Set<string>();
+        for (const t of s.transitions) {
+          if (t.from === st.id) {
+            for (const sym of t.symbols) covered.add(sym);
+          }
+        }
+        const missing = [...alphabet].filter(sym => !covered.has(sym));
+        if (missing.length > 0) {
+          needTrap = true;
+          missingTransitions.push({ from: st.id, symbols: missing });
+        }
+      }
+
+      if (!needTrap) return; // Already complete
+
+      // Create trap state
+      const trapId = genId();
+      const maxX = Math.max(...s.states.map(st => st.x), 0);
+      const avgY = s.states.reduce((sum, st) => sum + st.y, 0) / s.states.length || 300;
+      const trapState: State = {
+        id: trapId,
+        label: `trap`,
+        x: maxX + 150,
+        y: avgY,
+        isInitial: false,
+        isAccepting: false,
+      };
+
+      // Create transitions to trap
+      const newTransitions: Transition[] = [];
+      for (const { from, symbols } of missingTransitions) {
+        newTransitions.push({ id: genId(), from, to: trapId, symbols });
+      }
+      // Self-loop on trap for all symbols
+      newTransitions.push({ id: genId(), from: trapId, to: trapId, symbols: [...alphabet] });
+
+      set({
+        states: [...s.states, trapState],
+        transitions: [...s.transitions, ...newTransitions],
+        nextStateNum: s.nextStateNum,
+        redoStack: [],
+      });
     },
 
     setTool: (tool) => set({ tool }),
