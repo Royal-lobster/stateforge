@@ -260,6 +260,7 @@ export const useStore = create<StoreState>()(
       set({
         transitions: [...s.transitions, newT],
         editingTransitionId: newT.id,
+        tool: 'pointer',
         redoStack: [],
       });
     },
@@ -381,7 +382,10 @@ export const useStore = create<StoreState>()(
     simStart: () => {
       const s = get();
       const initial = s.states.find(st => st.isInitial);
-      if (!initial) return;
+      if (!initial) {
+        set({ simStatus: 'rejected', simCurrentStates: new Set(), simConsumed: '', simRemaining: '' });
+        return;
+      }
       let current: Set<string>;
       if (s.mode === 'nfa') {
         current = epsilonClosure(new Set([initial.id]), s.transitions);

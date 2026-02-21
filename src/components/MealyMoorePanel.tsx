@@ -72,18 +72,18 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
   return (
     <div className={`bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${isMobile ? 'max-h-[50vh]' : 'h-52'}`}>
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
-        <span className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">
+        <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">
           {isMealy ? 'Mealy Machine' : 'Moore Machine'}
         </span>
         {status && (
-          <span className="font-mono text-[10px] font-bold" style={{
+          <span className="font-mono text-[11px] font-bold" style={{
             color: status === 'done' ? 'var(--color-accept)' : 'var(--color-reject)',
           }}>
             {status === 'done' ? 'COMPLETE' : 'ERROR'}
           </span>
         )}
         {result && (
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">
             ({visibleSteps}/{allSteps.length})
           </span>
         )}
@@ -91,7 +91,7 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
       <div className="flex-1 flex gap-3 px-3 py-2 overflow-hidden">
         <div className="flex flex-col gap-2 w-64 shrink-0">
           <div className="flex items-center gap-1">
-            <span className="font-mono text-[10px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
@@ -106,17 +106,17 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
           </div>
           {displayOutput !== undefined && (
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)]">OUTPUT</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)]">OUTPUT</span>
               <span className="font-mono text-sm text-[var(--color-accent)] font-bold">{displayOutput || 'ε'}</span>
             </div>
           )}
-          <div className="text-[var(--color-text-dim)] font-mono text-[10px]">
+          <div className="text-[var(--color-text-dim)] font-mono text-[11px]">
             {isMealy ? 'Transitions: input/output (e.g. a/1)' : 'State labels: name/output (e.g. q0/0)'}
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           {shownSteps.length > 0 && (
-            <table className="w-full font-mono text-[10px]">
+            <table className="w-full font-mono text-[11px]">
               <thead>
                 <tr className="text-[var(--color-text-dim)]">
                   <td className="pb-1 pr-2">#</td>

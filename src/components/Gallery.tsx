@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import type { State, Transition, Mode } from '@/types';
 import {
   CircleDot, GitBranch, Layers, Cpu,
-  ArrowRight,
+  ArrowRight, Plus,
 } from 'lucide-react';
 
 interface Example {
@@ -130,7 +130,47 @@ const EXAMPLES: Example[] = [
   },
 ];
 
-const CATEGORIES = ['DFA', 'NFA', 'PDA', 'TM'];
+const MEALY_MOORE_EXAMPLES: Example[] = [
+  {
+    name: 'Mealy: Parity Bit',
+    description: 'Mealy machine that outputs parity of input so far',
+    icon: CircleDot,
+    category: 'MEALY',
+    mode: 'mealy',
+    states: [
+      { id: 'me0', label: 'even', x: 200, y: 300, isInitial: true, isAccepting: false },
+      { id: 'me1', label: 'odd', x: 500, y: 300, isInitial: false, isAccepting: false },
+    ],
+    transitions: [
+      { id: 'met0', from: 'me0', to: 'me0', symbols: ['0/0'] },
+      { id: 'met1', from: 'me0', to: 'me1', symbols: ['1/1'] },
+      { id: 'met2', from: 'me1', to: 'me1', symbols: ['0/1'] },
+      { id: 'met3', from: 'me1', to: 'me0', symbols: ['1/0'] },
+    ],
+  },
+  {
+    name: 'Moore: Binary Counter',
+    description: 'Moore machine outputting count mod 4',
+    icon: CircleDot,
+    category: 'MOORE',
+    mode: 'moore',
+    states: [
+      { id: 'mo0', label: 'q0/0', x: 200, y: 200, isInitial: true, isAccepting: false },
+      { id: 'mo1', label: 'q1/1', x: 500, y: 200, isInitial: false, isAccepting: false },
+      { id: 'mo2', label: 'q2/2', x: 500, y: 450, isInitial: false, isAccepting: false },
+      { id: 'mo3', label: 'q3/3', x: 200, y: 450, isInitial: false, isAccepting: false },
+    ],
+    transitions: [
+      { id: 'mot0', from: 'mo0', to: 'mo1', symbols: ['1'] },
+      { id: 'mot1', from: 'mo1', to: 'mo2', symbols: ['1'] },
+      { id: 'mot2', from: 'mo2', to: 'mo3', symbols: ['1'] },
+      { id: 'mot3', from: 'mo3', to: 'mo0', symbols: ['1'] },
+    ],
+  },
+];
+
+const ALL_EXAMPLES = [...EXAMPLES, ...MEALY_MOORE_EXAMPLES];
+const CATEGORIES = ['DFA', 'NFA', 'PDA', 'TM', 'MEALY', 'MOORE'];
 
 export default function Gallery({ onSelect }: { onSelect: () => void }) {
   const loadAutomaton = useStore(s => s.loadAutomaton);
@@ -154,12 +194,23 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
 
       {/* Examples by category */}
       <div className="max-w-4xl mx-auto px-4 pb-12 space-y-6">
+        {/* Start from scratch */}
+        <button
+          onClick={onSelect}
+          className="w-full flex items-center gap-3 p-4 border-2 border-dashed border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-left group"
+        >
+          <Plus size={20} className="text-[var(--color-text-dim)] group-hover:text-[var(--color-accent)] transition-colors shrink-0" />
+          <div>
+            <div className="font-mono text-xs text-[var(--color-text)] group-hover:text-[var(--color-accent)] transition-colors">Start from Scratch</div>
+            <div className="font-mono text-[11px] text-[var(--color-text-dim)]">Empty canvas — build your own automaton</div>
+          </div>
+        </button>
         {CATEGORIES.map(cat => {
-          const examples = EXAMPLES.filter(e => e.category === cat);
+          const examples = ALL_EXAMPLES.filter(e => e.category === cat);
           if (examples.length === 0) return null;
           return (
             <div key={cat}>
-              <h2 className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2 px-1">
+              <h2 className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2 px-1">
                 {cat}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -174,7 +225,7 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
                       <div className="font-mono text-xs text-[var(--color-text)] group-hover:text-[var(--color-accent)] transition-colors">
                         {ex.name}
                       </div>
-                      <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate">
+                      <div className="font-mono text-[11px] text-[var(--color-text-dim)] truncate">
                         {ex.description}
                       </div>
                     </div>
@@ -188,13 +239,13 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
 
         {/* Quick start */}
         <div className="border border-[var(--color-border)] p-4">
-          <h2 className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Quick Start</h2>
-          <div className="font-mono text-[10px] text-[var(--color-text-dim)] space-y-1">
+          <h2 className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Quick Start</h2>
+          <div className="font-mono text-xs text-[var(--color-text-dim)] space-y-1.5">
             <p><span className="text-[var(--color-accent)]">Double-click</span> canvas to add states</p>
-            <p><span className="text-[var(--color-accent)]">Drag</span> between states for transitions</p>
-            <p><span className="text-[var(--color-accent)]">Right-click</span> states for initial/accepting</p>
+            <p>Press <span className="text-[var(--color-accent)]">T</span> then drag between states for transitions</p>
+            <p><span className="text-[var(--color-accent)]">Right-click</span> states to set initial/accepting</p>
             <p><span className="text-[var(--color-accent)]">V/S/T</span> keys: Pointer, Add State, Add Transition</p>
-            <p><span className="text-[var(--color-accent)]">Share</span> button encodes automaton in URL</p>
+            <p><span className="text-[var(--color-accent)]">Ctrl+Z</span> to undo, <span className="text-[var(--color-accent)]">Share</span> button encodes in URL</p>
           </div>
         </div>
       </div>

@@ -99,17 +99,17 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
             <GripHorizontal size={16} className="text-[var(--color-border)]" />
           </div>
         )}
-        <span className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">Turing Machine</span>
-        <span className="font-mono text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
+        <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Turing Machine</span>
+        <span className="font-mono text-[11px] font-bold" style={{ color: statusColor }}>{statusText}</span>
         <div className="flex-1" />
         <div className="flex items-center gap-1">
           <Gauge size={11} className="text-[var(--color-text-dim)]" />
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Limit:</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Limit:</span>
           <input
             type="number"
             value={maxSteps}
             onChange={e => setMaxSteps(Math.max(1, parseInt(e.target.value) || 1000))}
-            className="w-16 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[10px] px-1 py-0.5 outline-none"
+            className="w-16 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-0.5 outline-none"
           />
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
         <div className="flex flex-col gap-2 px-3 py-2 flex-1">
           {/* Input + controls */}
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
@@ -133,7 +133,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
               <button onClick={handleFastRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><FastForward size={14} /></button>
               <button onClick={handleReset} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
             </div>
-            {sim && <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Step {sim.step}</span>}
+            {sim && <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Step {sim.step}</span>}
           </div>
 
           {/* Tape visualization */}
@@ -145,7 +145,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
                   return (
                     <div key={i} className="flex flex-col items-center">
                       {isHead && (
-                        <div className="text-[var(--color-accent)] text-[10px] mb-0.5">▼</div>
+                        <div className="text-[var(--color-accent)] text-[11px] mb-0.5">▼</div>
                       )}
                       <span
                         className={`w-6 h-6 flex items-center justify-center border shrink-0 ${
@@ -167,11 +167,11 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
           {sim && (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <span className="font-mono text-[10px] text-[var(--color-text-dim)]">STATE</span>
+                <span className="font-mono text-[11px] text-[var(--color-text-dim)]">STATE</span>
                 <span className="font-mono text-xs text-[var(--color-accent)]">{stateMap.get(sim.stateId)?.label ?? '?'}</span>
               </div>
               <div className="flex items-center gap-1">
-                <span className="font-mono text-[10px] text-[var(--color-text-dim)]">HEAD</span>
+                <span className="font-mono text-[11px] text-[var(--color-text-dim)]">HEAD</span>
                 <span className="font-mono text-xs text-[var(--color-text)]">{sim.tape.head}</span>
               </div>
             </div>
@@ -180,13 +180,13 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
 
         {/* Right: History */}
         <div className={`border-l border-[var(--color-border)] overflow-y-auto px-3 py-2 ${isMobile ? 'w-40' : 'w-56'} shrink-0`}>
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
             History {sim ? `(${sim.history.length})` : ''}
           </div>
           {sim && (
             <div className="space-y-0.5">
               {sim.history.map((h, i) => (
-                <div key={i} className={`font-mono text-[10px] py-0.5 ${i === sim.history.length - 1 ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                <div key={i} className={`font-mono text-[11px] py-0.5 ${i === sim.history.length - 1 ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
                   <span className="text-[var(--color-text-dim)] w-4 inline-block">{i}.</span>
                   {h.action}
                 </div>

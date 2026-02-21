@@ -62,7 +62,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const sidebarContent = (
     <div className={`flex flex-col h-full ${isMobile ? 'w-full' : 'w-56'}`}>
       {/* Header */}
-      <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase flex items-center justify-between">
+      <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase flex items-center justify-between">
         <span>Properties</span>
         {isMobile && (
           <button onClick={toggleSidebar} className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2">
@@ -75,16 +75,16 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
       <div className="px-3 py-2 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-1.5 mb-1">
           <Hash size={11} className="text-[var(--color-text-dim)]" />
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">MODE</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">MODE</span>
           <span className="font-mono text-xs text-[var(--color-accent)] ml-auto">{mode.toUpperCase()}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Σ =</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Σ =</span>
           <span className="font-mono text-xs text-[var(--color-text)]">
             {alphabet.size > 0 ? `{${[...alphabet].sort().join(', ')}}` : '∅'}
           </span>
         </div>
-        <div className="font-mono text-[10px] text-[var(--color-text-dim)] mt-1">
+        <div className="font-mono text-[11px] text-[var(--color-text-dim)] mt-1">
           {states.length} states, {transitions.length} transitions
         </div>
       </div>
@@ -92,13 +92,13 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
       {/* Mobile-only actions */}
       {isMobile && (
         <div className="px-3 py-2 border-b border-[var(--color-border)] flex gap-2">
-          <button onClick={handleShare} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+          <button onClick={handleShare} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
             <Share2 size={14} /> SHARE
           </button>
-          <button onClick={autoLayout} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+          <button onClick={autoLayout} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
             <LayoutGrid size={14} /> LAYOUT
           </button>
-          <button onClick={clearAll} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+          <button onClick={clearAll} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
             <RotateCcw size={14} /> CLEAR
           </button>
         </div>
@@ -106,30 +106,30 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
 
       {dfaErrors.length > 0 && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-reject)] uppercase mb-1">Errors</div>
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-reject)] uppercase mb-1">Errors</div>
           {dfaErrors.map((err, i) => (
-            <div key={i} className="font-mono text-[10px] text-[var(--color-reject)]">{err}</div>
+            <div key={i} className="font-mono text-[11px] text-[var(--color-reject)]">{err}</div>
           ))}
         </div>
       )}
 
       {selectedState && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected State</div>
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected State</div>
           <div className="font-mono text-sm text-[var(--color-accent)] mb-2">{selectedState.label}</div>
           <div className="flex flex-col gap-1">
             <label className="flex items-center gap-2 cursor-pointer min-h-[44px] md:min-h-0">
               <input type="checkbox" checked={selectedState.isInitial} onChange={() => toggleInitial(selectedState.id)} className="accent-[var(--color-accent)] w-4 h-4" />
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Initial</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Initial</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer min-h-[44px] md:min-h-0">
               <input type="checkbox" checked={selectedState.isAccepting} onChange={() => toggleAccepting(selectedState.id)} className="accent-[var(--color-accent)] w-4 h-4" />
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Accepting</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Accepting</span>
             </label>
           </div>
           <button
             onClick={() => setEditingState(selectedState.id)}
-            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
+            className="mt-2 w-full text-left font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
           >
             Rename...
           </button>
@@ -138,7 +138,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
 
       {selectedTransition && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected Transition</div>
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected Transition</div>
           <div className="font-mono text-xs text-[var(--color-text)]">
             {stateMap.get(selectedTransition.from)?.label} → {stateMap.get(selectedTransition.to)?.label}
           </div>
@@ -147,7 +147,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
           </div>
           <button
             onClick={() => setEditingTransition(selectedTransition.id)}
-            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
+            className="mt-2 w-full text-left font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
           >
             Edit symbols...
           </button>
@@ -156,7 +156,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
 
       {/* States list */}
       <div className="px-3 py-2 flex-1 overflow-y-auto">
-        <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">States</div>
+        <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">States</div>
         {states.map(s => (
           <button
             key={s.id}

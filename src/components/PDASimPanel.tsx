@@ -99,10 +99,10 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
             <GripHorizontal size={16} className="text-[var(--color-border)]" />
           </div>
         )}
-        <span className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">PDA Simulation</span>
-        <span className="font-mono text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
+        <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">PDA Simulation</span>
+        <span className="font-mono text-[11px] font-bold" style={{ color: statusColor }}>{statusText}</span>
         <div className="flex-1" />
-        <div className="flex items-center gap-0.5 font-mono text-[10px]">
+        <div className="flex items-center gap-0.5 font-mono text-[11px]">
           <button
             onClick={() => setAcceptMode('final-state')}
             className={`px-2 py-0.5 ${acceptMode === 'final-state' ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}
@@ -123,7 +123,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
         {/* Left: input + controls */}
         <div className="flex flex-col gap-2 px-3 py-2 w-60 shrink-0">
           <div className="flex items-center gap-1">
-            <span className="font-mono text-[10px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
@@ -136,7 +136,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
             <button onClick={handleStep} disabled={simState?.done} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
             <button onClick={handleFastRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><FastForward size={14} /></button>
             <button onClick={handleReset} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
-            {stepCount > 0 && <span className="font-mono text-[10px] text-[var(--color-text-dim)] ml-2">Step {stepCount}</span>}
+            {stepCount > 0 && <span className="font-mono text-[11px] text-[var(--color-text-dim)] ml-2">Step {stepCount}</span>}
           </div>
 
           {/* Input tape */}
@@ -166,11 +166,11 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
 
         {/* Middle: Active configurations */}
         <div className="flex-1 border-l border-[var(--color-border)] overflow-y-auto px-3 py-2">
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
             Active Configs {simState ? `(${simState.configs.length})` : ''}
           </div>
           {simState && simState.configs.map(config => (
-            <div key={config.id} className="font-mono text-[10px] flex items-center gap-2 py-0.5">
+            <div key={config.id} className="font-mono text-[11px] flex items-center gap-2 py-0.5">
               <span className="text-[var(--color-accent)]">{stateMap.get(config.stateId)?.label ?? '?'}</span>
               <span className="text-[var(--color-text-dim)]">pos:{config.inputPos}</span>
               <span className="text-[var(--color-sim-active)]">[{config.stack.join('') || 'ε'}]</span>
@@ -178,11 +178,11 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
           ))}
           {simState && simState.accepted.length > 0 && (
             <>
-              <div className="font-mono text-[10px] tracking-widest text-[var(--color-accept)] uppercase mt-2 mb-1">
+              <div className="font-mono text-[11px] tracking-widest text-[var(--color-accept)] uppercase mt-2 mb-1">
                 Accepted ({simState.accepted.length})
               </div>
               {simState.accepted.map(config => (
-                <div key={config.id} className="font-mono text-[10px] flex items-center gap-2 py-0.5 text-[var(--color-accept)]">
+                <div key={config.id} className="font-mono text-[11px] flex items-center gap-2 py-0.5 text-[var(--color-accept)]">
                   <span>{stateMap.get(config.stateId)?.label ?? '?'}</span>
                   <span>[{config.stack.join('') || 'ε'}]</span>
                 </div>
@@ -193,7 +193,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
 
         {/* Right: Stack visualization */}
         <div className="w-24 border-l border-[var(--color-border)] px-2 py-2 flex flex-col shrink-0">
-          <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Stack</div>
+          <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Stack</div>
           {simState && simState.configs.length > 0 && (() => {
             // Show stack of first config
             const config = simState.configs[0];
@@ -212,7 +212,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
                   </div>
                 ))}
                 {config.stack.length === 0 && (
-                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] text-center">empty</div>
+                  <div className="font-mono text-[11px] text-[var(--color-text-dim)] text-center">empty</div>
                 )}
               </div>
             );

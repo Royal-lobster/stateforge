@@ -110,16 +110,16 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-3 py-2">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                   Steps <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(nfaStepIdx + 1, nfaResult.steps.length)}/{nfaResult.steps.length})</span>
                 </div>
-                {visibleSteps.length === 0 && <p className="font-mono text-[10px] text-[var(--color-text-dim)]">Press ⏩ to step through...</p>}
+                {visibleSteps.length === 0 && <p className="font-mono text-[11px] text-[var(--color-text-dim)]">Press ⏩ to step through...</p>}
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
                     <div key={i} className={`font-mono text-xs flex items-center gap-1 py-0.5 ${i === nfaStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
-                      <span className="text-[10px] w-5 shrink-0">{i + 1}.</span>
+                      <span className="text-[11px] w-5 shrink-0">{i + 1}.</span>
                       <span>δ({step.subsetLabel}, {step.symbol}) = {step.resultLabel}</span>
-                      {step.isNew && <span className="text-[10px] text-[var(--color-accent)] ml-1">NEW</span>}
+                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1">NEW</span>}
                     </div>
                   ))}
                 </div>
@@ -157,22 +157,22 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-3 py-2">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                   Distinguishable Pairs <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(minStepIdx + 1, minResult.steps.length)}/{minResult.steps.length})</span>
                 </div>
                 {minResult.removedCount === 0 && (
                   <p className="font-mono text-xs text-[var(--color-accept)] mb-2">DFA is already minimal!</p>
                 )}
                 {visibleSteps.length === 0 && minResult.steps.length > 0 && (
-                  <p className="font-mono text-[10px] text-[var(--color-text-dim)]">Press ⏩ to step through...</p>
+                  <p className="font-mono text-[11px] text-[var(--color-text-dim)]">Press ⏩ to step through...</p>
                 )}
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
                     <div key={i} className={`font-mono text-xs py-0.5 ${i === minStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
-                      <span className="text-[10px] w-5 inline-block">{i + 1}.</span>
+                      <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       <span className="text-[var(--color-reject)]">✗ </span>
                       ({step.stateA}, {step.stateB})
-                      <span className="text-[10px] ml-2">{step.reason}</span>
+                      <span className="text-[11px] ml-2">{step.reason}</span>
                     </div>
                   ))}
                 </div>
@@ -205,7 +205,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     return (
       <>
         <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">RE</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">RE</span>
           <input
             value={reInput}
             onChange={e => { setReInput(e.target.value); setReResult(null); setReStepIdx(-1); setReApplied(false); }}
@@ -222,7 +222,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
         <div className="flex-1 flex overflow-hidden">
           {!reResult ? (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center font-mono text-[10px] text-[var(--color-text-dim)] space-y-1">
+              <div className="text-center font-mono text-[11px] text-[var(--color-text-dim)] space-y-1">
                 <p>Enter a regular expression and press ▶</p>
                 <p>Supported: a-z, 0-9, | (union), * + ? (quantifiers), () groups, ε</p>
               </div>
@@ -234,13 +234,13 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-3 py-2">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                   Thompson&apos;s Construction <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(reStepIdx + 1, reResult.steps.length)}/{reResult.steps.length})</span>
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
                     <div key={i} className={`font-mono text-xs py-0.5 ${i === reStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
-                      <span className="text-[10px] w-5 inline-block">{i + 1}.</span>
+                      <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       {step.description}
                     </div>
                   ))}
@@ -278,21 +278,21 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-3 py-2">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                   State Elimination <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(fareStepIdx + 1, fareResult.steps.length)}/{fareResult.steps.length})</span>
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
                     <div key={i} className={`font-mono text-xs py-0.5 ${i === fareStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
-                      <span className="text-[10px] w-5 inline-block">{i + 1}.</span>
+                      <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       Eliminate <span className="text-[var(--color-reject)]">{step.eliminatedState}</span>
-                      <span className="text-[10px] ml-2">({step.edgesUpdated} edges updated)</span>
+                      <span className="text-[11px] ml-2">({step.edgesUpdated} edges updated)</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="w-52 border-l border-[var(--color-border)] px-3 py-2 flex flex-col gap-2 shrink-0">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">Result RE</div>
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Result RE</div>
                 <div className="flex-1 overflow-y-auto">
                   <div className="font-mono text-sm text-[var(--color-accent)] break-all leading-relaxed">
                     {fareResult.regex}
@@ -300,7 +300,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 </div>
                 <button
                   onClick={() => { navigator.clipboard.writeText(fareResult.regex); }}
-                  className="flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[10px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
+                  className="flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[11px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
                 >
                   COPY RE
                 </button>
@@ -329,7 +329,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto px-3 py-2">
-              <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+              <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                 Right-Linear Grammar <span className="text-[var(--color-accent)] normal-case ml-1">(start: {gramResult.startSymbol})</span>
               </div>
               <div className="space-y-0.5">
@@ -347,7 +347,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                     const text = gramResult.productions.map(p => `${p.head} → ${p.body}`).join('\n');
                     navigator.clipboard.writeText(text);
                   }}
-                  className="mt-3 flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[10px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
+                  className="mt-3 flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[11px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
                 >
                   COPY GRAMMAR
                 </button>
@@ -370,7 +370,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     warning?: string,
   ) => (
     <div className="px-3 py-1 border-b border-[var(--color-border)] flex items-center gap-2">
-      {warning && <span className="font-mono text-[10px] text-[var(--color-reject)]">{warning}</span>}
+      {warning && <span className="font-mono text-[11px] text-[var(--color-reject)]">{warning}</span>}
       <div className="flex-1" />
       <div className="flex items-center gap-0.5">
         <button onClick={onRun} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
@@ -389,12 +389,12 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     extra?: string,
   ) => (
     <div className={`border-l border-[var(--color-border)] px-3 py-2 flex flex-col gap-2 shrink-0 ${isMobile ? 'w-36' : 'w-44'}`}>
-      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">Result</div>
-      <div className="font-mono text-[10px] text-[var(--color-text-dim)]">{rStates.length} states, {rTransitions.length} transitions</div>
-      {extra && <div className="font-mono text-[10px] text-[var(--color-accept)]">{extra}</div>}
+      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Result</div>
+      <div className="font-mono text-[11px] text-[var(--color-text-dim)]">{rStates.length} states, {rTransitions.length} transitions</div>
+      {extra && <div className="font-mono text-[11px] text-[var(--color-accept)]">{extra}</div>}
       <div className="flex-1 overflow-y-auto space-y-0.5">
         {rStates.map(s => (
-          <div key={s.id} className="font-mono text-[10px] flex items-center gap-1">
+          <div key={s.id} className="font-mono text-[11px] flex items-center gap-1">
             {s.isInitial && <span className="text-[var(--color-accent)]">→</span>}
             <span className={s.isAccepting ? 'text-[var(--color-accept)]' : 'text-[var(--color-text)]'}>{s.label}</span>
             {s.isAccepting && <span className="text-[var(--color-accept)]">✓</span>}
@@ -404,7 +404,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
       <button
         onClick={onApply}
         disabled={applied}
-        className={`flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[10px] tracking-wider transition-colors ${
+        className={`flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[11px] tracking-wider transition-colors ${
           applied ? 'bg-[var(--color-accept)] text-[var(--bg-primary)]' : 'bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90'
         }`}
       >
@@ -454,13 +454,13 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     return (
       <>
         <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2 flex-wrap">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">OP</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">OP</span>
           <div className="flex items-center gap-0">
             {opButtons.map(o => (
               <button
                 key={o.id}
                 onClick={() => { setCombineOp(o.id); setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }}
-                className={`px-2 py-1 font-mono text-[10px] transition-colors ${
+                className={`px-2 py-1 font-mono text-[11px] transition-colors ${
                   combineOp === o.id ? 'text-[var(--color-accent)] bg-[var(--bg-primary)]' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
                 }`}
                 title={o.label}
@@ -471,7 +471,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           </div>
           {!isComplement && (
             <>
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">B (RE)</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">B (RE)</span>
               <input
                 value={combineReB}
                 onChange={e => { setCombineReB(e.target.value); setCombineResult(null); }}
@@ -480,7 +480,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
               />
             </>
           )}
-          {mode !== 'dfa' && <span className="font-mono text-[10px] text-[var(--color-reject)]">Switch to DFA mode</span>}
+          {mode !== 'dfa' && <span className="font-mono text-[11px] text-[var(--color-reject)]">Switch to DFA mode</span>}
           <div className="flex items-center gap-0.5 ml-auto">
             <button onClick={run} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
             <button onClick={stepFwd} disabled={!canRun || (combineResult !== null && combineStepIdx >= combineResult.steps.length - 1)} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
@@ -491,7 +491,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
         <div className="flex-1 flex overflow-hidden">
           {!combineResult ? (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center font-mono text-[10px] text-[var(--color-text-dim)] space-y-1">
+              <div className="text-center font-mono text-[11px] text-[var(--color-text-dim)] space-y-1">
                 <p>Canvas automaton = A (must be DFA)</p>
                 {isComplement ? <p>Complement flips accepting states on A</p> : <p>Enter a RE for automaton B, then press ▶</p>}
               </div>
@@ -499,15 +499,15 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           ) : (
             <>
               <div className="flex-1 overflow-y-auto px-3 py-2">
-                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
                   Product Construction <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(combineStepIdx + 1, combineResult.steps.length)}/{combineResult.steps.length})</span>
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
                     <div key={i} className={`font-mono text-xs py-0.5 ${i === combineStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
-                      <span className="text-[10px] w-5 inline-block">{i + 1}.</span>
+                      <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       δ({step.pairLabel}, {step.symbol}) = {step.resultLabel}
-                      {step.isNew && <span className="text-[10px] text-[var(--color-accent)] ml-1">NEW</span>}
+                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1">NEW</span>}
                     </div>
                   ))}
                 </div>
@@ -552,7 +552,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
             <button
               key={t.id}
               onClick={() => switchTab(t.id)}
-              className={`px-2 py-1.5 font-mono text-[10px] tracking-wider whitespace-nowrap transition-colors ${
+              className={`px-2 py-1.5 font-mono text-[11px] tracking-wider whitespace-nowrap transition-colors ${
                 tab === t.id
                   ? 'text-[var(--color-accent)] border-b border-[var(--color-accent)]'
                   : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'

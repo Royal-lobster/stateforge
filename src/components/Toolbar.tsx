@@ -4,9 +4,10 @@ import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu,
-  ArrowRightLeft, BookOpen, TreePine, Home,
+  ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload,
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
+import type { State, Transition, Mode } from '@/types';
 
 function ToolBtn({ active, onClick, children, title, disabled }: {
   active?: boolean;
@@ -59,6 +60,8 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const toggleSimPanel = useStore(s => s.toggleSimPanel);
 
+  const loadAutomaton = useStore(s => s.loadAutomaton);
+
   const handleShare = () => {
     const hash = encodeAutomaton(states, transitions, mode);
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
@@ -68,6 +71,76 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       btn.textContent = 'COPIED';
       setTimeout(() => { btn.textContent = 'SHARE'; }, 1200);
     }
+  };
+
+  const handleExport = () => {
+    const data = JSON.stringify({ states, transitions, mode, _format: 'stateforge-v1' }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stateforge-${mode}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,.jff';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      try {
+        if (file.name.endsWith('.jff')) {
+          // JFLAP .jff XML import
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/xml');
+          const type = doc.querySelector('type')?.textContent ?? 'fa';
+          const jStates: State[] = [];
+          const jTrans: Transition[] = [];
+          const stateIdMap = new Map<string, string>();
+          doc.querySelectorAll('state').forEach((el) => {
+            const jId = el.getAttribute('id') ?? '';
+            const name = el.getAttribute('name') ?? `q${jId}`;
+            const x = parseFloat(el.querySelector('x')?.textContent ?? '0');
+            const y = parseFloat(el.querySelector('y')?.textContent ?? '0');
+            const isInitial = !!el.querySelector('initial');
+            const isAccepting = !!el.querySelector('final');
+            const id = `jff_${jId}`;
+            stateIdMap.set(jId, id);
+            jStates.push({ id, label: name, x, y, isInitial, isAccepting });
+          });
+          // Group transitions by from→to
+          const transMap = new Map<string, string[]>();
+          doc.querySelectorAll('transition').forEach((el) => {
+            const from = stateIdMap.get(el.querySelector('from')?.textContent ?? '') ?? '';
+            const to = stateIdMap.get(el.querySelector('to')?.textContent ?? '') ?? '';
+            const read = el.querySelector('read')?.textContent ?? '';
+            const symbol = read === '' ? 'ε' : read;
+            const key = `${from}→${to}`;
+            if (!transMap.has(key)) transMap.set(key, []);
+            transMap.get(key)!.push(symbol);
+          });
+          let tIdx = 0;
+          for (const [key, symbols] of transMap) {
+            const [from, to] = key.split('→');
+            jTrans.push({ id: `jt_${tIdx++}`, from, to, symbols });
+          }
+          const jMode: Mode = type === 'pda' ? 'pda' : type === 'turing' ? 'tm' : jStates.length > 0 ? 'nfa' : 'dfa';
+          loadAutomaton(jStates, jTrans, jMode);
+        } else {
+          const data = JSON.parse(text);
+          if (data.states && data.transitions) {
+            loadAutomaton(data.states, data.transitions, data.mode ?? 'dfa');
+          }
+        }
+      } catch (err) {
+        console.error('Import failed:', err);
+      }
+    };
+    input.click();
   };
 
   const handleMode = (m: string) => onModeChange?.(m);
@@ -138,7 +211,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       )}
 
       {/* Mode toggle */}
-      <div className="flex items-center font-mono text-[10px] tracking-wider shrink-0 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center font-mono text-[11px] tracking-wider shrink-0 overflow-x-auto scrollbar-hide">
         {modes.map(m => (
           <button
             key={m.id}
@@ -182,9 +255,15 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       {!isSpecialMode && (
         <>
           <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
-          <ToolBtn onClick={onConvert} title="Conversions">
-            <ArrowRightLeft size={iconSize} />
-          </ToolBtn>
+          <button
+            onClick={onConvert}
+            title="Conversions"
+            aria-label="Conversions"
+            className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+          >
+            <ArrowRightLeft size={14} />
+            {!isMobile && 'CONVERT'}
+          </button>
         </>
       )}
 
@@ -194,14 +273,22 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       {!isSpecialMode && (
         <>
           {!isMobile && (
-            <button
-              id="share-btn"
-              onClick={handleShare}
-              className="flex items-center gap-1 px-2 py-1 font-mono text-[10px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
-            >
-              <Share2 size={12} />
-              SHARE
-            </button>
+            <>
+              <ToolBtn onClick={handleImport} title="Import (JSON/JFLAP)">
+                <Upload size={iconSize} />
+              </ToolBtn>
+              <ToolBtn onClick={handleExport} title="Export JSON">
+                <Download size={iconSize} />
+              </ToolBtn>
+              <button
+                id="share-btn"
+                onClick={handleShare}
+                className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+              >
+                <Share2 size={12} />
+                SHARE
+              </button>
+            </>
           )}
           <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
             <PanelBottom size={iconSize} />

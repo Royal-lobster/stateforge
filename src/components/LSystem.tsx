@@ -201,7 +201,7 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
     <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
       {/* Controls */}
       <div className={`flex flex-col border-r border-[var(--color-border)] ${isMobile ? 'h-[35%]' : 'w-64'} shrink-0 overflow-y-auto`}>
-        <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">
+        <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">
           L-Systems
         </div>
 
@@ -210,7 +210,7 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
           <select
             value={preset}
             onChange={e => handlePresetChange(parseInt(e.target.value))}
-            className="w-full bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[10px] px-1 py-1 outline-none"
+            className="w-full bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-1 outline-none"
           >
             {PRESETS.map((p, i) => (
               <option key={i} value={i}>{p.name}</option>
@@ -221,7 +221,7 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
         {/* Iterations slider */}
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Iterations</span>
+            <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Iterations</span>
             <span className="font-mono text-xs text-[var(--color-accent)]">{iterations}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
 
         {/* Axiom */}
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Axiom</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Axiom</span>
           <input
             value={customAxiom || current.axiom}
             onChange={e => setCustomAxiom(e.target.value)}
@@ -254,7 +254,7 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
 
         {/* Angle */}
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Angle (°)</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Angle (°)</span>
           <input
             type="number"
             value={customAngle || current.angle}
@@ -265,11 +265,11 @@ export default function LSystem({ isMobile }: { isMobile: boolean }) {
 
         {/* Rules */}
         <div className="px-3 py-2 flex-1">
-          <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Rules (one per line: X=...)</span>
+          <span className="font-mono text-[11px] text-[var(--color-text-dim)]">Rules (one per line: X=...)</span>
           <textarea
             value={customRules || Object.entries(current.rules).map(([k, v]) => `${k}=${v}`).join('\n')}
             onChange={e => setCustomRules(e.target.value)}
-            className="w-full bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[10px] px-2 py-1 mt-1 outline-none focus:border-[var(--color-accent)] resize-none h-24"
+            className="w-full bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-2 py-1 mt-1 outline-none focus:border-[var(--color-accent)] resize-none h-24"
             spellCheck={false}
           />
         </div>

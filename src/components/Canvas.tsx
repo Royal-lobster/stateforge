@@ -543,7 +543,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
                 {s.isInitial && <line x1={s.x - STATE_RADIUS - 30} y1={s.y} x2={s.x - STATE_RADIUS - 2} y2={s.y} stroke="var(--color-accent)" strokeWidth={2} markerEnd="url(#arrowhead)" />}
                 {s.isAccepting && <rect x={s.x - STATE_RADIUS - 4} y={s.y - STATE_RADIUS - 4} width={(STATE_RADIUS + 4) * 2} height={(STATE_RADIUS + 4) * 2} fill="none" stroke={strokeColor} strokeWidth={1} />}
                 <rect x={s.x - STATE_RADIUS} y={s.y - STATE_RADIUS} width={STATE_RADIUS * 2} height={STATE_RADIUS * 2} fill={fillColor} stroke={strokeColor} strokeWidth={isSelected || isSimActive ? 2 : 1.5} />
-                <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" className="canvas-label" fill="var(--color-text)" fontSize="13" fontWeight={500}>{s.label}</text>
+                <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" className="canvas-label" fill="var(--color-text)" fontSize={s.label.length > 6 ? Math.max(8, Math.floor(78 / s.label.length)) : 13} fontWeight={500}>{s.label.length > 10 ? s.label.slice(0, 9) + '…' : s.label}</text>
               </g>
             );
           })}
@@ -613,6 +613,16 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             <div className="h-[env(safe-area-inset-bottom,8px)]" />
           </div>
         </>
+      )}
+
+      {/* Empty state onboarding */}
+      {states.length === 0 && !transitionDraft && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center font-mono">
+            <p className="text-sm text-[var(--color-text-dim)] mb-1">Double-click to add a state</p>
+            <p className="text-[11px] text-[var(--color-text-dim)] opacity-60">or press <span className="text-[var(--color-accent)]">S</span> then click</p>
+          </div>
+        </div>
       )}
 
       {/* Zoom indicator */}

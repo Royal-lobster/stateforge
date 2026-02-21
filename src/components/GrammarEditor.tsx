@@ -170,8 +170,8 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         {/* Header */}
         <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
           <BookOpen size={12} className="text-[var(--color-accent)]" />
-          <span className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">Grammar</span>
-          <span className="font-mono text-[10px] ml-auto" style={{ color: typeColor[grammarType] }}>
+          <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Grammar</span>
+          <span className="font-mono text-[11px] ml-auto" style={{ color: typeColor[grammarType] }}>
             {grammarType.toUpperCase()}
           </span>
         </div>
@@ -180,7 +180,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         <div className="px-3 py-1 border-b border-[var(--color-border)] flex items-center gap-2">
           <select
             onChange={e => { setGrammarText(EXAMPLE_GRAMMARS[parseInt(e.target.value)].text); resetParse(); setTransformResult(null); }}
-            className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[10px] px-1 py-1 outline-none"
+            className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-1 outline-none"
           >
             {EXAMPLE_GRAMMARS.map((eg, i) => (
               <option key={i} value={i}>{eg.name}</option>
@@ -198,7 +198,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         />
 
         {/* Stats */}
-        <div className="px-3 py-1.5 flex items-center gap-3 text-[10px] font-mono text-[var(--color-text-dim)]">
+        <div className="px-3 py-1.5 flex items-center gap-3 text-[11px] font-mono text-[var(--color-text-dim)]">
           <span>Σ = {terminals.size > 0 ? `{${[...terminals].sort().join(',')}}` : '∅'}</span>
           <span>V = {nonTerminals.size > 0 ? `{${[...nonTerminals].sort().join(',')}}` : '∅'}</span>
           <span>{grammar.productions.length} prod</span>
@@ -218,7 +218,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-1 px-3 py-1.5 font-mono text-[10px] tracking-wider whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-1 px-3 py-1.5 font-mono text-[11px] tracking-wider whitespace-nowrap transition-colors ${
                 activeTab === t.id
                   ? 'text-[var(--color-accent)] border-b border-[var(--color-accent)]'
                   : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
@@ -238,7 +238,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                 <button
                   key={t.id}
                   onClick={() => handleTransform(t.id)}
-                  className={`px-2 py-1 font-mono text-[10px] transition-colors ${
+                  className={`px-2 py-1 font-mono text-[11px] transition-colors ${
                     activeTransform === t.id
                       ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
                       : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] bg-[var(--bg-primary)]'
@@ -256,7 +256,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* Steps */}
                   {transformResult.steps.map((step, i) => (
                     <div key={i}>
-                      <div className="font-mono text-[10px] text-[var(--color-accent)] mb-1">{step.description}</div>
+                      <div className="font-mono text-[11px] text-[var(--color-accent)] mb-1">{step.description}</div>
                       <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 space-y-0.5">
                         {step.productions.map((p, j) => (
                           <div key={j} className="font-mono text-xs text-[var(--color-text)]">
@@ -270,7 +270,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   ))}
                   <button
                     onClick={applyTransform}
-                    className="flex items-center gap-1 px-3 py-1.5 font-mono text-[10px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
+                    className="flex items-center gap-1 px-3 py-1.5 font-mono text-[11px] tracking-wider bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90"
                   >
                     APPLY TO EDITOR
                   </button>
@@ -284,7 +284,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         {activeTab === 'cyk' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setCykResult(null); }}
@@ -310,9 +310,9 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* CYK Table */}
                   {cykResult.table.length > 0 && (
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">CYK Table</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">CYK Table</div>
                       <div className="overflow-x-auto">
-                        <table className="border-collapse font-mono text-[10px]">
+                        <table className="border-collapse font-mono text-[11px]">
                           <tbody>
                             {[...Array(cykResult.table.length)].map((_, l) => (
                               <tr key={l}>
@@ -343,7 +343,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* Parse tree */}
                   {cykResult.parseTree && (
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
                       <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
                         <ParseTree node={cykResult.parseTree} />
                       </div>
@@ -352,12 +352,12 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
 
                   {/* Steps */}
                   <div>
-                    <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+                    <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
                       Steps ({cykResult.steps.length})
                     </div>
                     <div className="max-h-[150px] overflow-y-auto space-y-0.5">
                       {cykResult.steps.map((step, i) => (
-                        <div key={i} className="font-mono text-[10px] text-[var(--color-text-dim)]">
+                        <div key={i} className="font-mono text-[11px] text-[var(--color-text-dim)]">
                           {step.description}
                         </div>
                       ))}
@@ -373,7 +373,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         {activeTab === 'll1' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setLl1Result(null); }}
@@ -399,11 +399,11 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* Conflicts */}
                   {ll1Result.conflicts.length > 0 && (
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-reject)] uppercase mb-1">
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-reject)] uppercase mb-1">
                         Conflicts ({ll1Result.conflicts.length})
                       </div>
                       {ll1Result.conflicts.map((c, i) => (
-                        <div key={i} className="font-mono text-[10px] text-[var(--color-reject)]">{c}</div>
+                        <div key={i} className="font-mono text-[11px] text-[var(--color-reject)]">{c}</div>
                       ))}
                     </div>
                   )}
@@ -411,9 +411,9 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* FIRST / FOLLOW */}
                   <div className="flex gap-4">
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">FIRST</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">FIRST</div>
                       {[...ll1Result.firstSets].filter(([k]) => k.length === 1 && k >= 'A' && k <= 'Z').map(([nt, set]) => (
-                        <div key={nt} className="font-mono text-[10px]">
+                        <div key={nt} className="font-mono text-[11px]">
                           <span className="text-[var(--color-accent)]">{nt}</span>
                           <span className="text-[var(--color-text-dim)]">: </span>
                           <span className="text-[var(--color-text)]">{`{${[...set].join(', ')}}`}</span>
@@ -421,9 +421,9 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                       ))}
                     </div>
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">FOLLOW</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">FOLLOW</div>
                       {[...ll1Result.followSets].map(([nt, set]) => (
-                        <div key={nt} className="font-mono text-[10px]">
+                        <div key={nt} className="font-mono text-[11px]">
                           <span className="text-[var(--color-accent)]">{nt}</span>
                           <span className="text-[var(--color-text-dim)]">: </span>
                           <span className="text-[var(--color-text)]">{`{${[...set].join(', ')}}`}</span>
@@ -434,13 +434,13 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
 
                   {/* Parse table */}
                   <div>
-                    <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Table</div>
+                    <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Table</div>
                     <div className="overflow-x-auto">
                       {(() => {
                         const allTerms = [...getTerminals(grammar), '$'].sort();
                         const allNTs = [...getNonTerminals(grammar)].sort();
                         return (
-                          <table className="border-collapse font-mono text-[10px]">
+                          <table className="border-collapse font-mono text-[11px]">
                             <thead>
                               <tr>
                                 <th className="border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-text-dim)]"></th>
@@ -476,11 +476,11 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
 
                   {/* Parse steps */}
                   <div>
-                    <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+                    <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
                       Parse Steps ({ll1Result.parseSteps.length})
                     </div>
                     <div className="overflow-x-auto max-h-[150px] overflow-y-auto">
-                      <table className="border-collapse font-mono text-[10px] w-full">
+                      <table className="border-collapse font-mono text-[11px] w-full">
                         <thead>
                           <tr className="text-[var(--color-text-dim)]">
                             <td className="pr-2 pb-1">#</td>
@@ -506,7 +506,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {/* Parse tree */}
                   {ll1Result.parseTree && (
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
                       <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
                         <ParseTree node={ll1Result.parseTree} />
                       </div>
@@ -522,7 +522,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         {activeTab === 'brute' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
-              <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
+              <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setBruteResult(null); }}
@@ -545,7 +545,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   </div>
                   {bruteResult.derivation.length > 0 && (
                     <div>
-                      <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Leftmost Derivation</div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Leftmost Derivation</div>
                       <div className="space-y-0.5">
                         {bruteResult.derivation.map((step, i) => (
                           <div key={i} className="font-mono text-xs">
