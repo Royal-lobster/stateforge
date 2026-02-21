@@ -21,8 +21,6 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const clearAll = useStore(s => s.clearAll);
   const addTrapState = useStore(s => s.addTrapState);
 
-  if (!showSidebar) return null;
-
   const alphabet = new Set<string>();
   for (const t of transitions) {
     for (const sym of t.symbols) {
@@ -251,6 +249,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   );
 
   if (isMobile) {
+    if (!showSidebar) return null;
     return (
       <>
         <div className="fixed inset-0 bg-black/60 z-40" onClick={toggleSidebar} />
@@ -261,9 +260,16 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
     );
   }
 
+  // Desktop: always in DOM, animate width for smooth canvas resize
   return (
-    <div className="w-64 bg-[var(--bg-surface)] border-l border-[var(--color-border)] flex flex-col shrink-0 overflow-y-auto select-none">
-      {sidebarContent}
+    <div
+      className={`bg-[var(--bg-surface)] border-l border-[var(--color-border)] flex flex-col shrink-0 overflow-hidden select-none transition-[width] duration-200 ease-out ${
+        showSidebar ? 'w-64' : 'w-0 border-l-0'
+      }`}
+    >
+      <div className="w-64 h-full overflow-y-auto">
+        {sidebarContent}
+      </div>
     </div>
   );
 }
