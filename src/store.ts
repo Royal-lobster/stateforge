@@ -249,7 +249,10 @@ export const useStore = create<StoreState>()(
         if (existing) return;
       }
       s.pushUndo();
-      const defaultSymbol = s.mode === 'tm' ? 'a → a, R' : s.mode === 'pda' ? 'a, Z → Z' : s.mode === 'nfa' ? 'ε' : 'a';
+      const defaultSymbol = s.mode === 'tm' ? 'a → a, R'
+        : s.mode === 'pda' ? 'a, Z → Z'
+        : s.mode === 'mealy' ? 'a/0'
+        : s.mode === 'nfa' ? 'ε' : 'a';
       const newT: Transition = {
         id: genId(), from, to, symbols: [defaultSymbol],
         ...(s.mode === 'pda' ? { pdaTransitions: [{ input: 'a', pop: 'Z', push: 'Z' }] } : {}),
