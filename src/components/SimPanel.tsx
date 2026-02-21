@@ -253,37 +253,47 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
           </div>
         </div>
       ) : (
-        /* Multi-run */
-        <div className="flex-1 flex gap-3 px-3 py-2 overflow-hidden">
-          <div className="flex flex-col gap-1.5 w-56">
+        /* Multi-run — compact side-by-side layout */
+        <div className="flex-1 flex overflow-hidden">
+          {/* Input area */}
+          <div className="flex flex-col w-52 border-r border-[var(--color-border)] p-2.5 gap-1.5">
+            <div className="font-mono text-[11px] text-[var(--color-text-dim)] flex items-center justify-between">
+              <span>TEST STRINGS</span>
+              {multiRunResults.length > 0 && (
+                <span className="text-[var(--color-text-muted)]">
+                  {multiRunResults.filter(r => r.accepted).length}/{multiRunResults.length} pass
+                </span>
+              )}
+            </div>
             <textarea value={multiInput} onChange={e => setMultiInput(e.target.value)}
               className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1.5 outline-none focus:border-[var(--color-accent)] resize-none"
-              placeholder="One string per line..." />
+              placeholder={"ε\na\nab\naab\nbba"} />
             <button onClick={handleMultiRun} className="flex items-center justify-center gap-1 px-2 py-1.5 bg-[var(--color-accent)] text-[var(--bg-primary)] font-mono text-[11px] tracking-wider font-medium hover:opacity-90 transition-opacity">
               <ListChecks size={12} /> RUN ALL
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          {/* Results */}
+          <div className="flex-1 overflow-y-auto p-2.5">
             {multiRunResults.length > 0 ? (
-              <table className="w-full font-mono text-xs">
-                <thead><tr className="text-[var(--color-text-dim)] text-[11px]"><td className="pb-1 pr-4">INPUT</td><td className="pb-1">RESULT</td></tr></thead>
-                <tbody>
-                  {multiRunResults.map((r, i) => (
-                    <tr key={i} className="border-b border-[var(--color-border)]/30">
-                      <td className="pr-4 py-1 text-[var(--color-text)]">{r.input || 'ε'}</td>
-                      <td className="py-1">
-                        <span className="font-bold" style={{ color: r.accepted ? 'var(--color-accept)' : 'var(--color-reject)' }}>
-                          {r.accepted ? '✓ ACCEPT' : '✗ REJECT'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="space-y-0">
+                {multiRunResults.map((r, i) => (
+                  <div key={i} className="flex items-center font-mono text-xs py-1 border-b border-[var(--color-border)]/30 gap-2">
+                    <span className="w-5 text-center font-bold" style={{ color: r.accepted ? 'var(--color-accept)' : 'var(--color-reject)' }}>
+                      {r.accepted ? '✓' : '✗'}
+                    </span>
+                    <span className="flex-1 text-[var(--color-text)] truncate">{r.input || 'ε'}</span>
+                    <span className="text-[11px] font-medium shrink-0" style={{ color: r.accepted ? 'var(--color-accept)' : 'var(--color-reject)' }}>
+                      {r.accepted ? 'ACCEPT' : 'REJECT'}
+                    </span>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center h-full">
-                <div className="font-mono text-[11px] text-[var(--color-text-muted)] text-center">
-                  Enter test strings (one per line)<br />and click RUN ALL
+              <div className="h-full flex flex-col items-center justify-center gap-2">
+                <ListChecks size={24} className="text-[var(--color-text-muted)]" />
+                <div className="font-mono text-[11px] text-[var(--color-text-muted)] text-center leading-relaxed">
+                  Batch test multiple strings<br />
+                  One per line · empty line = ε
                 </div>
               </div>
             )}

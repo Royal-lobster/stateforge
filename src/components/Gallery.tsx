@@ -130,6 +130,83 @@ const EXAMPLES: Example[] = [
   },
 ];
 
+const MORE_EXAMPLES: Example[] = [
+  // DFA: Divisible by 3
+  {
+    name: 'Divisible by 3',
+    description: 'DFA accepting binary numbers divisible by 3',
+    icon: CircleDot,
+    category: 'DFA',
+    mode: 'dfa',
+    states: [
+      { id: 'd30', label: 'r0', x: 150, y: 300, isInitial: true, isAccepting: true },
+      { id: 'd31', label: 'r1', x: 450, y: 150, isInitial: false, isAccepting: false },
+      { id: 'd32', label: 'r2', x: 450, y: 450, isInitial: false, isAccepting: false },
+    ],
+    transitions: [
+      { id: 'd3t0', from: 'd30', to: 'd30', symbols: ['0'] },
+      { id: 'd3t1', from: 'd30', to: 'd31', symbols: ['1'] },
+      { id: 'd3t2', from: 'd31', to: 'd32', symbols: ['0'] },
+      { id: 'd3t3', from: 'd31', to: 'd30', symbols: ['1'] },
+      { id: 'd3t4', from: 'd32', to: 'd31', symbols: ['0'] },
+      { id: 'd3t5', from: 'd32', to: 'd32', symbols: ['1'] },
+    ],
+  },
+  // NFA: Ends with 00
+  {
+    name: 'NFA: Ends with 00',
+    description: 'NFA accepting strings ending with two consecutive 0s',
+    icon: GitBranch,
+    category: 'NFA',
+    mode: 'nfa',
+    states: [
+      { id: 'n00_0', label: 'q0', x: 150, y: 300, isInitial: true, isAccepting: false },
+      { id: 'n00_1', label: 'q1', x: 400, y: 300, isInitial: false, isAccepting: false },
+      { id: 'n00_2', label: 'q2', x: 650, y: 300, isInitial: false, isAccepting: true },
+    ],
+    transitions: [
+      { id: 'n00t0', from: 'n00_0', to: 'n00_0', symbols: ['0', '1'] },
+      { id: 'n00t1', from: 'n00_0', to: 'n00_1', symbols: ['0'] },
+      { id: 'n00t2', from: 'n00_1', to: 'n00_2', symbols: ['0'] },
+    ],
+  },
+  // PDA: Palindromes
+  {
+    name: 'PDA: Palindromes',
+    description: 'PDA accepting even-length palindromes over {a,b}',
+    icon: Layers,
+    category: 'PDA',
+    mode: 'pda',
+    states: [
+      { id: 'pal0', label: 'q0', x: 150, y: 300, isInitial: true, isAccepting: false },
+      { id: 'pal1', label: 'q1', x: 400, y: 300, isInitial: false, isAccepting: false },
+      { id: 'pal2', label: 'q2', x: 650, y: 300, isInitial: false, isAccepting: true },
+    ],
+    transitions: [
+      { id: 'pt0', from: 'pal0', to: 'pal0', symbols: ['a, Z → AZ', 'a, A → AA', 'a, B → AB', 'b, Z → BZ', 'b, A → BA', 'b, B → BB'] },
+      { id: 'pt1', from: 'pal0', to: 'pal1', symbols: ['ε, A → A', 'ε, B → B'] },
+      { id: 'pt2', from: 'pal1', to: 'pal1', symbols: ['a, A → ε', 'b, B → ε'] },
+      { id: 'pt3', from: 'pal1', to: 'pal2', symbols: ['ε, Z → Z'] },
+    ],
+  },
+  // TM: Palindrome checker
+  {
+    name: 'TM: Binary NOT',
+    description: 'Turing machine that flips all bits (0↔1)',
+    icon: Cpu,
+    category: 'TM',
+    mode: 'tm',
+    states: [
+      { id: 'bn0', label: 'scan', x: 200, y: 300, isInitial: true, isAccepting: false },
+      { id: 'bn1', label: 'done', x: 500, y: 300, isInitial: false, isAccepting: true },
+    ],
+    transitions: [
+      { id: 'bnt0', from: 'bn0', to: 'bn0', symbols: ['0 → 1, R', '1 → 0, R'] },
+      { id: 'bnt1', from: 'bn0', to: 'bn1', symbols: ['⊔ → ⊔, S'] },
+    ],
+  },
+];
+
 const MEALY_MOORE_EXAMPLES: Example[] = [
   {
     name: 'Mealy: Parity Bit',
@@ -169,7 +246,7 @@ const MEALY_MOORE_EXAMPLES: Example[] = [
   },
 ];
 
-const ALL_EXAMPLES = [...EXAMPLES, ...MEALY_MOORE_EXAMPLES];
+const ALL_EXAMPLES = [...EXAMPLES, ...MORE_EXAMPLES, ...MEALY_MOORE_EXAMPLES];
 const CATEGORIES = ['DFA', 'NFA', 'PDA', 'TM', 'MEALY', 'MOORE'];
 
 export default function Gallery({ onSelect }: { onSelect: () => void }) {
