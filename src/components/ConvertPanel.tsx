@@ -3,16 +3,16 @@
 import { useState, useRef, useCallback } from 'react';
 import { useStore } from '@/store';
 import {
-  nfaToDFA, minimizeDFA, reToNFA, faToRegex, faToGrammar,
+  nfaToDFA, minimizeDFA, reToNFA, faToRegex, faToGrammar, combineDFA,
   type NFAToDFAResult, type MinimizationResult, type REToNFAResult,
-  type FAToREResult, type FAToGrammarResult,
+  type FAToREResult, type FAToGrammarResult, type CombineResult, type CombineOp,
 } from '@/conversions';
 import {
   X, Play, StepForward, FastForward, RotateCcw,
   ArrowRightLeft, Check, GripHorizontal,
 } from 'lucide-react';
 
-type ConversionType = 'nfa2dfa' | 'minimize' | 're2nfa' | 'fa2re' | 'fa2grammar';
+type ConversionType = 'nfa2dfa' | 'minimize' | 're2nfa' | 'fa2re' | 'fa2grammar' | 'combine';
 
 const TABS: { id: ConversionType; label: string; short: string }[] = [
   { id: 'nfa2dfa', label: 'NFA → DFA', short: 'N→D' },
@@ -20,6 +20,7 @@ const TABS: { id: ConversionType; label: string; short: string }[] = [
   { id: 're2nfa', label: 'RE → NFA', short: 'R→N' },
   { id: 'fa2re', label: 'FA → RE', short: 'F→R' },
   { id: 'fa2grammar', label: 'FA → Grammar', short: 'F→G' },
+  { id: 'combine', label: 'Combine', short: 'A∘B' },
 ];
 
 export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean; onClose: () => void }) {
@@ -55,6 +56,13 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
   // FA → Grammar state
   const [gramResult, setGramResult] = useState<FAToGrammarResult | null>(null);
 
+  // Combine state
+  const [combineOp, setCombineOp] = useState<CombineOp>('union');
+  const [combineReB, setCombineReB] = useState(''); // RE string for second automaton
+  const [combineResult, setCombineResult] = useState<CombineResult | null>(null);
+  const [combineStepIdx, setCombineStepIdx] = useState(-1);
+  const [combineApplied, setCombineApplied] = useState(false);
+
   // Swipe gesture for mobile
   const touchStartY = useRef(0);
   const handleTouchStart = useCallback((e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; }, []);
@@ -70,6 +78,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     setReResult(null); setReStepIdx(-1); setReApplied(false);
     setFareResult(null); setFareStepIdx(-1);
     setGramResult(null);
+    setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false);
   };
 
   const switchTab = (t: ConversionType) => { setTab(t); resetAll(); };
@@ -404,6 +413,113 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     </div>
   );
 
+  const renderCombine = () => {
+    const canRun = mode === 'dfa' && states.length > 0 && (combineOp === 'complement' || combineReB.trim().length > 0);
+    const isComplement = combineOp === 'complement';
+
+    const run = () => {
+      if (isComplement) {
+        const r = combineDFA(states, transitions, [], [], 'complement');
+        setCombineResult(r); setCombineStepIdx(-1); setCombineApplied(false);
+        return;
+      }
+      // Build DFA B from RE: RE → NFA → DFA
+      const nfa = reToNFA(combineReB.trim());
+      if (nfa.error || nfa.states.length === 0) return;
+      const dfa = nfaToDFA(nfa.states, nfa.transitions);
+      const r = combineDFA(states, transitions, dfa.states, dfa.transitions, combineOp);
+      setCombineResult(r); setCombineStepIdx(-1); setCombineApplied(false);
+    };
+
+    const stepFwd = () => {
+      if (!combineResult) { run(); return; }
+      if (combineStepIdx < combineResult.steps.length - 1) setCombineStepIdx(combineStepIdx + 1);
+    };
+    const ffwd = () => { if (!combineResult) run(); setCombineResult(prev => { if (prev) setCombineStepIdx(prev.steps.length - 1); return prev; }); };
+    const apply = () => {
+      if (combineResult) {
+        loadAutomaton(combineResult.states, combineResult.transitions, 'dfa');
+        setCombineApplied(true);
+      }
+    };
+    const visibleSteps = combineResult ? combineResult.steps.slice(0, combineStepIdx + 1) : [];
+
+    const opButtons: { id: CombineOp; label: string; symbol: string }[] = [
+      { id: 'union', label: 'Union', symbol: '∪' },
+      { id: 'intersection', label: 'Intersection', symbol: '∩' },
+      { id: 'difference', label: 'Difference', symbol: '−' },
+      { id: 'complement', label: 'Complement', symbol: '¬' },
+    ];
+
+    return (
+      <>
+        <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2 flex-wrap">
+          <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">OP</span>
+          <div className="flex items-center gap-0">
+            {opButtons.map(o => (
+              <button
+                key={o.id}
+                onClick={() => { setCombineOp(o.id); setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }}
+                className={`px-2 py-1 font-mono text-[10px] transition-colors ${
+                  combineOp === o.id ? 'text-[var(--color-accent)] bg-[var(--bg-primary)]' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
+                }`}
+                title={o.label}
+              >
+                {o.symbol}
+              </button>
+            ))}
+          </div>
+          {!isComplement && (
+            <>
+              <span className="font-mono text-[10px] text-[var(--color-text-dim)] shrink-0">B (RE)</span>
+              <input
+                value={combineReB}
+                onChange={e => { setCombineReB(e.target.value); setCombineResult(null); }}
+                className="flex-1 min-w-[100px] bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                placeholder="RE for automaton B, e.g. (a|b)*a"
+              />
+            </>
+          )}
+          {mode !== 'dfa' && <span className="font-mono text-[10px] text-[var(--color-reject)]">Switch to DFA mode</span>}
+          <div className="flex items-center gap-0.5 ml-auto">
+            <button onClick={run} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
+            <button onClick={stepFwd} disabled={!canRun || (combineResult !== null && combineStepIdx >= combineResult.steps.length - 1)} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
+            <button onClick={ffwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><FastForward size={14} /></button>
+            <button onClick={() => { setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
+          </div>
+        </div>
+        <div className="flex-1 flex overflow-hidden">
+          {!combineResult ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center font-mono text-[10px] text-[var(--color-text-dim)] space-y-1">
+                <p>Canvas automaton = A (must be DFA)</p>
+                {isComplement ? <p>Complement flips accepting states on A</p> : <p>Enter a RE for automaton B, then press ▶</p>}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto px-3 py-2">
+                <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">
+                  Product Construction <span className="text-[var(--color-accent)] normal-case ml-1">({Math.min(combineStepIdx + 1, combineResult.steps.length)}/{combineResult.steps.length})</span>
+                </div>
+                <div className="space-y-0.5">
+                  {visibleSteps.map((step, i) => (
+                    <div key={i} className={`font-mono text-xs py-0.5 ${i === combineStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                      <span className="text-[10px] w-5 inline-block">{i + 1}.</span>
+                      δ({step.pairLabel}, {step.symbol}) = {step.resultLabel}
+                      {step.isNew && <span className="text-[10px] text-[var(--color-accent)] ml-1">NEW</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {renderResultSidebar(combineResult.states, combineResult.transitions, combineApplied, apply)}
+            </>
+          )}
+        </div>
+      </>
+    );
+  };
+
   const content = (
     <>
       {tab === 'nfa2dfa' && renderNFA2DFA()}
@@ -411,6 +527,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
       {tab === 're2nfa' && renderRE2NFA()}
       {tab === 'fa2re' && renderFA2RE()}
       {tab === 'fa2grammar' && renderFA2Grammar()}
+      {tab === 'combine' && renderCombine()}
     </>
   );
 

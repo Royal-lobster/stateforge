@@ -891,3 +891,206 @@ export function faToGrammar(
 
   return { productions, startSymbol: 'S' };
 }
+
+// ════════════════════════════════════════════════════
+// ── Combine Automata (Product Construction) ──
+// ════════════════════════════════════════════════════
+
+export type CombineOp = 'union' | 'intersection' | 'difference' | 'complement';
+
+export interface CombineStep {
+  pairLabel: string;
+  symbol: string;
+  resultLabel: string;
+  isNew: boolean;
+}
+
+export interface CombineResult {
+  states: State[];
+  transitions: Transition[];
+  steps: CombineStep[];
+}
+
+/**
+ * Product construction for two DFAs.
+ * Both DFAs must be complete (have transitions for every symbol from every state).
+ * For complement, only dfaA is used (dfaB ignored).
+ */
+export function combineDFA(
+  statesA: State[], transA: Transition[],
+  statesB: State[], transB: Transition[],
+  op: CombineOp,
+): CombineResult {
+  // Complement: just flip accepting on A
+  if (op === 'complement') {
+    const completed = completeDFA(statesA, transA);
+    const pos = layoutCircular(completed.states.length);
+    const newStates = completed.states.map((s, i) => {
+      const { x, y } = pos(i);
+      return { ...s, id: uid(), x, y, isAccepting: !s.isAccepting };
+    });
+    // Remap transition IDs
+    const idMap = new Map(completed.states.map((s, i) => [s.id, newStates[i].id]));
+    const newTrans = completed.transitions.map(t => ({
+      id: uid(),
+      from: idMap.get(t.from)!,
+      to: idMap.get(t.to)!,
+      symbols: [...t.symbols],
+    }));
+    return {
+      states: newStates,
+      transitions: newTrans,
+      steps: [{ pairLabel: 'complement', symbol: '-', resultLabel: `Flipped ${newStates.length} states`, isNew: true }],
+    };
+  }
+
+  // Complete both DFAs (add trap states for missing transitions)
+  const a = completeDFA(statesA, transA);
+  const b = completeDFA(statesB, transB);
+
+  // Gather combined alphabet
+  const alphabet = new Set<string>();
+  for (const t of a.transitions) for (const sym of t.symbols) if (sym !== 'ε') alphabet.add(sym);
+  for (const t of b.transitions) for (const sym of t.symbols) if (sym !== 'ε') alphabet.add(sym);
+  const sortedAlpha = [...alphabet].sort();
+
+  // Build delta functions
+  const deltaA = new Map<string, string>();
+  for (const t of a.transitions) for (const sym of t.symbols) deltaA.set(`${t.from}|${sym}`, t.to);
+  const deltaB = new Map<string, string>();
+  for (const t of b.transitions) for (const sym of t.symbols) deltaB.set(`${t.from}|${sym}`, t.to);
+
+  const stateMapA = new Map(a.states.map(s => [s.id, s]));
+  const stateMapB = new Map(b.states.map(s => [s.id, s]));
+
+  const initialA = a.states.find(s => s.isInitial);
+  const initialB = b.states.find(s => s.isInitial);
+  if (!initialA || !initialB) return { states: [], transitions: [], steps: [] };
+
+  // BFS over product states
+  const pairKey = (a: string, b: string) => `${a}||${b}`;
+  const pairLabel = (a: string, b: string) => {
+    const la = stateMapA.get(a)?.label ?? a;
+    const lb = stateMapB.get(b)?.label ?? b;
+    return `(${la},${lb})`;
+  };
+
+  const productStates = new Map<string, { id: string; aId: string; bId: string; label: string }>();
+  const productTransitions: Transition[] = [];
+  const steps: CombineStep[] = [];
+
+  const startKey = pairKey(initialA.id, initialB.id);
+  const startId = uid();
+  productStates.set(startKey, { id: startId, aId: initialA.id, bId: initialB.id, label: pairLabel(initialA.id, initialB.id) });
+  const queue = [startKey];
+
+  while (queue.length > 0) {
+    const curKey = queue.shift()!;
+    const cur = productStates.get(curKey)!;
+
+    for (const sym of sortedAlpha) {
+      const nextA = deltaA.get(`${cur.aId}|${sym}`);
+      const nextB = deltaB.get(`${cur.bId}|${sym}`);
+      if (!nextA || !nextB) continue;
+
+      const nKey = pairKey(nextA, nextB);
+      let isNew = false;
+      if (!productStates.has(nKey)) {
+        isNew = true;
+        productStates.set(nKey, { id: uid(), aId: nextA, bId: nextB, label: pairLabel(nextA, nextB) });
+        queue.push(nKey);
+      }
+
+      const target = productStates.get(nKey)!;
+
+      // Merge symbols on same edge
+      const existing = productTransitions.find(t => t.from === cur.id && t.to === target.id);
+      if (existing) {
+        if (!existing.symbols.includes(sym)) existing.symbols.push(sym);
+      } else {
+        productTransitions.push({ id: uid(), from: cur.id, to: target.id, symbols: [sym] });
+      }
+
+      steps.push({ pairLabel: cur.label, symbol: sym, resultLabel: target.label, isNew });
+    }
+  }
+
+  // Determine accepting states based on operation
+  const isAccepting = (aId: string, bId: string): boolean => {
+    const accA = stateMapA.get(aId)?.isAccepting ?? false;
+    const accB = stateMapB.get(bId)?.isAccepting ?? false;
+    switch (op) {
+      case 'union': return accA || accB;
+      case 'intersection': return accA && accB;
+      case 'difference': return accA && !accB;
+      default: return false;
+    }
+  };
+
+  const entries = [...productStates.values()];
+  const pos = layoutCircular(entries.length);
+
+  const finalStates: State[] = entries.map((e, i) => {
+    const { x, y } = pos(i);
+    return {
+      id: e.id,
+      label: e.label,
+      x, y,
+      isInitial: e.id === startId,
+      isAccepting: isAccepting(e.aId, e.bId),
+    };
+  });
+
+  return { states: finalStates, transitions: productTransitions, steps };
+}
+
+/**
+ * Complete a DFA by adding a trap state for missing transitions.
+ */
+function completeDFA(states: State[], transitions: Transition[]): { states: State[]; transitions: Transition[] } {
+  const alphabet = new Set<string>();
+  for (const t of transitions) for (const sym of t.symbols) if (sym !== 'ε') alphabet.add(sym);
+  if (alphabet.size === 0) return { states: [...states], transitions: [...transitions] };
+
+  // Check which (state, symbol) pairs are missing
+  const delta = new Set<string>();
+  for (const t of transitions) for (const sym of t.symbols) delta.add(`${t.from}|${sym}`);
+
+  const missing: { stateId: string; sym: string }[] = [];
+  for (const s of states) {
+    for (const sym of alphabet) {
+      if (!delta.has(`${s.id}|${sym}`)) {
+        missing.push({ stateId: s.id, sym });
+      }
+    }
+  }
+
+  if (missing.length === 0) return { states: [...states], transitions: [...transitions] };
+
+  // Add trap state
+  const trapId = uid();
+  const trapState: State = { id: trapId, label: '∅', x: 0, y: 0, isInitial: false, isAccepting: false };
+  const newStates = [...states, trapState];
+  const newTransitions = [...transitions];
+
+  for (const { stateId, sym } of missing) {
+    const existing = newTransitions.find(t => t.from === stateId && t.to === trapId);
+    if (existing) {
+      if (!existing.symbols.includes(sym)) existing.symbols.push(sym);
+    } else {
+      newTransitions.push({ id: uid(), from: stateId, to: trapId, symbols: [sym] });
+    }
+  }
+
+  // Trap self-loops
+  for (const sym of alphabet) {
+    const existing = newTransitions.find(t => t.from === trapId && t.to === trapId);
+    if (existing) {
+      if (!existing.symbols.includes(sym)) existing.symbols.push(sym);
+    } else {
+      newTransitions.push({ id: uid(), from: trapId, to: trapId, symbols: [sym] });
+    }
+  }
+
+  return { states: newStates, transitions: newTransitions };
+}
