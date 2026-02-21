@@ -1,7 +1,9 @@
+'use client';
+
+import dynamic from 'next/dynamic';
+
+const App = dynamic(() => import('@/components/App'), { ssr: false });
+
 export default function Home() {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-2xl font-mono">StateForge</h1>
-    </div>
-  );
+  return <App />;
 }
