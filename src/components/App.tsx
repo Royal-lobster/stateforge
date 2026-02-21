@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useStore } from '@/store';
-import { decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/url';
+import { encodeAutomaton, decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/url';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
@@ -68,7 +68,14 @@ export default function App() {
     if (!showGrammar && !showLSystem && !showGallery) {
       const timer = setTimeout(() => {
         saveToLocalStorage(states, transitions, mode);
-        if (states.length > 0) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+        // Sync URL hash so the address bar is always shareable
+        if (states.length > 0) {
+          const hash = encodeAutomaton(states, transitions, mode);
+          window.history.replaceState(null, '', `#${hash}`);
+          setSaved(true); setTimeout(() => setSaved(false), 2000);
+        } else {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
       }, 500);
       return () => clearTimeout(timer);
     }
