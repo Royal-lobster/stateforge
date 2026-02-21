@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/store';
 import { decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/url';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -8,6 +8,7 @@ import Toolbar from './Toolbar';
 import Canvas from './Canvas';
 import Sidebar from './Sidebar';
 import SimPanel from './SimPanel';
+import ConvertPanel from './ConvertPanel';
 
 export default function App() {
   const states = useStore(s => s.states);
@@ -20,6 +21,7 @@ export default function App() {
   const clearSelection = useStore(s => s.clearSelection);
   const setTool = useStore(s => s.setTool);
   const isMobile = useIsMobile();
+  const [showConvert, setShowConvert] = useState(false);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -71,12 +73,16 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] w-screen flex flex-col overflow-hidden relative">
-      <Toolbar isMobile={isMobile} />
+      <Toolbar isMobile={isMobile} onConvert={() => setShowConvert(true)} />
       <div className="flex flex-1 overflow-hidden relative">
         <Canvas isMobile={isMobile} />
         <Sidebar isMobile={isMobile} />
       </div>
-      <SimPanel isMobile={isMobile} />
+      {showConvert ? (
+        <ConvertPanel isMobile={isMobile} onClose={() => setShowConvert(false)} />
+      ) : (
+        <SimPanel isMobile={isMobile} />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
-  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu
+  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, ArrowRightLeft
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 
@@ -27,7 +27,7 @@ function ToolBtn({ active, onClick, children, title }: {
   );
 }
 
-export default function Toolbar({ isMobile }: { isMobile: boolean }) {
+export default function Toolbar({ isMobile, onConvert }: { isMobile: boolean; onConvert: () => void }) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
   const undoStack = useStore(s => s.undoStack);
@@ -122,6 +122,13 @@ export default function Toolbar({ isMobile }: { isMobile: boolean }) {
           NFA
         </button>
       </div>
+
+      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+
+      {/* Convert */}
+      <ToolBtn onClick={onConvert} title="Convert (NFA→DFA)">
+        <ArrowRightLeft size={iconSize} />
+      </ToolBtn>
 
       <div className="flex-1" />
 
