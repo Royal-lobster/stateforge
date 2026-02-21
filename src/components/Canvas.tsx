@@ -64,6 +64,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const editingTransitionId = useStore(s => s.editingTransitionId);
   const editingStateId = useStore(s => s.editingStateId);
   const contextMenu = useStore(s => s.contextMenu);
+  const mode = useStore(s => s.mode);
   const simCurrentStates = useStore(s => s.simCurrentStates);
   const simStatus = useStore(s => s.simStatus);
 
@@ -74,6 +75,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const toggleInitial = useStore(s => s.toggleInitial);
   const toggleAccepting = useStore(s => s.toggleAccepting);
   const addTransition = useStore(s => s.addTransition);
+  const deleteTransition = useStore(s => s.deleteTransition);
   const updateTransitionSymbols = useStore(s => s.updateTransitionSymbols);
   const setSelected = useStore(s => s.setSelected);
   const toggleSelected = useStore(s => s.toggleSelected);
@@ -398,9 +400,11 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
     if (isMobile) return;
     const w = getWorldPos(e);
     const hitState = getStateAt(w.x, w.y, states);
-    if (hitState) setContextMenu({ x: e.clientX, y: e.clientY, stateId: hitState.id });
-    else setContextMenu(null);
-  }, [states, getWorldPos, setContextMenu, isMobile]);
+    if (hitState) { setContextMenu({ x: e.clientX, y: e.clientY, stateId: hitState.id }); return; }
+    const hitTrans = getTransitionAt(w.x, w.y, transitions, states);
+    if (hitTrans) { setContextMenu({ x: e.clientX, y: e.clientY, transitionId: hitTrans.id }); return; }
+    setContextMenu({ x: e.clientX, y: e.clientY, canvasX: w.x, canvasY: w.y });
+  }, [states, transitions, getWorldPos, setContextMenu, isMobile]);
 
   const handleDoubleClick = useCallback((e: React.MouseEvent) => {
     const w = getWorldPos(e);
@@ -458,17 +462,21 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         onTouchEnd={isMobile ? handleTouchEnd : undefined}
       >
         <defs>
-          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-accent)" />
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0.5, 8 3, 0 5.5" fill="var(--color-accent)" />
           </marker>
-          <marker id="arrowhead-dim" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-border)" />
+          <marker id="arrowhead-dim" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0.5, 8 3, 0 5.5" fill="var(--color-border)" />
           </marker>
-          <marker id="arrowhead-draft" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="var(--color-accent)" opacity="0.5" />
+          <marker id="arrowhead-draft" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0.5, 8 3, 0 5.5" fill="var(--color-accent)" opacity="0.5" />
           </marker>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
           <pattern id="grid" width={GRID_SIZE} height={GRID_SIZE} patternUnits="userSpaceOnUse">
-            <path d={`M ${GRID_SIZE} 0 L 0 0 0 ${GRID_SIZE}`} fill="none" stroke="var(--color-grid)" strokeWidth="0.5" />
+            <circle cx={GRID_SIZE} cy={GRID_SIZE} r="0.5" fill="var(--color-grid)" />
           </pattern>
         </defs>
 
@@ -484,7 +492,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             const curveOff = getEdgeCurveOffset(t, transitions);
 
             if (t.from === t.to) {
-              const cx = from.x, cy = from.y, loopR = 22;
+              const cx = from.x, cy = from.y, loopR = 18;
               return (
                 <g key={t.id}>
                   <path d={`M ${cx - 12} ${cy - STATE_RADIUS + 2} C ${cx - 30} ${cy - STATE_RADIUS - loopR * 2}, ${cx + 30} ${cy - STATE_RADIUS - loopR * 2}, ${cx + 12} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
@@ -542,8 +550,8 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
               <g key={s.id}>
                 {s.isInitial && <line x1={s.x - STATE_RADIUS - 30} y1={s.y} x2={s.x - STATE_RADIUS - 2} y2={s.y} stroke="var(--color-accent)" strokeWidth={2} markerEnd="url(#arrowhead)" />}
                 {s.isAccepting && <rect x={s.x - STATE_RADIUS - 4} y={s.y - STATE_RADIUS - 4} width={(STATE_RADIUS + 4) * 2} height={(STATE_RADIUS + 4) * 2} fill="none" stroke={strokeColor} strokeWidth={1} />}
-                <rect x={s.x - STATE_RADIUS} y={s.y - STATE_RADIUS} width={STATE_RADIUS * 2} height={STATE_RADIUS * 2} fill={fillColor} stroke={strokeColor} strokeWidth={isSelected || isSimActive ? 2 : 1.5} />
-                <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" className="canvas-label" fill="var(--color-text)" fontSize={s.label.length > 6 ? Math.max(8, Math.floor(78 / s.label.length)) : 13} fontWeight={500}>{s.label.length > 10 ? s.label.slice(0, 9) + '…' : s.label}</text>
+                <rect x={s.x - STATE_RADIUS} y={s.y - STATE_RADIUS} width={STATE_RADIUS * 2} height={STATE_RADIUS * 2} fill={fillColor} stroke={strokeColor} strokeWidth={isSelected || isSimActive ? 2 : 1.5} filter={isSelected ? 'url(#glow)' : undefined} />
+                <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" className="canvas-label" fill="var(--color-text)" fontSize={s.label.length > 6 ? Math.max(9, Math.floor(84 / s.label.length)) : 14} fontWeight={600}>{s.label.length > 10 ? s.label.slice(0, 9) + '…' : s.label}</text>
               </g>
             );
           })}
@@ -567,7 +575,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         else { lx = ((from.x + to.x) / 2) * zoom + pan.x; ly = ((from.y + to.y) / 2) * zoom + pan.y - 20; }
         return (
           <div className="absolute" style={{ left: lx - 60, top: ly - 12 }}>
-            <input autoFocus className="bg-[var(--bg-surface)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[120px] outline-none" value={editInput} onChange={e => setEditInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} onBlur={commitTransitionEdit} />
+            <input autoFocus className="bg-[var(--bg-surface-sunken)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[140px] outline-none" value={editInput} onChange={e => setEditInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} onBlur={commitTransitionEdit} placeholder={mode === 'pda' ? 'a, Z → AZ' : mode === 'tm' ? 'a → b, R' : mode === 'mealy' ? 'a/0' : 'a, b'} />
           </div>
         );
       })()}
@@ -587,12 +595,23 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
 
       {/* Desktop context menu */}
       {!isMobile && contextMenu && (
-        <div className="absolute bg-[var(--bg-surface)] border border-[var(--color-border)] shadow-lg z-50" style={{ left: contextMenu.x, top: contextMenu.y }}>
-          {contextMenuItems(contextMenu.stateId).map(item => (
-            <button key={item.label} className="block w-full text-left px-4 py-1.5 text-xs font-mono hover:bg-[var(--color-accent)] hover:text-[var(--bg-primary)] transition-colors" onClick={() => { item.action(); setContextMenu(null); }}>
-              {item.label}
-            </button>
-          ))}
+        <div className="absolute bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-lg z-50 animate-scale-in" style={{ left: contextMenu.x, top: contextMenu.y }}>
+          {contextMenu.stateId ? (
+            contextMenuItems(contextMenu.stateId).map(item => (
+              <button key={item.label} className="block w-full text-left px-4 py-1.5 text-xs font-mono hover:bg-[var(--color-accent)] hover:text-[var(--bg-primary)] transition-colors" onClick={() => { item.action(); setContextMenu(null); }}>
+                {item.label}
+              </button>
+            ))
+          ) : contextMenu.transitionId ? (
+            <>
+              <button className="block w-full text-left px-4 py-1.5 text-xs font-mono hover:bg-[var(--color-accent)] hover:text-[var(--bg-primary)] transition-colors" onClick={() => { setEditingTransition(contextMenu.transitionId!); setContextMenu(null); }}>Edit Label</button>
+              <button className="block w-full text-left px-4 py-1.5 text-xs font-mono hover:bg-[var(--color-reject)] hover:text-white transition-colors" onClick={() => { deleteTransition(contextMenu.transitionId!); setContextMenu(null); }}>Delete</button>
+            </>
+          ) : (
+            <>
+              <button className="block w-full text-left px-4 py-1.5 text-xs font-mono hover:bg-[var(--color-accent)] hover:text-[var(--bg-primary)] transition-colors" onClick={() => { addState(contextMenu.canvasX!, contextMenu.canvasY!); setContextMenu(null); }}>Add State Here</button>
+            </>
+          )}
         </div>
       )}
 

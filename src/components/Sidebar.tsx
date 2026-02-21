@@ -1,7 +1,7 @@
 'use client';
 
 import { useStore } from '@/store';
-import { Circle, ArrowRight, Hash, X, Share2, LayoutGrid, RotateCcw } from 'lucide-react';
+import { Circle, ArrowRight, Hash, X, Share2, LayoutGrid, RotateCcw, Download, Upload } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 
 export default function Sidebar({ isMobile }: { isMobile: boolean }) {
@@ -91,16 +91,38 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
 
       {/* Mobile-only actions */}
       {isMobile && (
-        <div className="px-3 py-2 border-b border-[var(--color-border)] flex gap-2">
-          <button onClick={handleShare} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
-            <Share2 size={14} /> SHARE
-          </button>
-          <button onClick={autoLayout} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
-            <LayoutGrid size={14} /> LAYOUT
-          </button>
-          <button onClick={clearAll} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
-            <RotateCcw size={14} /> CLEAR
-          </button>
+        <div className="border-b border-[var(--color-border)]">
+          <div className="px-3 py-2 flex gap-2 flex-wrap">
+            <button onClick={handleShare} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+              <Share2 size={14} /> SHARE
+            </button>
+            <button onClick={autoLayout} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+              <LayoutGrid size={14} /> LAYOUT
+            </button>
+            <button onClick={clearAll} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+              <RotateCcw size={14} /> CLEAR
+            </button>
+            <button onClick={() => {
+              const data = JSON.stringify({ states, transitions, mode, _format: 'stateforge-v1' }, null, 2);
+              const blob = new Blob([data], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `stateforge-${mode}.json`; a.click();
+              URL.revokeObjectURL(url);
+            }} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+              <Download size={14} /> EXPORT
+            </button>
+            <button onClick={() => {
+              const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,.jff';
+              input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return;
+                const text = await file.text();
+                try { const d = JSON.parse(text); if (d.states) useStore.getState().loadAutomaton(d.states, d.transitions, d.mode ?? 'dfa'); } catch {}
+              };
+              input.click();
+            }} className="flex items-center gap-1 px-2 py-2 font-mono text-[11px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+              <Upload size={14} /> IMPORT
+            </button>
+          </div>
         </div>
       )}
 

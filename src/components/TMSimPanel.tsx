@@ -86,7 +86,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div
-      className={`bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
+      className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
         isMobile ? (mobileExpanded ? 'max-h-[60vh]' : 'max-h-[180px]') : 'h-52'
       }`}
       onTouchStart={isMobile ? handleTouchStart : undefined}
@@ -109,7 +109,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
             type="number"
             value={maxSteps}
             onChange={e => setMaxSteps(Math.max(1, parseInt(e.target.value) || 1000))}
-            className="w-16 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-0.5 outline-none"
+            className="w-16 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-0.5 outline-none"
           />
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
-              className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] max-w-[200px]"
+              className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] max-w-[200px]"
               placeholder="Tape input..."
             />
             <div className="flex items-center gap-0.5">
@@ -151,7 +151,7 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
                         className={`w-6 h-6 flex items-center justify-center border shrink-0 ${
                           isHead
                             ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--bg-primary)] font-bold'
-                            : 'border-[var(--color-border)] bg-[var(--bg-primary)] text-[var(--color-text)]'
+                            : 'border-[var(--color-border)] bg-[var(--bg-surface-sunken)] text-[var(--color-text)]'
                         }`}
                       >
                         {ch}

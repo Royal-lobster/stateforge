@@ -86,7 +86,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div
-      className={`bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
+      className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
         isMobile ? (mobileExpanded ? 'max-h-[60vh]' : 'max-h-[180px]') : 'h-52'
       }`}
       onTouchStart={isMobile ? handleTouchStart : undefined}
@@ -127,7 +127,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
-              className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+              className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
               placeholder="Input string..."
             />
           </div>
@@ -151,7 +151,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
                   <span
                     key={i}
                     className={`w-5 h-5 flex items-center justify-center border border-[var(--color-border)] shrink-0 ${
-                      isConsumed ? 'bg-[var(--bg-primary)] text-[var(--color-text-dim)]'
+                      isConsumed ? 'bg-[var(--bg-surface-sunken)] text-[var(--color-text-dim)]'
                         : isCurrent ? 'bg-[var(--color-sim-active)] text-[var(--bg-primary)]'
                         : 'bg-[var(--bg-surface)] text-[var(--color-text)]'
                     }`}
@@ -205,7 +205,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
                     className={`font-mono text-xs text-center border border-[var(--color-border)] py-0.5 ${
                       i === config.stack.length - 1
                         ? 'bg-[var(--color-sim-active)] text-[var(--bg-primary)]'
-                        : 'bg-[var(--bg-primary)] text-[var(--color-text)]'
+                        : 'bg-[var(--bg-surface-sunken)] text-[var(--color-text)]'
                     }`}
                   >
                     {sym}

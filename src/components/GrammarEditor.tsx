@@ -180,7 +180,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
         <div className="px-3 py-1 border-b border-[var(--color-border)] flex items-center gap-2">
           <select
             onChange={e => { setGrammarText(EXAMPLE_GRAMMARS[parseInt(e.target.value)].text); resetParse(); setTransformResult(null); }}
-            className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-1 outline-none"
+            className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-[11px] px-1 py-1 outline-none"
           >
             {EXAMPLE_GRAMMARS.map((eg, i) => (
               <option key={i} value={i}>{eg.name}</option>
@@ -241,7 +241,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   className={`px-2 py-1 font-mono text-[11px] transition-colors ${
                     activeTransform === t.id
                       ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
-                      : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] bg-[var(--bg-primary)]'
+                      : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] bg-[var(--bg-surface-sunken)]'
                   }`}
                 >
                   {t.label}
@@ -257,7 +257,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {transformResult.steps.map((step, i) => (
                     <div key={i}>
                       <div className="font-mono text-[11px] text-[var(--color-accent)] mb-1">{step.description}</div>
-                      <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 space-y-0.5">
+                      <div className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-2 space-y-0.5">
                         {step.productions.map((p, j) => (
                           <div key={j} className="font-mono text-xs text-[var(--color-text)]">
                             <span className="text-[var(--color-accent)]">{p.head}</span>
@@ -288,7 +288,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setCykResult(null); }}
-                className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
                 placeholder="String to parse..."
               />
               <button onClick={handleCYK} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><Play size={14} /></button>
@@ -344,7 +344,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {cykResult.parseTree && (
                     <div>
                       <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
-                      <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
+                      <div className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
                         <ParseTree node={cykResult.parseTree} />
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setLl1Result(null); }}
-                className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
                 placeholder="String to parse..."
               />
               <button onClick={handleLL1} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><Play size={14} /></button>
@@ -507,7 +507,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {ll1Result.parseTree && (
                     <div>
                       <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
-                      <div className="bg-[var(--bg-primary)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
+                      <div className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
                         <ParseTree node={ll1Result.parseTree} />
                       </div>
                     </div>
@@ -526,7 +526,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
               <input
                 value={parseInput}
                 onChange={e => { setParseInput(e.target.value); setBruteResult(null); }}
-                className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
                 placeholder="String to parse..."
               />
               <button onClick={handleBrute} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><Play size={14} /></button>

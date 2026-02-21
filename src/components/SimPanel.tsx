@@ -107,7 +107,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
                 value={simInput}
                 onChange={e => setSimInput(e.target.value)}
                 disabled={simStatus === 'stepping'}
-                className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-2 outline-none focus:border-[var(--color-accent)]"
+                className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-2 outline-none focus:border-[var(--color-accent)]"
                 placeholder="Input string..."
               />
             </div>
@@ -116,7 +116,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
             {simStatus !== 'idle' && (
               <div className="flex items-center gap-0 font-mono text-xs overflow-x-auto">
                 {[...simConsumed].map((ch, i) => (
-                  <span key={`c${i}`} className="w-6 h-6 flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text-dim)] shrink-0">{ch}</span>
+                  <span key={`c${i}`} className="w-6 h-6 flex items-center justify-center bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text-dim)] shrink-0">{ch}</span>
                 ))}
                 {[...simRemaining].map((ch, i) => (
                   <span key={`r${i}`} className={`w-6 h-6 flex items-center justify-center border border-[var(--color-border)] shrink-0 ${i === 0 && simStatus === 'stepping' ? 'bg-[var(--color-sim-active)] text-[var(--bg-primary)]' : 'bg-[var(--bg-surface)] text-[var(--color-text)]'}`}>{ch}</span>
@@ -135,7 +135,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
             <textarea
               value={multiInput}
               onChange={e => setMultiInput(e.target.value)}
-              className="bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] resize-none h-16"
+              className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] resize-none h-16"
               placeholder="One string per line..."
             />
             <button onClick={handleMultiRun} className="flex items-center justify-center gap-1 px-2 py-2 bg-[var(--color-accent)] text-[var(--bg-primary)] font-mono text-[11px] tracking-wider min-h-[44px]">
@@ -159,7 +159,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
 
   // Desktop layout (unchanged)
   return (
-    <div className="h-44 bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none">
+    <div className="h-44 bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none">
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
         <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Simulation</span>
         <div className="flex items-center gap-1 ml-auto">
@@ -172,16 +172,16 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
           <div className="flex flex-col gap-2 w-72">
             <div className="flex items-center gap-1">
               <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
-              <input value={simInput} onChange={e => setSimInput(e.target.value)} disabled={simStatus === 'stepping'} className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]" placeholder="Enter string..." />
+              <input value={simInput} onChange={e => setSimInput(e.target.value)} disabled={simStatus === 'stepping'} className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]" placeholder="Enter string..." />
             </div>
             {controlButtons}
             {simStatus !== 'idle' && (
               <div className="flex items-center gap-0 font-mono text-xs mt-1">
                 {[...simConsumed].map((ch, i) => (
-                  <span key={`c${i}`} className="w-5 h-5 flex items-center justify-center bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text-dim)]">{ch}</span>
+                  <span key={`c${i}`} className="w-6 h-6 flex items-center justify-center bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text-dim)]">{ch}</span>
                 ))}
                 {[...simRemaining].map((ch, i) => (
-                  <span key={`r${i}`} className={`w-5 h-5 flex items-center justify-center border border-[var(--color-border)] ${i === 0 && simStatus === 'stepping' ? 'bg-[var(--color-sim-active)] text-[var(--bg-primary)]' : 'bg-[var(--bg-surface)] text-[var(--color-text)]'}`}>{ch}</span>
+                  <span key={`r${i}`} className={`w-6 h-6 flex items-center justify-center border border-[var(--color-border)] ${i === 0 && simStatus === 'stepping' ? 'bg-[var(--color-sim-active)] text-[var(--bg-primary)]' : 'bg-[var(--bg-surface)] text-[var(--color-text)]'}`}>{ch}</span>
                 ))}
                 {simRemaining.length === 0 && simConsumed.length === 0 && (
                   <span className="text-[var(--color-text-dim)] text-[11px]">ε (empty string)</span>
@@ -192,7 +192,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
           <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[11px] text-[var(--color-text-dim)]">STATUS</span>
-              <span className="font-mono text-xs font-bold" style={{ color: statusColor }}>{statusText}</span>
+              <span className="font-mono text-sm font-bold" style={{ color: statusColor }}>{statusText}</span>
             </div>
             {activeLabels.length > 0 && (
               <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
       ) : (
         <div className="flex-1 flex gap-3 px-3 py-2 overflow-hidden">
           <div className="flex flex-col gap-1 w-56">
-            <textarea value={multiInput} onChange={e => setMultiInput(e.target.value)} className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] resize-none" placeholder="One string per line..." />
+            <textarea value={multiInput} onChange={e => setMultiInput(e.target.value)} className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)] resize-none" placeholder="One string per line..." />
             <button onClick={handleMultiRun} className="flex items-center justify-center gap-1 px-2 py-1 bg-[var(--color-accent)] text-[var(--bg-primary)] font-mono text-[11px] tracking-wider hover:opacity-90">
               <ListChecks size={12} /> RUN ALL
             </button>

@@ -209,7 +209,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           <input
             value={reInput}
             onChange={e => { setReInput(e.target.value); setReResult(null); setReStepIdx(-1); setReApplied(false); }}
-            className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+            className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
             placeholder="e.g. (a|b)*abb"
           />
           <div className="flex items-center gap-0.5">
@@ -461,7 +461,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 key={o.id}
                 onClick={() => { setCombineOp(o.id); setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }}
                 className={`px-2 py-1 font-mono text-[11px] transition-colors ${
-                  combineOp === o.id ? 'text-[var(--color-accent)] bg-[var(--bg-primary)]' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
+                  combineOp === o.id ? 'text-[var(--color-accent)] bg-[var(--bg-surface-sunken)]' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
                 }`}
                 title={o.label}
               >
@@ -475,7 +475,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
               <input
                 value={combineReB}
                 onChange={e => { setCombineReB(e.target.value); setCombineResult(null); }}
-                className="flex-1 min-w-[100px] bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                className="flex-1 min-w-[100px] bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
                 placeholder="RE for automaton B, e.g. (a|b)*a"
               />
             </>
@@ -533,7 +533,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
 
   return (
     <div
-      className={`bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
+      className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${
         isMobile ? (mobileExpanded ? 'max-h-[65vh]' : 'max-h-[200px]') : 'h-56'
       }`}
       onTouchStart={isMobile ? handleTouchStart : undefined}

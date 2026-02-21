@@ -4,15 +4,22 @@
 :root {
   --bg-primary: #0a0a0a;
   --bg-surface: #111111;
+  --bg-surface-raised: #161616;
+  --bg-surface-sunken: #0c0c0c;
   --bg-canvas: #080808;
+  --bg-hover: #1a1a1a;
   --color-border: #1e1e1e;
   --color-grid: #151515;
   --color-text: #d4d4d4;
+  --color-text-bright: #f0f0f0;
   --color-text-dim: #888888;
+  --color-text-muted: #555555;
   --color-accent: #22d3ee;
+  --color-accent-dim: #155e75;
+  --color-accent-warm: #f59e0b;
   --color-accept: #22c55e;
   --color-reject: #ef4444;
-  --color-sim-active: #eab308;
+  --color-sim-active: #f59e0b;
 }
 
 * {
@@ -64,7 +71,15 @@ input[type="checkbox"] {
   outline-offset: 2px;
 }
 
-/* Mobile animations */
+/* SVG transitions for canvas */
+svg rect, svg circle {
+  transition: stroke 0.15s ease, fill 0.15s ease;
+}
+svg line, svg path {
+  transition: stroke 0.12s ease;
+}
+
+/* Animations */
 @keyframes slide-in-right {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
@@ -73,11 +88,45 @@ input[type="checkbox"] {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .animate-slide-in-right {
   animation: slide-in-right 0.2s ease-out;
 }
 .animate-slide-up {
   animation: slide-up 0.2s ease-out;
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+.animate-scale-in {
+  animation: scale-in 0.12s ease-out;
+}
+.animate-toast {
+  animation: toast-in 0.2s ease-out, toast-out 0.3s ease-in 0.8s forwards;
+}
+
+/* Depth utilities */
+.shadow-panel {
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.4);
+}
+.glow-accent {
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.1);
 }
 
 /* Hide scrollbar but keep scrolling */

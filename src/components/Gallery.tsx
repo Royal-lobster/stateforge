@@ -183,12 +183,20 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
   return (
     <div className="flex-1 overflow-y-auto bg-[var(--bg-canvas)]">
       {/* Hero */}
-      <div className="text-center py-8 md:py-12 px-4">
-        <h1 className="font-mono text-2xl md:text-3xl font-bold text-[var(--color-accent)] tracking-wider mb-2">
-          STATEFORGE
+      <div className="text-center py-12 md:py-20 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03]">
+          <div className="font-mono text-[11px] leading-tight text-[var(--color-accent)] whitespace-pre select-none" style={{ transform: 'rotate(-3deg) scale(1.5)', transformOrigin: 'center' }}>
+            {Array(20).fill('q0 → q1 → q2 → q3 ⊢ accept\n').join('')}
+          </div>
+        </div>
+        <h1 className="font-mono text-3xl md:text-5xl font-bold tracking-wider mb-3 relative">
+          <span className="text-[var(--color-accent)]">STATE</span><span className="text-[var(--color-text-bright)]">FORGE</span>
         </h1>
-        <p className="font-mono text-xs text-[var(--color-text-dim)] max-w-md mx-auto">
-          Build, simulate, and share automata in the browser. No install, no accounts, just a URL.
+        <p className="font-mono text-sm text-[var(--color-text-dim)] max-w-lg mx-auto relative">
+          Build, simulate, and convert finite automata — DFA, NFA, PDA, Turing machines.
+        </p>
+        <p className="font-mono text-xs text-[var(--color-text-muted)] mt-2 relative">
+          No install · No accounts · Just a URL
         </p>
       </div>
 
@@ -210,7 +218,7 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
           if (examples.length === 0) return null;
           return (
             <div key={cat}>
-              <h2 className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2 px-1">
+              <h2 className="font-mono text-xs tracking-widest text-[var(--color-accent)] uppercase mb-3 px-1 flex items-center gap-2 font-medium"><span className="w-4 h-px bg-[var(--color-accent)] opacity-50" />
                 {cat}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -218,7 +226,7 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
                   <button
                     key={i}
                     onClick={() => handleSelect(ex)}
-                    className="flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] transition-colors text-left group"
+                    className="flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 transition-all text-left group"
                   >
                     <ex.icon size={20} className="text-[var(--color-text-dim)] group-hover:text-[var(--color-accent)] transition-colors shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -238,8 +246,8 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
         })}
 
         {/* Quick start */}
-        <div className="border border-[var(--color-border)] p-4">
-          <h2 className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Quick Start</h2>
+        <div className="border border-[var(--color-accent)]/20 bg-[var(--bg-surface)] p-4">
+          <h2 className="font-mono text-xs tracking-widest text-[var(--color-accent)] uppercase mb-3 font-medium">Quick Start</h2>
           <div className="font-mono text-xs text-[var(--color-text-dim)] space-y-1.5">
             <p><span className="text-[var(--color-accent)]">Double-click</span> canvas to add states</p>
             <p>Press <span className="text-[var(--color-accent)]">T</span> then drag between states for transitions</p>

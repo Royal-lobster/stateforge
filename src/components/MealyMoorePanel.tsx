@@ -70,7 +70,7 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
     : fullOutput?.slice(0, visibleSteps + 1));
 
   return (
-    <div className={`bg-[var(--bg-surface)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${isMobile ? 'max-h-[50vh]' : 'h-52'}`}>
+    <div className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] flex flex-col shrink-0 select-none ${isMobile ? 'max-h-[50vh]' : 'h-52'}`}>
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
         <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">
           {isMealy ? 'Mealy Machine' : 'Moore Machine'}
@@ -95,7 +95,7 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
             <input
               value={input}
               onChange={e => { setInput(e.target.value); handleReset(); }}
-              className="flex-1 bg-[var(--bg-primary)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+              className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
               placeholder="Input string..."
             />
           </div>

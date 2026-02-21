@@ -21,7 +21,7 @@ interface StoreState {
   transitionDraft: { fromId: string; x: number; y: number } | null;
   editingTransitionId: string | null;
   editingStateId: string | null;
-  contextMenu: { x: number; y: number; stateId: string } | null;
+  contextMenu: { x: number; y: number; stateId?: string; transitionId?: string; canvasX?: number; canvasY?: number } | null;
 
   // Viewport
   pan: { x: number; y: number };
@@ -68,7 +68,7 @@ interface StoreState {
   setTransitionDraft: (draft: { fromId: string; x: number; y: number } | null) => void;
   setEditingTransition: (id: string | null) => void;
   setEditingState: (id: string | null) => void;
-  setContextMenu: (menu: { x: number; y: number; stateId: string } | null) => void;
+  setContextMenu: (menu: { x: number; y: number; stateId?: string; transitionId?: string; canvasX?: number; canvasY?: number } | null) => void;
 
   // Actions - viewport
   setPan: (pan: { x: number; y: number }) => void;

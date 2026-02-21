@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
@@ -23,10 +24,10 @@ function ToolBtn({ active, onClick, children, title, disabled }: {
       aria-label={title}
       disabled={disabled}
       className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
-        ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
+        ? 'bg-[var(--color-accent)] text-[var(--bg-primary)] glow-accent'
         : disabled
           ? 'text-[var(--color-text-dim)] opacity-30'
-          : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface)] active:bg-[var(--bg-surface)]'
+          : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] active:bg-[var(--color-accent)]/10'
       }`}
     >
       {children}
@@ -41,9 +42,11 @@ interface ToolbarProps {
   onGallery?: () => void;
   grammarMode?: boolean;
   lsystemMode?: boolean;
+  saved?: boolean;
+  onShortcuts?: () => void;
 }
 
-export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, grammarMode, lsystemMode }: ToolbarProps) {
+export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, grammarMode, lsystemMode, saved, onShortcuts }: ToolbarProps) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
   const undoStack = useStore(s => s.undoStack);
@@ -62,15 +65,19 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
   const loadAutomaton = useStore(s => s.loadAutomaton);
 
-  const handleShare = () => {
+  const [shareText, setShareText] = useState('SHARE');
+
+  const handleShare = async () => {
     const hash = encodeAutomaton(states, transitions, mode);
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
-    navigator.clipboard.writeText(url);
-    const btn = document.getElementById('share-btn');
-    if (btn) {
-      btn.textContent = 'COPIED';
-      setTimeout(() => { btn.textContent = 'SHARE'; }, 1200);
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareText('COPIED');
+    } catch {
+      prompt('Copy this URL:', url);
+      setShareText('COPIED');
     }
+    setTimeout(() => setShareText('SHARE'), 1200);
   };
 
   const handleExport = () => {
@@ -281,14 +288,17 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
                 <Download size={iconSize} />
               </ToolBtn>
               <button
-                id="share-btn"
                 onClick={handleShare}
                 className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
               >
                 <Share2 size={12} />
-                SHARE
+                {shareText}
               </button>
             </>
+          )}
+          {saved && <span className="font-mono text-[11px] text-[var(--color-text-muted)] transition-opacity animate-fade-in shrink-0">saved</span>}
+          {!isMobile && onShortcuts && (
+            <button onClick={onShortcuts} title="Keyboard Shortcuts (?)" aria-label="Keyboard shortcuts" className="px-1.5 py-1 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0">?</button>
           )}
           <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
             <PanelBottom size={iconSize} />
