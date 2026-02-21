@@ -106,7 +106,7 @@ export default function DocsPage() {
         </button>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden max-w-6xl mx-auto w-full">
         {/* Mobile backdrop */}
         {tocOpen && (
           <div className="fixed inset-0 bg-black/60 z-30 lg:hidden" onClick={() => setTocOpen(false)} />
@@ -137,7 +137,7 @@ export default function DocsPage() {
 
         {/* Main content — this is the scrollable area */}
         <main className="flex-1 min-w-0 overflow-y-auto scroll-smooth">
-          <div className="px-6 md:px-12 py-12 max-w-3xl">
+          <div className="px-6 md:px-12 py-12 max-w-3xl mx-auto">
 
           {/* ────────────────────── OVERVIEW ────────────────────── */}
           <section id="overview" className="mb-16">
