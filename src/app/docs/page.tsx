@@ -327,7 +327,8 @@ export default function DocsPage() {
               Switch to the &quot;Multi&quot; tab to test multiple strings at once. Enter one string per line (empty line = ε), then click <strong className="text-[var(--color-text)]">RUN ALL</strong>. Results show ✓ ACCEPT or ✗ REJECT for each string with a pass count summary.
             </p>
 
-            <Screenshot id="simulation" description="Simulation — single run with input tape and result banner" src="/docs/simulation.png" />
+            <Screenshot id="sim-accepted" description="Simulation — string accepted with input tape consumed" src="/docs/sim-accepted.png" />
+            <Screenshot id="sim-rejected" description="Simulation — string rejected" src="/docs/sim-rejected.png" />
             <Screenshot id="multi-run" description="Multi-run — batch test multiple strings at once" src="/docs/multi-run.png" />
           </section>
 
@@ -530,6 +531,8 @@ export default function DocsPage() {
               <li>→ <strong className="text-[var(--color-text)]">q₀</strong> — Initial state</li>
               <li>→ <strong className="text-[var(--color-text)]">F</strong> — Set of accepting states</li>
             </ul>
+
+            <Screenshot id="sidebar" description="Properties panel — formal definition, transition table, state list" src="/docs/sidebar.png" />
 
             <h3 className="text-xs tracking-widest text-[var(--color-accent)] uppercase mt-6 mb-3 font-medium">Transition Table (δ)</h3>
             <p className="text-sm text-[var(--color-text-dim)] leading-relaxed mb-2">
