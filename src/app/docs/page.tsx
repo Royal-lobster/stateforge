@@ -378,7 +378,7 @@ export default function DocsPage() {
               <li>→ Step-through or fast-run both supported</li>
             </ul>
 
-            <Screenshot id="automaton-modes" description="PDA simulation showing stack visualization and active configurations" />
+            <Screenshot id="automaton-modes" description="PDA simulation — stack visualization, active configs, input tape stepping" src="/docs/pda-sim.png" />
           </section>
 
           {/* ────────────────────── CONVERSIONS ────────────────────── */}
@@ -480,7 +480,7 @@ export default function DocsPage() {
               </li>
             </ul>
 
-            <Screenshot id="grammar-editor" description="Grammar editor with CYK parse table and parse tree" />
+            <Screenshot id="grammar-editor" description="Grammar editor — CFG transforms panel with grammar loaded" src="/docs/grammar-editor.png" />
           </section>
 
           {/* ────────────────────── L-SYSTEMS ────────────────────── */}
@@ -510,7 +510,7 @@ export default function DocsPage() {
               <li>→ Drawing commands: <code className="text-[var(--color-accent)]">F</code>/<code className="text-[var(--color-accent)]">G</code> (draw forward), <code className="text-[var(--color-accent)]">f</code> (move without drawing), <code className="text-[var(--color-accent)]">+</code>/<code className="text-[var(--color-accent)]">-</code> (turn), <code className="text-[var(--color-accent)]">[</code>/<code className="text-[var(--color-accent)]">]</code> (push/pop position)</li>
             </ul>
 
-            <Screenshot id="l-systems" description="L-system view showing Plant fractal rendering" />
+            <Screenshot id="l-systems" description="L-Systems — Koch Curve fractal rendered at 3 iterations" src="/docs/l-system.png" />
           </section>
 
           {/* ────────────────────── PROPERTIES PANEL ────────────────────── */}
