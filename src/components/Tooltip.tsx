@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, type ReactNode } from 'react';
+import { useState, useRef, useCallback, useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface TooltipProps {
   label: string;
@@ -11,31 +12,53 @@ interface TooltipProps {
 
 export default function Tooltip({ label, shortcut, children, position = 'bottom' }: TooltipProps) {
   const [show, setShow] = useState(false);
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const handleEnter = useCallback(() => {
-    timeout.current = setTimeout(() => setShow(true), 200);
-  }, []);
+    timeout.current = setTimeout(() => {
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        setCoords({
+          x: rect.left + rect.width / 2,
+          y: position === 'top' ? rect.top : rect.bottom,
+        });
+      }
+      setShow(true);
+    }, 300);
+  }, [position]);
 
   const handleLeave = useCallback(() => {
     if (timeout.current) clearTimeout(timeout.current);
     setShow(false);
   }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { if (timeout.current) clearTimeout(timeout.current); };
+  }, []);
+
   return (
-    <div className="relative inline-flex" onMouseEnter={handleEnter} onMouseLeave={handleLeave} onFocus={handleEnter} onBlur={handleLeave}>
+    <div ref={ref} className="relative inline-flex" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       {children}
-      {show && (
-        <div className={`absolute z-[80] pointer-events-none animate-fade-in ${
-          position === 'top' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-        } left-1/2 -translate-x-1/2 whitespace-nowrap`}>
-          <div className="bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel px-2 py-1 font-mono text-[11px] flex items-center gap-1.5">
+      {show && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed z-[200] pointer-events-none animate-fade-in"
+          style={{
+            left: coords.x,
+            top: position === 'top' ? coords.y - 6 : coords.y + 6,
+            transform: position === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
+          }}
+        >
+          <div className="bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel px-2 py-1 font-mono text-[11px] flex items-center gap-1.5 whitespace-nowrap">
             <span className="text-[var(--color-text)]">{label}</span>
             {shortcut && (
               <kbd className="text-[var(--color-accent)] bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1 py-px text-[10px] leading-tight">{shortcut}</kbd>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
