@@ -27,8 +27,11 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
     const to = stateMap.get(t.to);
     if (!from || !to) continue;
     if (t.from === t.to) {
-      // Hit area: self-loop label area above state
-      const cx = from.x, cy = from.y - STATE_RADIUS - 18;
+      // Hit area: self-loop label area above state (offset for stacked loops)
+      const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
+      const selfIdx = selfLoops.indexOf(t);
+      const loopR = 18 + selfIdx * 18;
+      const cx = from.x, cy = from.y - STATE_RADIUS - loopR * 1.5;
       const dx = wx - cx, dy = wy - cy;
       if (dx * dx + dy * dy < 1200) return t;
       continue;
@@ -493,10 +496,15 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             const curveOff = getEdgeCurveOffset(t, transitions);
 
             if (t.from === t.to) {
-              const cx = from.x, cy = from.y, loopR = 18;
+              // Offset multiple self-loops on same state
+              const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
+              const selfIdx = selfLoops.indexOf(t);
+              const cx = from.x, cy = from.y, baseR = 18;
+              const loopR = baseR + selfIdx * 18;
+              const spread = 12 + selfIdx * 4;
               return (
                 <g key={t.id}>
-                  <path d={`M ${cx - 12} ${cy - STATE_RADIUS + 2} C ${cx - 30} ${cy - STATE_RADIUS - loopR * 2}, ${cx + 30} ${cy - STATE_RADIUS - loopR * 2}, ${cx + 12} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
+                  <path d={`M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
                   <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
                 </g>
               );

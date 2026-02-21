@@ -246,6 +246,8 @@ export const useStore = create<StoreState>()(
     addTransition: (from, to) => {
       const s = get();
       // For DFA/NFA/Mealy/Moore, if transition exists, open it for editing instead of blocking
+      // PDA/TM allow multiple transitions between same states
+      // DFA/NFA/Mealy/Moore: open existing transition for editing (add symbols there)
       if (s.mode !== 'pda' && s.mode !== 'tm') {
         const existing = s.transitions.find(t => t.from === from && t.to === to);
         if (existing) {
