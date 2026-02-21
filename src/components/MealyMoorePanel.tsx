@@ -92,7 +92,7 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
   );
 
   return (
-    <div className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${isMobile ? 'max-h-[50vh]' : 'h-48'}`}>
+    <div className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${isMobile ? '' : 'h-48'}`}>
       {/* Header */}
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
         <Zap size={11} className="text-[var(--color-accent)]" />
@@ -108,9 +108,9 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 flex overflow-hidden ${isMobile ? 'flex-col' : ''}`}>
         {/* Left: Input + Controls */}
-        <div className="flex flex-col gap-2 p-3 w-72 border-r border-[var(--color-border)]">
+        <div className={`flex flex-col gap-2 p-3 ${isMobile ? '' : 'w-72 border-r border-[var(--color-border)]'}`}>
           <div className="flex items-center gap-1">
             <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
             <input

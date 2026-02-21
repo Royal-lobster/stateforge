@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/store';
 import { pdaInit, pdaStep, pdaFastRun, type PDASimState } from '@/pda';
 import {
-  Play, StepForward, FastForward, RotateCcw, GripHorizontal, Zap,
+  Play, StepForward, FastForward, RotateCcw, Zap,
 } from 'lucide-react';
 import Tooltip from './Tooltip';
 
@@ -17,15 +17,6 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
   const [acceptMode, setAcceptMode] = useState<'final-state' | 'empty-stack'>('final-state');
   const [simState, setSimState] = useState<PDASimState | null>(null);
   const [stepCount, setStepCount] = useState(0);
-  const [mobileExpanded, setMobileExpanded] = useState(false);
-
-  const touchStartY = useRef(0);
-  const handleTouchStart = useCallback((e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; }, []);
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    const dy = touchStartY.current - e.changedTouches[0].clientY;
-    if (dy > 40) setMobileExpanded(true);
-    if (dy < -40) setMobileExpanded(false);
-  }, []);
 
   if (!showSimPanel) return null;
 
@@ -97,23 +88,16 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
   return (
     <div
       className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${
-        isMobile ? (mobileExpanded ? 'max-h-[60vh]' : 'max-h-[180px]') : 'h-48'
+        isMobile ? '' : 'h-48'
       }`}
-      onTouchStart={isMobile ? handleTouchStart : undefined}
-      onTouchEnd={isMobile ? handleTouchEnd : undefined}
     >
       {/* Header */}
-      <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
-        {isMobile && (
-          <div className="cursor-grab" onClick={() => setMobileExpanded(!mobileExpanded)}>
-            <GripHorizontal size={16} className="text-[var(--color-border)]" />
-          </div>
-        )}
-        <Zap size={11} className="text-[var(--color-accent)]" />
+      <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2 flex-wrap">
+        <Zap size={11} className="text-[var(--color-accent)] shrink-0" />
         <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase font-medium">PDA Simulation</span>
         <span className="font-mono text-sm font-bold" style={{ color: statusColor }}>{statusText}</span>
-        <div className="flex-1" />
-        <div className="flex items-center gap-0.5 font-mono text-[11px]">
+        <div className="flex-1 min-w-1" />
+        <div className="flex items-center gap-0.5 font-mono text-[11px] shrink-0">
           <button
             onClick={() => setAcceptMode('final-state')}
             className={`px-2 py-0.5 transition-colors ${acceptMode === 'final-state' ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'}`}
@@ -126,9 +110,9 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 flex overflow-hidden ${isMobile ? 'flex-col' : ''}`}>
         {/* Left: Input + Controls */}
-        <div className="flex flex-col gap-2 p-3 w-72 border-r border-[var(--color-border)]">
+        <div className={`flex flex-col gap-2 p-3 ${isMobile ? 'border-b border-[var(--color-border)]' : 'w-72 border-r border-[var(--color-border)]'}`}>
           <div className="flex items-center gap-1">
             <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
             <input
@@ -225,8 +209,8 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
             )}
           </div>
 
-          {/* Stack viz */}
-          <div className="w-20 border-l border-[var(--color-border)] p-2 flex flex-col shrink-0">
+          {/* Stack viz (desktop only) */}
+          <div className={`w-20 border-l border-[var(--color-border)] p-2 flex flex-col shrink-0 ${isMobile ? 'hidden' : ''}`}>
             <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Stack</div>
             {simState && simState.configs.length > 0 ? (() => {
               const config = simState.configs[0];
