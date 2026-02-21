@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Menu, X } from 'lucide-react';
+import { ArrowLeft, Menu, X as XIcon } from 'lucide-react';
 
 const sections = [
   { id: 'overview', label: 'Overview' },
@@ -19,14 +19,43 @@ const sections = [
   { id: 'keyboard-shortcuts', label: 'Keyboard Shortcuts' },
 ];
 
-function Screenshot({ id, description }: { id: string; description: string }) {
+function Screenshot({ id, description, src }: { id: string; description: string; src?: string }) {
+  const [lightbox, setLightbox] = useState(false);
+
+  if (!src) {
+    return (
+      <div
+        id={`screenshot-${id}`}
+        className="border border-[var(--color-border)] bg-[var(--bg-surface-sunken)] flex items-center justify-center py-16 my-6 font-mono text-xs text-[var(--color-text-muted)]"
+      >
+        Screenshot: {description}
+      </div>
+    );
+  }
+
   return (
-    <div
-      id={`screenshot-${id}`}
-      className="border border-[var(--color-border)] bg-[var(--bg-surface-sunken)] flex items-center justify-center py-16 my-6 font-mono text-xs text-[var(--color-text-muted)]"
-    >
-      Screenshot: {description}
-    </div>
+    <>
+      <figure id={`screenshot-${id}`} className="my-6 group cursor-pointer" onClick={() => setLightbox(true)}>
+        <div className="border border-[var(--color-border)] bg-[var(--bg-surface-sunken)] overflow-hidden relative">
+          <img src={src} alt={description} className="w-full block" loading="lazy" />
+          <div className="absolute inset-0 bg-[var(--color-accent)]/0 group-hover:bg-[var(--color-accent)]/5 transition-colors flex items-center justify-center">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-accent)] font-mono text-xs tracking-wider bg-[var(--bg-primary)]/80 px-3 py-1.5 border border-[var(--color-accent)]/30">CLICK TO EXPAND</span>
+          </div>
+        </div>
+        <figcaption className="font-mono text-[11px] text-[var(--color-text-muted)] mt-2">{description}</figcaption>
+      </figure>
+      {lightbox && (
+        <div className="fixed inset-0 z-[100] bg-black/85 flex items-center justify-center p-4 cursor-pointer animate-fade-in" onClick={() => setLightbox(false)}>
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <img src={src} alt={description} className="max-w-full max-h-[90vh] object-contain border border-[var(--color-border)]" />
+            <button className="absolute -top-3 -right-3 w-7 h-7 bg-[var(--bg-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors" onClick={() => setLightbox(false)}>
+              <XIcon size={14} />
+            </button>
+            <div className="absolute -bottom-8 left-0 right-0 text-center font-mono text-xs text-[var(--color-text-muted)]">{description}</div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -59,9 +88,9 @@ export default function DocsPage() {
   const [tocOpen, setTocOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--color-text)] font-mono">
+    <div className="h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--color-text)] font-mono overflow-hidden">
       {/* Top bar */}
-      <header className="sticky top-0 z-50 h-11 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-4 gap-3">
+      <header className="h-11 shrink-0 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-4 gap-3 z-50">
         <Link href="/" className="flex items-center gap-2 text-[var(--color-accent)] hover:opacity-80 transition-opacity text-xs tracking-wider font-bold shrink-0">
           <ArrowLeft size={14} />
           STATEFORGE
@@ -73,21 +102,23 @@ export default function DocsPage() {
           className="lg:hidden p-1 text-[var(--color-text-dim)] hover:text-[var(--color-text)]"
           aria-label="Toggle table of contents"
         >
-          {tocOpen ? <X size={18} /> : <Menu size={18} />}
+          {tocOpen ? <XIcon size={18} /> : <Menu size={18} />}
         </button>
       </header>
 
-      <div className="flex max-w-7xl mx-auto">
-        {/* Sidebar TOC — desktop: always visible, mobile: toggle */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Mobile backdrop */}
         {tocOpen && (
           <div className="fixed inset-0 bg-black/60 z-30 lg:hidden" onClick={() => setTocOpen(false)} />
         )}
+        {/* Sidebar TOC */}
         <nav
           className={`
-            fixed top-11 left-0 bottom-0 w-56 bg-[var(--bg-surface)] border-r border-[var(--color-border)] z-40
-            overflow-y-auto py-6 px-4
+            fixed top-11 left-0 bottom-0 w-52 border-r border-[var(--color-border)] z-40
+            overflow-y-auto py-6 pl-4 pr-3
             transition-transform duration-200
-            lg:sticky lg:top-11 lg:h-[calc(100vh-2.75rem)] lg:translate-x-0 lg:z-10 lg:shrink-0
+            lg:relative lg:top-0 lg:translate-x-0 lg:z-10 lg:shrink-0
+            bg-[var(--bg-primary)] lg:bg-transparent
             ${tocOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
@@ -97,15 +128,16 @@ export default function DocsPage() {
               key={s.id}
               href={`#${s.id}`}
               onClick={() => setTocOpen(false)}
-              className="block py-1.5 text-xs text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors"
+              className="block py-1.5 px-2 text-xs text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--color-accent)]/5 border-l-2 border-transparent hover:border-[var(--color-accent)] transition-all"
             >
               {s.label}
             </a>
           ))}
         </nav>
 
-        {/* Main content */}
-        <main className="flex-1 min-w-0 px-6 md:px-12 py-12 max-w-3xl">
+        {/* Main content — this is the scrollable area */}
+        <main className="flex-1 min-w-0 overflow-y-auto scroll-smooth">
+          <div className="px-6 md:px-12 py-12 max-w-3xl">
 
           {/* ────────────────────── OVERVIEW ────────────────────── */}
           <section id="overview" className="mb-16">
@@ -129,7 +161,7 @@ export default function DocsPage() {
               <li>→ L-system rendering with presets</li>
             </ul>
 
-            <Screenshot id="overview" description="Full app view showing canvas with automaton, sidebar, and simulation panel" />
+            <Screenshot id="overview" description="Full app view — DFA with states, transitions, sidebar, and simulation panel" src="/docs/canvas-dfa.png" />
           </section>
 
           {/* ────────────────────── GETTING STARTED ────────────────────── */}
@@ -154,7 +186,7 @@ export default function DocsPage() {
               <li>Open the simulation panel (<kbd className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1 text-[var(--color-accent)] text-[11px]">⌘.</kbd>) and test your automaton</li>
             </ol>
 
-            <Screenshot id="getting-started" description="Gallery view with example automata cards" />
+            <Screenshot id="getting-started" description="Gallery — pick a pre-built example or start from scratch" src="/docs/gallery.png" />
           </section>
 
           {/* ────────────────────── CANVAS & STATES ────────────────────── */}
@@ -199,7 +231,7 @@ export default function DocsPage() {
               <li>→ <kbd className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1 text-[var(--color-accent)] text-[11px]">⌘1</kbd> — Zoom to Fit (frames all states)</li>
             </ul>
 
-            <Screenshot id="canvas-states" description="Canvas showing states with initial arrow, accepting double border, and selection highlighting" />
+            <Screenshot id="canvas-states" description="Canvas with states, transitions, initial arrow, and context menu" src="/docs/context-menu.png" />
           </section>
 
           {/* ────────────────────── TRANSITIONS ────────────────────── */}
@@ -295,7 +327,8 @@ export default function DocsPage() {
               Switch to the &quot;Multi&quot; tab to test multiple strings at once. Enter one string per line (empty line = ε), then click <strong className="text-[var(--color-text)]">RUN ALL</strong>. Results show ✓ ACCEPT or ✗ REJECT for each string with a pass count summary.
             </p>
 
-            <Screenshot id="simulation" description="Simulation panel showing stepping state, input tape with head position, and active states" />
+            <Screenshot id="simulation" description="Simulation — single run with input tape and result banner" src="/docs/simulation.png" />
+            <Screenshot id="multi-run" description="Multi-run — batch test multiple strings at once" src="/docs/multi-run.png" />
           </section>
 
           {/* ────────────────────── AUTOMATON MODES ────────────────────── */}
@@ -394,7 +427,7 @@ export default function DocsPage() {
               Uses product construction for binary ops (B is converted RE → NFA → DFA internally). Step through to see each product state created.
             </p>
 
-            <Screenshot id="conversions" description="NFA to DFA conversion panel showing subset construction steps" />
+            <Screenshot id="conversions" description="Conversions panel — NFA→DFA, Minimize, RE, Grammar tools" src="/docs/conversions.png" />
           </section>
 
           {/* ────────────────────── GRAMMAR EDITOR ────────────────────── */}
@@ -550,6 +583,7 @@ export default function DocsPage() {
             <p className="text-sm text-[var(--color-text-dim)] leading-relaxed mb-4">
               Press <kbd className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1 text-[var(--color-accent)] text-[11px]">?</kbd> in the app to see the shortcuts overlay. Full list:
             </p>
+            <Screenshot id="shortcuts" description="Keyboard shortcuts modal — press ? to toggle" src="/docs/shortcuts.png" />
 
             <h3 className="text-xs tracking-widest text-[var(--color-accent)] uppercase mt-6 mb-3 font-medium">Tools</h3>
             <KbdTable rows={[
@@ -620,6 +654,7 @@ export default function DocsPage() {
             <p className="text-xs text-[var(--color-text-muted)] mt-1">
               <Link href="/" className="text-[var(--color-accent)] hover:opacity-80 transition-opacity">← Back to app</Link>
             </p>
+          </div>
           </div>
         </main>
       </div>
