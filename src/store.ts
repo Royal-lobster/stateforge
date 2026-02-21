@@ -167,7 +167,7 @@ export const useStore = create<StoreState>()(
     contextMenu: null,
 
     pan: { x: 0, y: 0 },
-    zoom: 1,
+    zoom: 1.5,
 
     undoStack: [],
     redoStack: [],
@@ -186,11 +186,20 @@ export const useStore = create<StoreState>()(
       const s = get();
       s.pushUndo();
       const num = s.nextStateNum;
+      const isFirst = s.states.length === 0;
       set({
-        states: [...s.states, { id: genId(), label: `q${num}`, x, y, isInitial: s.states.length === 0, isAccepting: false }],
+        states: [...s.states, { id: genId(), label: `q${num}`, x, y, isInitial: isFirst, isAccepting: false }],
         nextStateNum: num + 1,
         redoStack: [],
       });
+      // Auto-fit when we have a few states to keep things nicely framed
+      if (isFirst) {
+        // Center on first state
+        const cw = typeof window !== 'undefined' ? window.innerWidth - 64 : 800;
+        const ch = typeof window !== 'undefined' ? window.innerHeight - 200 : 600;
+        const zoom = get().zoom;
+        set({ pan: { x: cw / 2 - x * zoom, y: ch / 2 - y * zoom } });
+      }
     },
 
     deleteState: (id) => {
@@ -318,6 +327,7 @@ export const useStore = create<StoreState>()(
         return { ...st, x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
       });
       set({ states: newStates, redoStack: [] });
+      setTimeout(() => get().zoomToFit(), 50);
     },
 
     loadAutomaton: (states, transitions, mode) => {
@@ -327,6 +337,8 @@ export const useStore = create<StoreState>()(
         if (match) maxNum = Math.max(maxNum, parseInt(match[1]) + 1);
       }
       set({ states, transitions, mode, nextStateNum: maxNum, undoStack: [], redoStack: [] });
+      // Auto-fit after loading
+      setTimeout(() => get().zoomToFit(), 50);
     },
 
     clearAll: () => {
@@ -428,7 +440,7 @@ export const useStore = create<StoreState>()(
       // Assume canvas is roughly the viewport minus sidebar/toolbar
       const cw = window.innerWidth - 64;
       const ch = window.innerHeight - 200;
-      const zoom = Math.max(0.25, Math.min(2, Math.min(cw / w, ch / h) * 0.85));
+      const zoom = Math.max(0.5, Math.min(2.5, Math.min(cw / w, ch / h) * 0.8));
       const cx = (minX + maxX) / 2;
       const cy = (minY + maxY) / 2;
       set({ zoom, pan: { x: cw / 2 - cx * zoom, y: ch / 2 - cy * zoom } });
