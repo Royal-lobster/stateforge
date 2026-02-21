@@ -12,9 +12,19 @@ export interface Transition {
   from: string;
   to: string;
   symbols: string[];
+  // PDA-specific: each entry corresponds to symbols[i]
+  // format: "inputSymbol, stackPop → stackPush"
+  // e.g. symbols=["a,Z→AZ"] means read 'a', pop 'Z', push 'AZ'
+  pdaTransitions?: PDATransitionEntry[];
 }
 
-export type Mode = 'dfa' | 'nfa' | 'grammar';
+export interface PDATransitionEntry {
+  input: string;     // input symbol (or 'ε')
+  pop: string;       // stack symbol to pop (or 'ε')
+  push: string;      // string to push (or 'ε'), leftmost = top
+}
+
+export type Mode = 'dfa' | 'nfa' | 'grammar' | 'pda';
 export type Tool = 'pointer' | 'addState' | 'addTransition';
 
 export interface AutomatonData {

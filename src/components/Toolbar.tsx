@@ -143,6 +143,15 @@ export default function Toolbar({ isMobile, onConvert, grammarMode, onModeChange
           NFA
         </button>
         <button
+          onClick={() => handleModeClick('pda')}
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${!grammarMode && mode === 'pda'
+            ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
+            : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
+          }`}
+        >
+          PDA
+        </button>
+        <button
           onClick={() => handleModeClick('grammar')}
           className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center gap-1 transition-colors ${grammarMode
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'

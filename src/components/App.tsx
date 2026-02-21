@@ -10,6 +10,7 @@ import Sidebar from './Sidebar';
 import SimPanel from './SimPanel';
 import ConvertPanel from './ConvertPanel';
 import GrammarEditor from './GrammarEditor';
+import PDASimPanel from './PDASimPanel';
 
 export default function App() {
   const states = useStore(s => s.states);
@@ -82,7 +83,7 @@ export default function App() {
       setShowConvert(false);
     } else {
       setShowGrammar(false);
-      setMode(newMode as 'dfa' | 'nfa');
+      setMode(newMode as 'dfa' | 'nfa' | 'pda');
     }
   };
 
@@ -114,6 +115,8 @@ export default function App() {
       </div>
       {showConvert ? (
         <ConvertPanel isMobile={isMobile} onClose={() => setShowConvert(false)} />
+      ) : mode === 'pda' ? (
+        <PDASimPanel isMobile={isMobile} />
       ) : (
         <SimPanel isMobile={isMobile} />
       )}
