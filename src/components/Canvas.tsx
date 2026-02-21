@@ -242,7 +242,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
       const rect = containerRef.current!.getBoundingClientRect();
       const mx = cx - rect.left;
       const my = cy - rect.top;
-      const newZoom = Math.max(0.1, Math.min(5, zoom * factor));
+      const newZoom = Math.max(0.25, Math.min(3, zoom * factor));
       const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
       const newPanY = my - (my - pan.y) * (newZoom / zoom);
       // Also pan with two-finger drag
@@ -389,7 +389,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.1, Math.min(5, zoom * factor));
+    const newZoom = Math.max(0.25, Math.min(3, zoom * factor));
     const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
     const newPanY = my - (my - pan.y) * (newZoom / zoom);
     setZoom(newZoom);

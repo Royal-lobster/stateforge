@@ -38,6 +38,7 @@ export default function App() {
   const simFastRun = useStore(s => s.simFastRun);
   const simReset = useStore(s => s.simReset);
   const setSelected = useStore(s => s.setSelected);
+  const zoomToFit = useStore(s => s.zoomToFit);
   const isMobile = useIsMobile();
   const [showConvert, setShowConvert] = useState(false);
   const [showGrammar, setShowGrammar] = useState(false);
@@ -125,6 +126,7 @@ export default function App() {
         if (key === 'm' && !shift) { e.preventDefault(); setShowConvert(v => !v); return; }
         if (key === 'a' && !inInput) { e.preventDefault(); setSelected(new Set(states.map(s => s.id))); return; }
         if (key === '0') { e.preventDefault(); simReset(); showToast('Sim Reset'); return; }
+        if (key === '1') { e.preventDefault(); zoomToFit(); return; }
         if (key === 'enter' && shift) { e.preventDefault(); simFastRun(); return; }
         if (key === 'enter') { e.preventDefault(); simStart(); return; }
         if (key === "'") { e.preventDefault(); simStep(); return; }
@@ -163,7 +165,7 @@ export default function App() {
   }, [undo, redo, deleteSelected, clearSelection, setTool, setSelected, states,
       showGrammar, showLSystem, showGallery, showToast, handleModeChange,
       autoLayout, clearAll, toggleSidebar, toggleSimPanel, addTrapState,
-      simStart, simStep, simFastRun, simReset]);
+      simStart, simStep, simFastRun, simReset, zoomToFit]);
 
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');

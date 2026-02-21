@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
-  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu,
+  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, Maximize2,
   ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload,
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
@@ -62,6 +62,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
   const redo = useStore(s => s.redo);
   const autoLayout = useStore(s => s.autoLayout);
   const clearAll = useStore(s => s.clearAll);
+  const zoomToFit = useStore(s => s.zoomToFit);
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const toggleSimPanel = useStore(s => s.toggleSimPanel);
 
@@ -221,6 +222,9 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
           {!isMobile && (
             <>
+              <ToolBtn onClick={zoomToFit} title="Zoom to Fit" shortcut="⌘1">
+                <Maximize2 size={iconSize} />
+              </ToolBtn>
               <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L">
                 <LayoutGrid size={iconSize} />
               </ToolBtn>

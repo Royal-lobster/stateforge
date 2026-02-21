@@ -74,6 +74,7 @@ interface StoreState {
   // Actions - viewport
   setPan: (pan: { x: number; y: number }) => void;
   setZoom: (zoom: number) => void;
+  zoomToFit: () => void;
 
   // Actions - undo/redo
   pushUndo: () => void;
@@ -410,7 +411,26 @@ export const useStore = create<StoreState>()(
     setContextMenu: (menu) => set({ contextMenu: menu }),
 
     setPan: (pan) => set({ pan }),
-    setZoom: (zoom) => set({ zoom: Math.max(0.1, Math.min(5, zoom)) }),
+    setZoom: (zoom) => set({ zoom: Math.max(0.25, Math.min(3, zoom)) }),
+    zoomToFit: () => {
+      const { states } = get();
+      if (states.length === 0) { set({ pan: { x: 0, y: 0 }, zoom: 1 }); return; }
+      const xs = states.map(s => s.x);
+      const ys = states.map(s => s.y);
+      const minX = Math.min(...xs) - 80;
+      const maxX = Math.max(...xs) + 80;
+      const minY = Math.min(...ys) - 80;
+      const maxY = Math.max(...ys) + 80;
+      const w = maxX - minX;
+      const h = maxY - minY;
+      // Assume canvas is roughly the viewport minus sidebar/toolbar
+      const cw = window.innerWidth - 64;
+      const ch = window.innerHeight - 200;
+      const zoom = Math.max(0.25, Math.min(2, Math.min(cw / w, ch / h) * 0.85));
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      set({ zoom, pan: { x: cw / 2 - cx * zoom, y: ch / 2 - cy * zoom } });
+    },
 
     pushUndo: () => {
       const s = get();
