@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
@@ -69,7 +69,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
   const [shareText, setShareText] = useState('SHARE');
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     const hash = encodeAutomaton(states, transitions, mode);
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
     try {
@@ -80,9 +80,9 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       setShareText('COPIED');
     }
     setTimeout(() => setShareText('SHARE'), 1200);
-  };
+  }, [states, transitions, mode]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const data = JSON.stringify({ states, transitions, mode, _format: 'stateforge-v1' }, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -91,9 +91,9 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
     a.download = `stateforge-${mode}-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, [states, transitions, mode]);
 
-  const handleImport = () => {
+  const handleImport = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json,.jff';
@@ -150,20 +150,35 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       }
     };
     input.click();
-  };
+  }, [loadAutomaton]);
+
+  // Listen for keyboard shortcut events
+  useEffect(() => {
+    const onShare = () => handleShare();
+    const onExport = () => handleExport();
+    const onImport = () => handleImport();
+    window.addEventListener('stateforge:share', onShare);
+    window.addEventListener('stateforge:export', onExport);
+    window.addEventListener('stateforge:import', onImport);
+    return () => {
+      window.removeEventListener('stateforge:share', onShare);
+      window.removeEventListener('stateforge:export', onExport);
+      window.removeEventListener('stateforge:import', onImport);
+    };
+  }, [handleShare, handleExport, handleImport]);
 
   const handleMode = (m: string) => onModeChange?.(m);
 
   const iconSize = isMobile ? 18 : 16;
   const isSpecialMode = grammarMode || lsystemMode;
 
-  const modes: { id: string; label: string; icon?: React.ComponentType<{ size?: number }> }[] = [
-    { id: 'dfa', label: 'DFA' },
-    { id: 'nfa', label: 'NFA' },
-    { id: 'pda', label: 'PDA' },
-    { id: 'tm', label: 'TM' },
-    { id: 'mealy', label: 'MEALY' },
-    { id: 'moore', label: 'MOORE' },
+  const modes: { id: string; label: string; shortcut: string }[] = [
+    { id: 'dfa', label: 'DFA', shortcut: '1' },
+    { id: 'nfa', label: 'NFA', shortcut: '2' },
+    { id: 'pda', label: 'PDA', shortcut: '3' },
+    { id: 'tm', label: 'TM', shortcut: '4' },
+    { id: 'mealy', label: 'MEALY', shortcut: '5' },
+    { id: 'moore', label: 'MOORE', shortcut: '6' },
   ];
 
   const isActiveMode = (id: string) => !isSpecialMode && mode === id;
@@ -206,10 +221,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
           {!isMobile && (
             <>
-              <ToolBtn onClick={autoLayout} title="Auto Layout">
+              <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L">
                 <LayoutGrid size={iconSize} />
               </ToolBtn>
-              <ToolBtn onClick={clearAll} title="Clear All">
+              <ToolBtn onClick={clearAll} title="Clear All" shortcut="⇧⌘X">
                 <RotateCcw size={iconSize} />
               </ToolBtn>
             </>
@@ -222,17 +237,18 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       {/* Mode toggle */}
       <div className="flex items-center font-mono text-[11px] tracking-wider shrink-0 overflow-x-auto scrollbar-hide">
         {modes.map(m => (
-          <button
-            key={m.id}
-            onClick={() => handleMode(m.id)}
-            className={`px-1.5 md:px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors whitespace-nowrap ${
-              isActiveMode(m.id)
-                ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
-                : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
-            }`}
-          >
-            {m.label}
-          </button>
+          <Tooltip key={m.id} label={m.label} shortcut={m.shortcut}>
+            <button
+              onClick={() => handleMode(m.id)}
+              className={`px-1.5 md:px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors whitespace-nowrap ${
+                isActiveMode(m.id)
+                  ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
+                  : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              {m.label}
+            </button>
+          </Tooltip>
         ))}
 
         <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
@@ -266,7 +282,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
           <button
             onClick={onConvert}
-            title="Conversions"
+            title="Conversions (⌘M)"
             aria-label="Conversions"
             className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
           >
@@ -283,10 +299,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
         <>
           {!isMobile && (
             <>
-              <ToolBtn onClick={handleImport} title="Import" shortcut="JSON/JFF">
+              <ToolBtn onClick={handleImport} title="Import" shortcut="⌘O">
                 <Upload size={iconSize} />
               </ToolBtn>
-              <ToolBtn onClick={handleExport} title="Export">
+              <ToolBtn onClick={handleExport} title="Export" shortcut="⌘E">
                 <Download size={iconSize} />
               </ToolBtn>
               <button
@@ -302,10 +318,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           {!isMobile && onShortcuts && (
             <button onClick={onShortcuts} title="Keyboard Shortcuts (?)" aria-label="Keyboard shortcuts" className="px-1.5 py-1 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0">?</button>
           )}
-          <ToolBtn onClick={toggleSimPanel} title="Simulation Panel">
+          <ToolBtn onClick={toggleSimPanel} title="Simulation Panel" shortcut="⌘.">
             <PanelBottom size={iconSize} />
           </ToolBtn>
-          <ToolBtn onClick={toggleSidebar} title="Properties Panel">
+          <ToolBtn onClick={toggleSidebar} title="Properties Panel" shortcut="⌘/">
             {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
           </ToolBtn>
         </>

@@ -28,6 +28,16 @@ export default function App() {
   const clearSelection = useStore(s => s.clearSelection);
   const setTool = useStore(s => s.setTool);
   const setMode = useStore(s => s.setMode);
+  const autoLayout = useStore(s => s.autoLayout);
+  const clearAll = useStore(s => s.clearAll);
+  const toggleSidebar = useStore(s => s.toggleSidebar);
+  const toggleSimPanel = useStore(s => s.toggleSimPanel);
+  const addTrapState = useStore(s => s.addTrapState);
+  const simStart = useStore(s => s.simStart);
+  const simStep = useStore(s => s.simStep);
+  const simFastRun = useStore(s => s.simFastRun);
+  const simReset = useStore(s => s.simReset);
+  const setSelected = useStore(s => s.setSelected);
   const isMobile = useIsMobile();
   const [showConvert, setShowConvert] = useState(false);
   const [showGrammar, setShowGrammar] = useState(false);
@@ -81,22 +91,79 @@ export default function App() {
     }
   }, [states, transitions, mode, showGrammar, showLSystem, showGallery]);
 
+  const handleModeChange = useCallback((newMode: string) => {
+    setShowGallery(false);
+    if (newMode === 'grammar') {
+      setShowGrammar(true); setShowLSystem(false); setShowConvert(false);
+    } else if (newMode === 'lsystem') {
+      setShowLSystem(true); setShowGrammar(false); setShowConvert(false);
+    } else {
+      setShowGrammar(false); setShowLSystem(false);
+      setMode(newMode as 'dfa' | 'nfa' | 'pda' | 'tm' | 'mealy' | 'moore');
+    }
+  }, [setMode]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const mod = e.ctrlKey || e.metaKey;
+      const shift = e.shiftKey;
+      const inInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      const key = e.key.toLowerCase();
+
+      // Global shortcuts (work even in inputs for some)
+      if (key === 'escape') { clearSelection(); setShowShortcuts(false); setShowConvert(false); return; }
+
+      // Ctrl/Cmd shortcuts (work everywhere)
+      if (mod) {
+        if (key === 'z' && shift) { e.preventDefault(); redo(); showToast('Redo'); return; }
+        if (key === 'z') { e.preventDefault(); undo(); showToast('Undo'); return; }
+        if (key === 's') { e.preventDefault(); window.dispatchEvent(new CustomEvent('stateforge:share')); showToast('URL Copied'); return; }
+        if (key === 'e' && !shift) { e.preventDefault(); window.dispatchEvent(new CustomEvent('stateforge:export')); return; }
+        if (key === 'o') { e.preventDefault(); window.dispatchEvent(new CustomEvent('stateforge:import')); return; }
+        if (key === '.') { e.preventDefault(); toggleSimPanel(); return; }
+        if (key === '/') { e.preventDefault(); toggleSidebar(); return; }
+        if (key === 'm' && !shift) { e.preventDefault(); setShowConvert(v => !v); return; }
+        if (key === 'a' && !inInput) { e.preventDefault(); setSelected(new Set(states.map(s => s.id))); return; }
+        if (key === '0') { e.preventDefault(); simReset(); showToast('Sim Reset'); return; }
+        if (key === 'enter' && shift) { e.preventDefault(); simFastRun(); return; }
+        if (key === 'enter') { e.preventDefault(); simStart(); return; }
+        if (key === "'") { e.preventDefault(); simStep(); return; }
+        if (key === ';') { e.preventDefault(); /* toggle sim mode handled via ref */ return; }
+
+        // Ctrl+Shift combos
+        if (shift) {
+          if (key === 'l') { e.preventDefault(); autoLayout(); showToast('Auto Layout'); return; }
+          if (key === 'x') { e.preventDefault(); clearAll(); showToast('Cleared'); return; }
+          if (key === 'q') { e.preventDefault(); addTrapState(); showToast('Trap State Added'); return; }
+        }
+        return;
+      }
+
+      // Non-modifier shortcuts (skip if in input)
+      if (inInput) return;
       if (showGrammar || showLSystem || showGallery) return;
-      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); redo(); showToast('Redo'); }
-      else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undo(); showToast('Undo'); }
-      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
-      else if (e.key === 'Escape') { clearSelection(); setShowShortcuts(false); }
-      else if (e.key === '?') { setShowShortcuts(v => !v); }
-      else if (e.key === 'v' || e.key === 'V') { setTool('pointer'); }
-      else if (e.key === 's' && !e.ctrlKey && !e.metaKey) { setTool('addState'); }
-      else if (e.key === 't' && !e.ctrlKey && !e.metaKey) { setTool('addTransition'); }
+
+      if (key === 'delete' || key === 'backspace') { e.preventDefault(); deleteSelected(); }
+      else if (key === '?') { setShowShortcuts(v => !v); }
+      else if (key === 'v') { setTool('pointer'); }
+      else if (key === 's') { setTool('addState'); }
+      else if (key === 't') { setTool('addTransition'); }
+      // Mode switching with number keys
+      else if (key === '1') { handleModeChange('dfa'); }
+      else if (key === '2') { handleModeChange('nfa'); }
+      else if (key === '3') { handleModeChange('pda'); }
+      else if (key === '4') { handleModeChange('tm'); }
+      else if (key === '5') { handleModeChange('mealy'); }
+      else if (key === '6') { handleModeChange('moore'); }
+      else if (key === '7') { handleModeChange('grammar'); }
+      else if (key === '8') { handleModeChange('lsystem'); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, deleteSelected, clearSelection, setTool, showGrammar, showLSystem, showGallery, showToast]);
+  }, [undo, redo, deleteSelected, clearSelection, setTool, setSelected, states,
+      showGrammar, showLSystem, showGallery, showToast, handleModeChange,
+      autoLayout, clearAll, toggleSidebar, toggleSimPanel, addTrapState,
+      simStart, simStep, simFastRun, simReset]);
 
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');
@@ -107,18 +174,6 @@ export default function App() {
     }
     meta.setAttribute('content', 'width=device-width, initial-scale=1');
   }, []);
-
-  const handleModeChange = (newMode: string) => {
-    setShowGallery(false);
-    if (newMode === 'grammar') {
-      setShowGrammar(true); setShowLSystem(false); setShowConvert(false);
-    } else if (newMode === 'lsystem') {
-      setShowLSystem(true); setShowGrammar(false); setShowConvert(false);
-    } else {
-      setShowGrammar(false); setShowLSystem(false);
-      setMode(newMode as 'dfa' | 'nfa' | 'pda' | 'tm' | 'mealy' | 'moore');
-    }
-  };
 
   const toolbarProps = {
     isMobile,
@@ -132,19 +187,45 @@ export default function App() {
   };
 
   const shortcuts = [
+    ['— TOOLS —', ''],
     ['V', 'Pointer tool'],
     ['S', 'Add State tool'],
     ['T', 'Add Transition tool'],
-    ['Double-click', 'Add state / Edit label'],
-    ['Right-click', 'Context menu'],
-    ['Del / Backspace', 'Delete selected'],
-    ['Ctrl+Z', 'Undo'],
-    ['Ctrl+Shift+Z', 'Redo'],
-    ['Space + Drag', 'Pan canvas'],
+    ['Del', 'Delete selected'],
+    ['⌘A', 'Select all'],
+    ['⌘Z / ⌘⇧Z', 'Undo / Redo'],
+    ['', ''],
+    ['— MODES —', ''],
+    ['1–6', 'DFA · NFA · PDA · TM · Mealy · Moore'],
+    ['7 / 8', 'CFG / L-System'],
+    ['', ''],
+    ['— PANELS —', ''],
+    ['⌘.', 'Toggle Simulation'],
+    ['⌘/', 'Toggle Properties'],
+    ['⌘M', 'Toggle Conversions'],
+    ['', ''],
+    ['— SIMULATION —', ''],
+    ['⌘↵', 'Start simulation'],
+    ['⌘\'', 'Step simulation'],
+    ['⇧⌘↵', 'Fast run'],
+    ['⌘0', 'Reset simulation'],
+    ['', ''],
+    ['— FILE —', ''],
+    ['⌘S', 'Share / Copy URL'],
+    ['⌘E', 'Export JSON'],
+    ['⌘O', 'Import file'],
+    ['', ''],
+    ['— CANVAS —', ''],
+    ['Space+Drag', 'Pan'],
     ['Scroll', 'Zoom'],
     ['Shift+Click', 'Multi-select'],
+    ['Double-click', 'Add state / Edit'],
+    ['Right-click', 'Context menu'],
+    ['⇧⌘L', 'Auto Layout'],
+    ['⇧⌘X', 'Clear All'],
+    ['⇧⌘Q', 'Add Trap State'],
     ['Esc', 'Deselect / Close'],
-    ['?', 'Toggle this help'],
+    ['?', 'This help'],
   ];
 
   const overlays = (
@@ -160,18 +241,24 @@ export default function App() {
       {/* Shortcuts modal */}
       {showShortcuts && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60" onClick={() => setShowShortcuts(false)}>
-          <div className="bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel w-80 max-h-[80vh] overflow-y-auto animate-scale-in" onClick={e => e.stopPropagation()}>
+          <div className="bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel w-96 max-h-[80vh] overflow-y-auto animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
               <span className="font-mono text-xs font-semibold tracking-widest uppercase text-[var(--color-text-bright)]">Keyboard Shortcuts</span>
               <button onClick={() => setShowShortcuts(false)} className="text-[var(--color-text-dim)] hover:text-[var(--color-text)]"><X size={14} /></button>
             </div>
-            <div className="p-4 space-y-2">
-              {shortcuts.map(([key, desc]) => (
-                <div key={key} className="flex items-center justify-between font-mono text-xs">
-                  <span className="text-[var(--color-text-dim)]">{desc}</span>
-                  <kbd className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-accent)] text-[11px]">{key}</kbd>
-                </div>
-              ))}
+            <div className="p-4 space-y-1">
+              {shortcuts.map(([key, desc], i) => {
+                if (!key && !desc) return <div key={i} className="h-1" />;
+                if (key.startsWith('—')) return (
+                  <div key={i} className="font-mono text-[10px] tracking-widest text-[var(--color-accent)] uppercase pt-1 font-medium">{key.replaceAll('—', '').trim()}</div>
+                );
+                return (
+                  <div key={i} className="flex items-center justify-between font-mono text-xs py-0.5">
+                    <span className="text-[var(--color-text-dim)]">{desc}</span>
+                    <kbd className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-accent)] text-[11px] shrink-0 ml-3">{key}</kbd>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
