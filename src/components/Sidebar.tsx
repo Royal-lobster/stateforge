@@ -1,9 +1,10 @@
 'use client';
 
 import { useStore } from '@/store';
-import { Circle, ArrowRight, Hash } from 'lucide-react';
+import { Circle, ArrowRight, Hash, X, Share2, LayoutGrid, RotateCcw } from 'lucide-react';
+import { encodeAutomaton } from '@/url';
 
-export default function Sidebar() {
+export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const states = useStore(s => s.states);
   const transitions = useStore(s => s.transitions);
   const selectedIds = useStore(s => s.selectedIds);
@@ -15,10 +16,12 @@ export default function Sidebar() {
   const setEditingTransition = useStore(s => s.setEditingTransition);
   const toggleAccepting = useStore(s => s.toggleAccepting);
   const toggleInitial = useStore(s => s.toggleInitial);
+  const toggleSidebar = useStore(s => s.toggleSidebar);
+  const autoLayout = useStore(s => s.autoLayout);
+  const clearAll = useStore(s => s.clearAll);
 
   if (!showSidebar) return null;
 
-  // Derive alphabet
   const alphabet = new Set<string>();
   for (const t of transitions) {
     for (const sym of t.symbols) {
@@ -26,12 +29,10 @@ export default function Sidebar() {
     }
   }
 
-  // Selected state details
   const selectedState = states.find(s => selectedIds.has(s.id));
   const selectedTransition = transitions.find(t => selectedIds.has(t.id));
   const stateMap = new Map(states.map(s => [s.id, s]));
 
-  // DFA validation
   const dfaErrors: string[] = [];
   if (mode === 'dfa') {
     const initials = states.filter(s => s.isInitial);
@@ -52,11 +53,22 @@ export default function Sidebar() {
     }
   }
 
-  return (
-    <div className="w-56 bg-[var(--bg-surface)] border-l border-[var(--color-border)] flex flex-col shrink-0 overflow-y-auto select-none">
-      {/* Properties header */}
-      <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase">
-        Properties
+  const handleShare = () => {
+    const hash = encodeAutomaton(states, transitions, mode);
+    const url = `${window.location.origin}${window.location.pathname}#${hash}`;
+    navigator.clipboard.writeText(url);
+  };
+
+  const sidebarContent = (
+    <div className={`flex flex-col h-full ${isMobile ? 'w-full' : 'w-56'}`}>
+      {/* Header */}
+      <div className="px-3 py-2 border-b border-[var(--color-border)] font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase flex items-center justify-between">
+        <span>Properties</span>
+        {isMobile && (
+          <button onClick={toggleSidebar} className="min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2">
+            <X size={16} className="text-[var(--color-text-dim)]" />
+          </button>
+        )}
       </div>
 
       {/* Mode + Alphabet */}
@@ -77,7 +89,21 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* DFA errors */}
+      {/* Mobile-only actions */}
+      {isMobile && (
+        <div className="px-3 py-2 border-b border-[var(--color-border)] flex gap-2">
+          <button onClick={handleShare} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+            <Share2 size={14} /> SHARE
+          </button>
+          <button onClick={autoLayout} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+            <LayoutGrid size={14} /> LAYOUT
+          </button>
+          <button onClick={clearAll} className="flex items-center gap-1 px-2 py-2 font-mono text-[10px] text-[var(--color-text-dim)] active:text-[var(--color-accent)]">
+            <RotateCcw size={14} /> CLEAR
+          </button>
+        </div>
+      )}
+
       {dfaErrors.length > 0 && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
           <div className="font-mono text-[10px] tracking-widest text-[var(--color-reject)] uppercase mb-1">Errors</div>
@@ -87,41 +113,29 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Selected state */}
       {selectedState && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
           <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected State</div>
           <div className="font-mono text-sm text-[var(--color-accent)] mb-2">{selectedState.label}</div>
           <div className="flex flex-col gap-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedState.isInitial}
-                onChange={() => toggleInitial(selectedState.id)}
-                className="accent-[var(--color-accent)]"
-              />
+            <label className="flex items-center gap-2 cursor-pointer min-h-[44px] md:min-h-0">
+              <input type="checkbox" checked={selectedState.isInitial} onChange={() => toggleInitial(selectedState.id)} className="accent-[var(--color-accent)] w-4 h-4" />
               <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Initial</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedState.isAccepting}
-                onChange={() => toggleAccepting(selectedState.id)}
-                className="accent-[var(--color-accent)]"
-              />
+            <label className="flex items-center gap-2 cursor-pointer min-h-[44px] md:min-h-0">
+              <input type="checkbox" checked={selectedState.isAccepting} onChange={() => toggleAccepting(selectedState.id)} className="accent-[var(--color-accent)] w-4 h-4" />
               <span className="font-mono text-[10px] text-[var(--color-text-dim)]">Accepting</span>
             </label>
           </div>
           <button
             onClick={() => setEditingState(selectedState.id)}
-            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors"
+            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
           >
             Rename...
           </button>
         </div>
       )}
 
-      {/* Selected transition */}
       {selectedTransition && (
         <div className="px-3 py-2 border-b border-[var(--color-border)]">
           <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">Selected Transition</div>
@@ -133,7 +147,7 @@ export default function Sidebar() {
           </div>
           <button
             onClick={() => setEditingTransition(selectedTransition.id)}
-            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors"
+            className="mt-2 w-full text-left font-mono text-[10px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] min-h-[44px] md:min-h-0 flex items-center"
           >
             Edit symbols...
           </button>
@@ -141,13 +155,13 @@ export default function Sidebar() {
       )}
 
       {/* States list */}
-      <div className="px-3 py-2 flex-1">
+      <div className="px-3 py-2 flex-1 overflow-y-auto">
         <div className="font-mono text-[10px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2">States</div>
         {states.map(s => (
           <button
             key={s.id}
             onClick={() => setSelected(new Set([s.id]))}
-            className={`flex items-center gap-1.5 w-full text-left px-1 py-0.5 font-mono text-xs transition-colors ${
+            className={`flex items-center gap-1.5 w-full text-left px-1 min-h-[44px] md:min-h-0 md:py-0.5 font-mono text-xs transition-colors ${
               selectedIds.has(s.id) ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
             }`}
           >
@@ -157,6 +171,30 @@ export default function Sidebar() {
           </button>
         ))}
       </div>
+    </div>
+  );
+
+  // Mobile: slide-in drawer from right with overlay
+  if (isMobile) {
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/60 z-40"
+          onClick={toggleSidebar}
+        />
+        {/* Drawer */}
+        <div className="fixed top-0 right-0 bottom-0 w-72 max-w-[85vw] bg-[var(--bg-surface)] border-l border-[var(--color-border)] z-50 flex flex-col animate-slide-in-right">
+          {sidebarContent}
+        </div>
+      </>
+    );
+  }
+
+  // Desktop: inline sidebar
+  return (
+    <div className="w-56 bg-[var(--bg-surface)] border-l border-[var(--color-border)] flex flex-col shrink-0 overflow-y-auto select-none">
+      {sidebarContent}
     </div>
   );
 }

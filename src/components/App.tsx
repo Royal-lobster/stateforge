@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useStore } from '@/store';
 import { decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/url';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';
 import Sidebar from './Sidebar';
@@ -18,8 +19,8 @@ export default function App() {
   const deleteSelected = useStore(s => s.deleteSelected);
   const clearSelection = useStore(s => s.clearSelection);
   const setTool = useStore(s => s.setTool);
+  const isMobile = useIsMobile();
 
-  // Load from URL hash or localStorage on mount
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (hash) {
@@ -35,7 +36,6 @@ export default function App() {
     }
   }, [loadAutomaton]);
 
-  // Auto-save to localStorage
   useEffect(() => {
     const timer = setTimeout(() => {
       saveToLocalStorage(states, transitions, mode);
@@ -43,42 +43,40 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [states, transitions, mode]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
-      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
-        e.preventDefault();
-        redo();
-      } else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        undo();
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        deleteSelected();
-      } else if (e.key === 'Escape') {
-        clearSelection();
-      } else if (e.key === 'v' || e.key === 'V') {
-        setTool('pointer');
-      } else if (e.key === 's' && !e.ctrlKey && !e.metaKey) {
-        setTool('addState');
-      } else if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
-        setTool('addTransition');
-      }
+      if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); redo(); }
+      else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undo(); }
+      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
+      else if (e.key === 'Escape') { clearSelection(); }
+      else if (e.key === 'v' || e.key === 'V') { setTool('pointer'); }
+      else if (e.key === 's' && !e.ctrlKey && !e.metaKey) { setTool('addState'); }
+      else if (e.key === 't' && !e.ctrlKey && !e.metaKey) { setTool('addTransition'); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [undo, redo, deleteSelected, clearSelection, setTool]);
 
+  // Add viewport meta for mobile
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'viewport');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+  }, []);
+
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <Toolbar />
-      <div className="flex flex-1 overflow-hidden">
-        <Canvas />
-        <Sidebar />
+    <div className="h-[100dvh] w-screen flex flex-col overflow-hidden relative">
+      <Toolbar isMobile={isMobile} />
+      <div className="flex flex-1 overflow-hidden relative">
+        <Canvas isMobile={isMobile} />
+        <Sidebar isMobile={isMobile} />
       </div>
-      <SimPanel />
+      <SimPanel isMobile={isMobile} />
     </div>
   );
 }

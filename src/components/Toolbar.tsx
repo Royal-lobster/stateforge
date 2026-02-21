@@ -3,7 +3,7 @@
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
-  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw
+  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 
@@ -17,9 +17,9 @@ function ToolBtn({ active, onClick, children, title }: {
     <button
       onClick={onClick}
       title={title}
-      className={`p-1.5 transition-colors ${active
+      className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
         ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
-        : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface)]'
+        : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface)] active:bg-[var(--bg-surface)]'
       }`}
     >
       {children}
@@ -27,7 +27,7 @@ function ToolBtn({ active, onClick, children, title }: {
   );
 }
 
-export default function Toolbar() {
+export default function Toolbar({ isMobile }: { isMobile: boolean }) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
   const undoStack = useStore(s => s.undoStack);
@@ -49,7 +49,6 @@ export default function Toolbar() {
     const hash = encodeAutomaton(states, transitions, mode);
     const url = `${window.location.origin}${window.location.pathname}#${hash}`;
     navigator.clipboard.writeText(url);
-    // brief flash feedback
     const btn = document.getElementById('share-btn');
     if (btn) {
       btn.textContent = 'COPIED';
@@ -57,13 +56,13 @@ export default function Toolbar() {
     }
   };
 
-  const iconSize = 16;
+  const iconSize = isMobile ? 18 : 16;
 
   return (
-    <div className="h-9 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-1 gap-0.5 shrink-0 select-none">
+    <div className="h-11 md:h-9 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-1 gap-0.5 shrink-0 select-none overflow-x-auto scrollbar-hide">
       {/* Logo */}
-      <div className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-2 mr-2 border-r border-[var(--color-border)] h-full flex items-center">
-        STATEFORGE
+      <div className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-2 mr-1 md:mr-2 border-r border-[var(--color-border)] h-full flex items-center shrink-0">
+        {isMobile ? 'SF' : 'STATEFORGE'}
       </div>
 
       {/* Tools */}
@@ -77,7 +76,7 @@ export default function Toolbar() {
         <ArrowRight size={iconSize} />
       </ToolBtn>
 
-      <div className="w-px h-5 bg-[var(--color-border)] mx-1" />
+      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
 
       <ToolBtn onClick={deleteSelected} title="Delete Selected (Del)">
         <Trash2 size={iconSize} />
@@ -88,20 +87,25 @@ export default function Toolbar() {
       <ToolBtn onClick={redo} title="Redo (Ctrl+Shift+Z)">
         <Redo2 size={iconSize} className={redoStack.length === 0 ? 'opacity-30' : ''} />
       </ToolBtn>
-      <ToolBtn onClick={autoLayout} title="Auto Layout">
-        <LayoutGrid size={iconSize} />
-      </ToolBtn>
-      <ToolBtn onClick={clearAll} title="Clear All">
-        <RotateCcw size={iconSize} />
-      </ToolBtn>
 
-      <div className="w-px h-5 bg-[var(--color-border)] mx-1" />
+      {!isMobile && (
+        <>
+          <ToolBtn onClick={autoLayout} title="Auto Layout">
+            <LayoutGrid size={iconSize} />
+          </ToolBtn>
+          <ToolBtn onClick={clearAll} title="Clear All">
+            <RotateCcw size={iconSize} />
+          </ToolBtn>
+        </>
+      )}
+
+      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
 
       {/* Mode toggle */}
-      <div className="flex items-center font-mono text-[10px] tracking-wider">
+      <div className="flex items-center font-mono text-[10px] tracking-wider shrink-0">
         <button
           onClick={() => setMode('dfa')}
-          className={`px-2 py-1 transition-colors ${mode === 'dfa'
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${mode === 'dfa'
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
@@ -110,7 +114,7 @@ export default function Toolbar() {
         </button>
         <button
           onClick={() => setMode('nfa')}
-          className={`px-2 py-1 transition-colors ${mode === 'nfa'
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${mode === 'nfa'
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
@@ -122,19 +126,21 @@ export default function Toolbar() {
       <div className="flex-1" />
 
       {/* Right side */}
-      <button
-        id="share-btn"
-        onClick={handleShare}
-        className="flex items-center gap-1 px-2 py-1 font-mono text-[10px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors"
-      >
-        <Share2 size={12} />
-        SHARE
-      </button>
+      {!isMobile && (
+        <button
+          id="share-btn"
+          onClick={handleShare}
+          className="flex items-center gap-1 px-2 py-1 font-mono text-[10px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+        >
+          <Share2 size={12} />
+          SHARE
+        </button>
+      )}
       <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
         <PanelBottom size={iconSize} />
       </ToolBtn>
       <ToolBtn onClick={toggleSidebar} title="Toggle Sidebar">
-        <PanelRight size={iconSize} />
+        {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
       </ToolBtn>
     </div>
   );
