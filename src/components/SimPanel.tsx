@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useStore } from '@/store';
 import { Play, StepForward, FastForward, RotateCcw, ListChecks, GripHorizontal, Zap } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function SimPanel({ isMobile }: { isMobile: boolean }) {
   const showSimPanel = useStore(s => s.showSimPanel);
@@ -61,11 +62,13 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
     simMultiRun(inputs);
   };
 
-  const controlBtn = (onClick: () => void, disabled: boolean, title: string, icon: React.ReactNode) => (
-    <button onClick={onClick} disabled={disabled} title={title} aria-label={title}
-      className="p-1.5 flex items-center justify-center text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--bg-hover)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors">
-      {icon}
-    </button>
+  const controlBtn = (onClick: () => void, disabled: boolean, title: string, icon: React.ReactNode, shortcut?: string) => (
+    <Tooltip label={title} shortcut={shortcut} position="top">
+      <button onClick={onClick} disabled={disabled} aria-label={title}
+        className="p-1.5 flex items-center justify-center text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--bg-hover)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors">
+        {icon}
+      </button>
+    </Tooltip>
   );
 
   // Mobile bottom sheet
@@ -167,9 +170,9 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); simStatus === 'idle' ? simStart() : simStep(); }}} />
             </div>
             <div className="flex items-center gap-0.5 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] w-fit">
-              {controlBtn(simStart, simStatus === 'stepping', 'Start (Enter)', <Play size={14} />)}
-              {controlBtn(simStep, simStatus !== 'stepping', 'Step (Enter)', <StepForward size={14} />)}
-              {controlBtn(simFastRun, simStatus === 'stepping', 'Fast run', <FastForward size={14} />)}
+              {controlBtn(simStart, simStatus === 'stepping', 'Start', <Play size={14} />, 'Enter')}
+              {controlBtn(simStep, simStatus !== 'stepping', 'Step', <StepForward size={14} />, 'Enter')}
+              {controlBtn(simFastRun, simStatus === 'stepping', 'Fast Run', <FastForward size={14} />)}
               {controlBtn(simReset, false, 'Reset', <RotateCcw size={14} />)}
             </div>
             {/* Tape visualization */}

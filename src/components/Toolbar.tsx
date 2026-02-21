@@ -9,18 +9,19 @@ import {
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 import type { State, Transition, Mode } from '@/types';
+import Tooltip from './Tooltip';
 
-function ToolBtn({ active, onClick, children, title, disabled }: {
+function ToolBtn({ active, onClick, children, title, shortcut, disabled }: {
   active?: boolean;
   onClick: () => void;
   children: React.ReactNode;
   title: string;
+  shortcut?: string;
   disabled?: boolean;
 }) {
-  return (
+  const btn = (
     <button
       onClick={onClick}
-      title={title}
       aria-label={title}
       disabled={disabled}
       className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
@@ -33,6 +34,7 @@ function ToolBtn({ active, onClick, children, title, disabled }: {
       {children}
     </button>
   );
+  return <Tooltip label={title} shortcut={shortcut}>{btn}</Tooltip>;
 }
 
 interface ToolbarProps {
@@ -180,25 +182,25 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       {/* Canvas tools (hidden in special modes) */}
       {!isSpecialMode && (
         <>
-          <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer (V)">
+          <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V">
             <MousePointer2 size={iconSize} />
           </ToolBtn>
-          <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State (S)">
+          <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S">
             <Plus size={iconSize} />
           </ToolBtn>
-          <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition (T)">
+          <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T">
             <ArrowRight size={iconSize} />
           </ToolBtn>
 
           <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
 
-          <ToolBtn onClick={deleteSelected} title="Delete Selected (Del)">
+          <ToolBtn onClick={deleteSelected} title="Delete Selected" shortcut="Del">
             <Trash2 size={iconSize} />
           </ToolBtn>
-          <ToolBtn onClick={undo} title="Undo (Ctrl+Z)">
+          <ToolBtn onClick={undo} title="Undo" shortcut="⌘Z">
             <Undo2 size={iconSize} className={undoStack.length === 0 ? 'opacity-30' : ''} />
           </ToolBtn>
-          <ToolBtn onClick={redo} title="Redo (Ctrl+Shift+Z)">
+          <ToolBtn onClick={redo} title="Redo" shortcut="⌘⇧Z">
             <Redo2 size={iconSize} className={redoStack.length === 0 ? 'opacity-30' : ''} />
           </ToolBtn>
 
@@ -281,10 +283,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
         <>
           {!isMobile && (
             <>
-              <ToolBtn onClick={handleImport} title="Import (JSON/JFLAP)">
+              <ToolBtn onClick={handleImport} title="Import" shortcut="JSON/JFF">
                 <Upload size={iconSize} />
               </ToolBtn>
-              <ToolBtn onClick={handleExport} title="Export JSON">
+              <ToolBtn onClick={handleExport} title="Export">
                 <Download size={iconSize} />
               </ToolBtn>
               <button
@@ -300,10 +302,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           {!isMobile && onShortcuts && (
             <button onClick={onShortcuts} title="Keyboard Shortcuts (?)" aria-label="Keyboard shortcuts" className="px-1.5 py-1 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0">?</button>
           )}
-          <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
+          <ToolBtn onClick={toggleSimPanel} title="Simulation Panel">
             <PanelBottom size={iconSize} />
           </ToolBtn>
-          <ToolBtn onClick={toggleSidebar} title="Toggle Sidebar">
+          <ToolBtn onClick={toggleSidebar} title="Properties Panel">
             {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
           </ToolBtn>
         </>
