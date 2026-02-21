@@ -194,9 +194,10 @@ export const useStore = create<StoreState>()(
       });
       // Auto-fit when we have a few states to keep things nicely framed
       if (isFirst) {
-        // Center on first state
-        const cw = typeof window !== 'undefined' ? window.innerWidth - 64 : 800;
-        const ch = typeof window !== 'undefined' ? window.innerHeight - 200 : 600;
+        // Center on first state using actual canvas dimensions
+        const canvasEl = typeof document !== 'undefined' ? document.querySelector('[data-canvas]') as HTMLElement | null : null;
+        const cw = canvasEl ? canvasEl.clientWidth : 800;
+        const ch = canvasEl ? canvasEl.clientHeight : 600;
         const zoom = get().zoom;
         set({ pan: { x: cw / 2 - x * zoom, y: ch / 2 - y * zoom } });
       }
@@ -437,9 +438,10 @@ export const useStore = create<StoreState>()(
       const maxY = Math.max(...ys) + 80;
       const w = maxX - minX;
       const h = maxY - minY;
-      // Assume canvas is roughly the viewport minus sidebar/toolbar
-      const cw = window.innerWidth - 64;
-      const ch = window.innerHeight - 200;
+      // Measure actual visible canvas area
+      const canvasEl = document.querySelector('[data-canvas]') as HTMLElement | null;
+      const cw = canvasEl ? canvasEl.clientWidth : window.innerWidth - 300;
+      const ch = canvasEl ? canvasEl.clientHeight : window.innerHeight - 200;
       const zoom = Math.max(0.5, Math.min(2.5, Math.min(cw / w, ch / h) * 0.8));
       const cx = (minX + maxX) / 2;
       const cy = (minY + maxY) / 2;

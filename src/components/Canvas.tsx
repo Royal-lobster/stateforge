@@ -449,6 +449,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   return (
     <div
       ref={containerRef}
+      data-canvas
       className="flex-1 relative overflow-hidden bg-[var(--bg-canvas)] touch-none transition-all duration-200"
       style={{ cursor }}
       onWheel={handleWheel}
