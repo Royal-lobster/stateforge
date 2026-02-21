@@ -135,12 +135,15 @@ export function tmStep(
 
         const action = `Read '${currentSymbol}', write '${writeSymbol}', move ${entry.move} → ${toState?.label ?? t.to}`;
 
+        // Mutate history in place to avoid O(n²) copying
+        sim.history.push({ stateId: t.to, tape: newTape, action });
+
         return {
           stateId: t.to,
           tape: newTape,
           step: sim.step + 1,
           status: isAccepting ? 'accepted' : 'running',
-          history: [...sim.history, { stateId: t.to, tape: newTape, action }],
+          history: sim.history,
         };
       }
     }
@@ -148,10 +151,11 @@ export function tmStep(
 
   // No transition found — halt/reject
   const currentState = states.find(s => s.id === sim.stateId);
+  sim.history.push({ stateId: sim.stateId, tape: sim.tape, action: 'No transition — halt' });
   return {
     ...sim,
     status: currentState?.isAccepting ? 'accepted' : 'rejected',
-    history: [...sim.history, { stateId: sim.stateId, tape: sim.tape, action: 'No transition — halt' }],
+    history: sim.history,
   };
 }
 

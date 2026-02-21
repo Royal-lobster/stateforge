@@ -485,21 +485,29 @@ export function toGNF(grammar: Grammar): TransformResult {
   let prods = cnfResult.grammar.productions.map(p => ({ ...p, body: [...p.body] }));
   const startSymbol = cnfResult.grammar.startSymbol;
 
-  // Order non-terminals
-  const nts = [...getNonTerminals(cnfResult.grammar)].sort();
-  const ntOrder = new Map(nts.map((nt, i) => [nt, i]));
+  // Collect all non-terminals and order them
+  function collectNTs() {
+    const s = new Set<string>();
+    for (const p of prods) {
+      s.add(p.head);
+      for (const sym of p.body) if (isNonTerminal(sym)) s.add(sym);
+    }
+    return [...s].sort();
+  }
 
-  // Ensure A_i → A_j ... only when j > i (left-to-right elimination)
+  let nts = collectNTs();
+
+  // Phase 1: Forward pass — ensure A_i → A_j γ only when j > i, remove left recursion
   for (let i = 0; i < nts.length; i++) {
+    // Substitute lower-ordered NTs
     for (let j = 0; j < i; j++) {
-      // Replace A_i → A_j γ with A_i → δ1 γ | δ2 γ | ... for each A_j → δk
       const toReplace = prods.filter(p => p.head === nts[i] && p.body.length > 0 && p.body[0] === nts[j]);
       const replacements: Production[] = [];
       for (const p of toReplace) {
         const rest = p.body.slice(1);
         const ajProds = prods.filter(pp => pp.head === nts[j]);
         for (const ajp of ajProds) {
-          const newBody = [...ajp.body.filter(s => s !== 'ε'), ...rest];
+          const newBody = ajp.body[0] === 'ε' ? [...rest] : [...ajp.body, ...rest];
           if (newBody.length === 0) continue;
           replacements.push({ id: uid(), head: nts[i], body: newBody });
         }
@@ -516,13 +524,16 @@ export function toGNF(grammar: Grammar): TransformResult {
       const newProds: Production[] = [];
 
       for (const p of nonRecursive) {
-        newProds.push({ id: uid(), head: nts[i], body: [...p.body, newNT] });
+        const body = p.body[0] === 'ε' ? [newNT] : [...p.body, newNT];
+        newProds.push({ id: uid(), head: nts[i], body });
+        // Also keep original without the new NT appended
+        newProds.push({ id: uid(), head: nts[i], body: [...p.body] });
       }
       for (const p of recursive) {
         const alpha = p.body.slice(1);
         newProds.push({ id: uid(), head: newNT, body: [...alpha, newNT] });
+        newProds.push({ id: uid(), head: newNT, body: [...alpha] });
       }
-      newProds.push({ id: uid(), head: newNT, body: ['ε'] });
 
       prods = prods.filter(p => p.head !== nts[i]);
       prods.push(...newProds);
@@ -530,7 +541,71 @@ export function toGNF(grammar: Grammar): TransformResult {
   }
 
   allSteps.push({
-    description: `GNF conversion complete: ${prods.length} productions`,
+    description: `[GNF] Forward pass: left recursion removed (${prods.length} productions)`,
+    productions: prods.map(p => ({ ...p })),
+  });
+
+  // Phase 2: Back-substitution — process from highest to lowest
+  // After forward pass, A_n starts with a terminal (highest-ordered NT).
+  // Substitute backwards so all productions start with a terminal.
+  nts = collectNTs();
+  for (let i = nts.length - 2; i >= 0; i--) {
+    const toFix = prods.filter(p => p.head === nts[i] && p.body.length > 0 && isNonTerminal(p.body[0]));
+    const replacements: Production[] = [];
+    for (const p of toFix) {
+      const leadNT = p.body[0];
+      const rest = p.body.slice(1);
+      const leadProds = prods.filter(pp => pp.head === leadNT);
+      for (const lp of leadProds) {
+        if (lp.body[0] === 'ε') {
+          if (rest.length > 0) replacements.push({ id: uid(), head: nts[i], body: [...rest] });
+        } else {
+          replacements.push({ id: uid(), head: nts[i], body: [...lp.body, ...rest] });
+        }
+      }
+    }
+    prods = prods.filter(p => !toFix.includes(p));
+    prods.push(...replacements);
+  }
+
+  // Also fix primed NTs (from left recursion removal)
+  const primedNTs = nts.filter(nt => nt.endsWith("'"));
+  for (const pnt of primedNTs) {
+    const toFix = prods.filter(p => p.head === pnt && p.body.length > 0 && isNonTerminal(p.body[0]));
+    const replacements: Production[] = [];
+    for (const p of toFix) {
+      const leadNT = p.body[0];
+      const rest = p.body.slice(1);
+      const leadProds = prods.filter(pp => pp.head === leadNT && pp.body.length > 0 && !isNonTerminal(pp.body[0]));
+      for (const lp of leadProds) {
+        replacements.push({ id: uid(), head: pnt, body: [...lp.body, ...rest] });
+      }
+    }
+    if (replacements.length > 0) {
+      prods = prods.filter(p => !toFix.includes(p));
+      prods.push(...replacements);
+    }
+  }
+
+  // Remove duplicate productions
+  const seen = new Set<string>();
+  prods = prods.filter(p => {
+    const key = `${p.head}→${p.body.join(' ')}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Keep S → ε if the original grammar had it
+  const hadStartEps = grammar.productions.some(
+    p => p.head === grammar.startSymbol && p.body.length === 1 && p.body[0] === 'ε'
+  );
+  if (hadStartEps && !prods.some(p => p.head === startSymbol && p.body.length === 1 && p.body[0] === 'ε')) {
+    prods.push({ id: uid(), head: startSymbol, body: ['ε'] });
+  }
+
+  allSteps.push({
+    description: `[GNF] Back-substitution complete: ${prods.length} productions`,
     productions: prods.map(p => ({ ...p })),
   });
 
@@ -548,8 +623,15 @@ export interface CYKResult {
   parseTree: ParseTreeNode | null;
 }
 
-export function cykParse(grammar: Grammar, input: string): CYKResult {
-  // Grammar should be in CNF
+export function cykParse(grammarInput: Grammar, input: string): CYKResult {
+  // Auto-convert to CNF if needed
+  const isCNF = grammarInput.productions.every(p =>
+    (p.body.length === 2 && isNonTerminal(p.body[0]) && isNonTerminal(p.body[1])) ||
+    (p.body.length === 1 && isTerminal(p.body[0]) && p.body[0] !== 'ε') ||
+    (p.body.length === 1 && p.body[0] === 'ε' && p.head === grammarInput.startSymbol)
+  );
+  const grammar = isCNF ? grammarInput : toCNF(grammarInput).grammar;
+
   const n = input.length;
   const steps: { row: number; col: number; description: string }[] = [];
 
@@ -903,45 +985,53 @@ export function ll1Parse(grammar: Grammar, input: string): LL1Result {
 // ════════════════════════════════════════════════════
 
 export function bruteForceParse(grammar: Grammar, input: string, maxDepth = 15): { accepted: boolean; derivation: string[] } {
-  // BFS derivation from start symbol
-  const target = input || 'ε';
-  const queue: { sentential: string; steps: string[] }[] = [
-    { sentential: grammar.startSymbol, steps: [grammar.startSymbol] },
+  // BFS derivation using token arrays (supports multi-char non-terminals)
+  const targetTokens = input ? input.split('') : [];
+
+  type Form = string[]; // array of symbols (terminals + non-terminals)
+  const formKey = (f: Form) => f.join('\x00');
+  const formStr = (f: Form) => f.length === 0 ? 'ε' : f.join('');
+
+  const startForm: Form = [grammar.startSymbol];
+  const queue: { form: Form; steps: string[] }[] = [
+    { form: startForm, steps: [formStr(startForm)] },
   ];
   const visited = new Set<string>();
-  visited.add(grammar.startSymbol);
+  visited.add(formKey(startForm));
 
   while (queue.length > 0) {
-    const { sentential, steps } = queue.shift()!;
+    const { form, steps } = queue.shift()!;
 
-    if (sentential === target || (sentential === 'ε' && target === '')) {
+    // Check if form matches target (all terminals)
+    const allTerminal = form.every(s => isTerminal(s) && s !== 'ε');
+    const formTerminals = form.filter(s => s !== 'ε');
+    if (allTerminal && formTerminals.join('') === input) {
+      return { accepted: true, derivation: steps };
+    }
+    if (form.length === 0 && input === '') {
       return { accepted: true, derivation: steps };
     }
 
     if (steps.length > maxDepth) continue;
-    if (sentential.length > input.length * 3 + 10) continue; // prune
+    // Prune: too many terminal symbols already
+    const termCount = form.filter(s => isTerminal(s) && s !== 'ε').length;
+    if (termCount > input.length + 5) continue;
 
     // Find leftmost non-terminal
-    let ntPos = -1;
-    let ntSym = '';
-    for (let i = 0; i < sentential.length; i++) {
-      if (isNonTerminal(sentential[i])) {
-        ntPos = i;
-        ntSym = sentential[i];
-        break;
-      }
-    }
+    const ntIdx = form.findIndex(s => isNonTerminal(s));
+    if (ntIdx === -1) continue; // all terminals, didn't match
 
-    if (ntPos === -1) continue; // all terminals, didn't match
+    const ntSym = form[ntIdx];
 
     for (const p of grammar.productions) {
       if (p.head !== ntSym) continue;
-      const bodyStr = p.body[0] === 'ε' ? '' : p.body.join('');
-      const next = sentential.slice(0, ntPos) + bodyStr + sentential.slice(ntPos + 1);
+      const replacement = p.body[0] === 'ε' ? [] : [...p.body];
+      const newForm: Form = [...form.slice(0, ntIdx), ...replacement, ...form.slice(ntIdx + 1)];
+      const key = formKey(newForm);
 
-      if (!visited.has(next)) {
-        visited.add(next);
-        queue.push({ sentential: next, steps: [...steps, next] });
+      if (!visited.has(key)) {
+        visited.add(key);
+        queue.push({ form: newForm, steps: [...steps, formStr(newForm)] });
       }
     }
   }
