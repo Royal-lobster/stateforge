@@ -3,23 +3,27 @@
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
-  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, ArrowRightLeft
+  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, ArrowRightLeft, BookOpen
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 
-function ToolBtn({ active, onClick, children, title }: {
+function ToolBtn({ active, onClick, children, title, disabled }: {
   active?: boolean;
   onClick: () => void;
   children: React.ReactNode;
   title: string;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       title={title}
+      disabled={disabled}
       className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
         ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
-        : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface)] active:bg-[var(--bg-surface)]'
+        : disabled
+          ? 'text-[var(--color-text-dim)] opacity-30'
+          : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface)] active:bg-[var(--bg-surface)]'
       }`}
     >
       {children}
@@ -27,7 +31,12 @@ function ToolBtn({ active, onClick, children, title }: {
   );
 }
 
-export default function Toolbar({ isMobile, onConvert }: { isMobile: boolean; onConvert: () => void }) {
+export default function Toolbar({ isMobile, onConvert, grammarMode, onModeChange }: {
+  isMobile: boolean;
+  onConvert: () => void;
+  grammarMode?: boolean;
+  onModeChange?: (mode: string) => void;
+}) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
   const undoStack = useStore(s => s.undoStack);
@@ -56,6 +65,14 @@ export default function Toolbar({ isMobile, onConvert }: { isMobile: boolean; on
     }
   };
 
+  const handleModeClick = (m: string) => {
+    if (onModeChange) {
+      onModeChange(m);
+    } else {
+      if (m !== 'grammar') setMode(m as 'dfa' | 'nfa');
+    }
+  };
+
   const iconSize = isMobile ? 18 : 16;
 
   return (
@@ -65,47 +82,51 @@ export default function Toolbar({ isMobile, onConvert }: { isMobile: boolean; on
         {isMobile ? 'SF' : 'STATEFORGE'}
       </div>
 
-      {/* Tools */}
-      <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer (V)">
-        <MousePointer2 size={iconSize} />
-      </ToolBtn>
-      <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State (S)">
-        <Plus size={iconSize} />
-      </ToolBtn>
-      <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition (T)">
-        <ArrowRight size={iconSize} />
-      </ToolBtn>
-
-      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
-
-      <ToolBtn onClick={deleteSelected} title="Delete Selected (Del)">
-        <Trash2 size={iconSize} />
-      </ToolBtn>
-      <ToolBtn onClick={undo} title="Undo (Ctrl+Z)">
-        <Undo2 size={iconSize} className={undoStack.length === 0 ? 'opacity-30' : ''} />
-      </ToolBtn>
-      <ToolBtn onClick={redo} title="Redo (Ctrl+Shift+Z)">
-        <Redo2 size={iconSize} className={redoStack.length === 0 ? 'opacity-30' : ''} />
-      </ToolBtn>
-
-      {!isMobile && (
+      {/* Canvas tools (hidden in grammar mode) */}
+      {!grammarMode && (
         <>
-          <ToolBtn onClick={autoLayout} title="Auto Layout">
-            <LayoutGrid size={iconSize} />
+          <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer (V)">
+            <MousePointer2 size={iconSize} />
           </ToolBtn>
-          <ToolBtn onClick={clearAll} title="Clear All">
-            <RotateCcw size={iconSize} />
+          <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State (S)">
+            <Plus size={iconSize} />
           </ToolBtn>
+          <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition (T)">
+            <ArrowRight size={iconSize} />
+          </ToolBtn>
+
+          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+
+          <ToolBtn onClick={deleteSelected} title="Delete Selected (Del)">
+            <Trash2 size={iconSize} />
+          </ToolBtn>
+          <ToolBtn onClick={undo} title="Undo (Ctrl+Z)">
+            <Undo2 size={iconSize} className={undoStack.length === 0 ? 'opacity-30' : ''} />
+          </ToolBtn>
+          <ToolBtn onClick={redo} title="Redo (Ctrl+Shift+Z)">
+            <Redo2 size={iconSize} className={redoStack.length === 0 ? 'opacity-30' : ''} />
+          </ToolBtn>
+
+          {!isMobile && (
+            <>
+              <ToolBtn onClick={autoLayout} title="Auto Layout">
+                <LayoutGrid size={iconSize} />
+              </ToolBtn>
+              <ToolBtn onClick={clearAll} title="Clear All">
+                <RotateCcw size={iconSize} />
+              </ToolBtn>
+            </>
+          )}
+
+          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
         </>
       )}
-
-      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
 
       {/* Mode toggle */}
       <div className="flex items-center font-mono text-[10px] tracking-wider shrink-0">
         <button
-          onClick={() => setMode('dfa')}
-          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${mode === 'dfa'
+          onClick={() => handleModeClick('dfa')}
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${!grammarMode && mode === 'dfa'
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
@@ -113,42 +134,59 @@ export default function Toolbar({ isMobile, onConvert }: { isMobile: boolean; on
           DFA
         </button>
         <button
-          onClick={() => setMode('nfa')}
-          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${mode === 'nfa'
+          onClick={() => handleModeClick('nfa')}
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors ${!grammarMode && mode === 'nfa'
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
         >
           NFA
         </button>
+        <button
+          onClick={() => handleModeClick('grammar')}
+          className={`px-2 py-1 min-h-[44px] md:min-h-0 flex items-center gap-1 transition-colors ${grammarMode
+            ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
+            : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
+          }`}
+        >
+          <BookOpen size={isMobile ? 14 : 12} />
+          CFG
+        </button>
       </div>
 
-      <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
-
-      {/* Convert */}
-      <ToolBtn onClick={onConvert} title="Convert (NFA→DFA)">
-        <ArrowRightLeft size={iconSize} />
-      </ToolBtn>
+      {/* Convert (hidden in grammar mode) */}
+      {!grammarMode && (
+        <>
+          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+          <ToolBtn onClick={onConvert} title="Convert (NFA→DFA)">
+            <ArrowRightLeft size={iconSize} />
+          </ToolBtn>
+        </>
+      )}
 
       <div className="flex-1" />
 
       {/* Right side */}
-      {!isMobile && (
-        <button
-          id="share-btn"
-          onClick={handleShare}
-          className="flex items-center gap-1 px-2 py-1 font-mono text-[10px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
-        >
-          <Share2 size={12} />
-          SHARE
-        </button>
+      {!grammarMode && (
+        <>
+          {!isMobile && (
+            <button
+              id="share-btn"
+              onClick={handleShare}
+              className="flex items-center gap-1 px-2 py-1 font-mono text-[10px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+            >
+              <Share2 size={12} />
+              SHARE
+            </button>
+          )}
+          <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
+            <PanelBottom size={iconSize} />
+          </ToolBtn>
+          <ToolBtn onClick={toggleSidebar} title="Toggle Sidebar">
+            {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
+          </ToolBtn>
+        </>
       )}
-      <ToolBtn onClick={toggleSimPanel} title="Toggle Simulation Panel">
-        <PanelBottom size={iconSize} />
-      </ToolBtn>
-      <ToolBtn onClick={toggleSidebar} title="Toggle Sidebar">
-        {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
-      </ToolBtn>
     </div>
   );
 }

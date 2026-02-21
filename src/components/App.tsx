@@ -9,6 +9,7 @@ import Canvas from './Canvas';
 import Sidebar from './Sidebar';
 import SimPanel from './SimPanel';
 import ConvertPanel from './ConvertPanel';
+import GrammarEditor from './GrammarEditor';
 
 export default function App() {
   const states = useStore(s => s.states);
@@ -20,8 +21,10 @@ export default function App() {
   const deleteSelected = useStore(s => s.deleteSelected);
   const clearSelection = useStore(s => s.clearSelection);
   const setTool = useStore(s => s.setTool);
+  const setMode = useStore(s => s.setMode);
   const isMobile = useIsMobile();
   const [showConvert, setShowConvert] = useState(false);
+  const [showGrammar, setShowGrammar] = useState(false);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -39,15 +42,18 @@ export default function App() {
   }, [loadAutomaton]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      saveToLocalStorage(states, transitions, mode);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [states, transitions, mode]);
+    if (!showGrammar) {
+      const timer = setTimeout(() => {
+        saveToLocalStorage(states, transitions, mode);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [states, transitions, mode, showGrammar]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (showGrammar) return; // don't capture keys in grammar mode
       if (e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); redo(); }
       else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undo(); }
       else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelected(); }
@@ -58,9 +64,8 @@ export default function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, deleteSelected, clearSelection, setTool]);
+  }, [undo, redo, deleteSelected, clearSelection, setTool, showGrammar]);
 
-  // Add viewport meta for mobile
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');
     if (!meta) {
@@ -71,9 +76,38 @@ export default function App() {
     meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
   }, []);
 
+  const handleModeChange = (newMode: string) => {
+    if (newMode === 'grammar') {
+      setShowGrammar(true);
+      setShowConvert(false);
+    } else {
+      setShowGrammar(false);
+      setMode(newMode as 'dfa' | 'nfa');
+    }
+  };
+
+  if (showGrammar) {
+    return (
+      <div className="h-[100dvh] w-screen flex flex-col overflow-hidden relative">
+        <Toolbar
+          isMobile={isMobile}
+          onConvert={() => setShowConvert(true)}
+          grammarMode={true}
+          onModeChange={handleModeChange}
+        />
+        <GrammarEditor isMobile={isMobile} />
+      </div>
+    );
+  }
+
   return (
     <div className="h-[100dvh] w-screen flex flex-col overflow-hidden relative">
-      <Toolbar isMobile={isMobile} onConvert={() => setShowConvert(true)} />
+      <Toolbar
+        isMobile={isMobile}
+        onConvert={() => setShowConvert(true)}
+        grammarMode={false}
+        onModeChange={handleModeChange}
+      />
       <div className="flex flex-1 overflow-hidden relative">
         <Canvas isMobile={isMobile} />
         <Sidebar isMobile={isMobile} />
