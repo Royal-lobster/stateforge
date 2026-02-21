@@ -17,6 +17,7 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const toggleAccepting = useStore(s => s.toggleAccepting);
   const toggleInitial = useStore(s => s.toggleInitial);
   const toggleSidebar = useStore(s => s.toggleSidebar);
+  const deleteSelected = useStore(s => s.deleteSelected);
   const autoLayout = useStore(s => s.autoLayout);
   const clearAll = useStore(s => s.clearAll);
   const addTrapState = useStore(s => s.addTrapState);
@@ -159,8 +160,53 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
         </div>
       )}
 
-      {/* Selected State */}
-      {selectedState && (
+      {/* Multi-Select Summary */}
+      {selectedIds.size > 1 && (() => {
+        const selStates = states.filter(s => selectedIds.has(s.id));
+        const selTransitions = transitions.filter(t => selectedIds.has(t.id));
+        return (
+          <div className="px-3 py-2.5 border-b border-[var(--color-border)]">
+            <div className="font-mono text-[11px] tracking-widest text-[var(--color-accent)] uppercase mb-2 font-medium">
+              {selectedIds.size} Selected
+            </div>
+            {selStates.length > 0 && (
+              <div className="font-mono text-xs text-[var(--color-text)] mb-1.5">
+                {selStates.length} state{selStates.length > 1 ? 's' : ''}: {selStates.map(s => s.label).join(', ')}
+              </div>
+            )}
+            {selTransitions.length > 0 && (
+              <div className="font-mono text-xs text-[var(--color-text)] mb-1.5">
+                {selTransitions.length} transition{selTransitions.length > 1 ? 's' : ''}
+              </div>
+            )}
+            {selStates.length > 0 && (
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <button
+                  onClick={() => selStates.forEach(s => { if (!s.isAccepting) toggleAccepting(s.id); })}
+                  className="font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accept)] border border-[var(--color-border)] hover:border-[var(--color-accept)]/50 px-2 py-1 transition-colors"
+                >
+                  All Accepting
+                </button>
+                <button
+                  onClick={() => selStates.forEach(s => { if (s.isAccepting) toggleAccepting(s.id); })}
+                  className="font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-text)] border border-[var(--color-border)] px-2 py-1 transition-colors"
+                >
+                  None Accepting
+                </button>
+              </div>
+            )}
+            <button
+              onClick={deleteSelected}
+              className="mt-2 font-mono text-[11px] text-[var(--color-reject)] hover:text-white hover:bg-[var(--color-reject)] border border-[var(--color-reject)]/50 px-2 py-1 transition-colors"
+            >
+              Delete All
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* Selected State (single) */}
+      {selectedIds.size === 1 && selectedState && (
         <div className="px-3 py-2.5 border-b border-[var(--color-border)]">
           <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2 font-medium">Selected State</div>
           <div className="font-mono text-sm text-[var(--color-accent)] mb-2 font-semibold">{selectedState.label}</div>
@@ -180,8 +226,8 @@ export default function Sidebar({ isMobile }: { isMobile: boolean }) {
         </div>
       )}
 
-      {/* Selected Transition */}
-      {selectedTransition && (
+      {/* Selected Transition (single) */}
+      {selectedIds.size === 1 && selectedTransition && (
         <div className="px-3 py-2.5 border-b border-[var(--color-border)]">
           <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-2 font-medium">Selected Transition</div>
           <div className="font-mono text-xs text-[var(--color-text)] flex items-center gap-1">

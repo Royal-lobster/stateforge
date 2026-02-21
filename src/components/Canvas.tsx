@@ -439,12 +439,19 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
 
   const stateMap = new Map(states.map(s => [s.id, s]));
 
-  const contextMenuItems = (stateId: string) => [
-    { label: 'Set Initial', action: () => toggleInitial(stateId) },
-    { label: 'Set Accepting', action: () => toggleAccepting(stateId) },
-    { label: 'Rename', action: () => setEditingState(stateId) },
-    { label: 'Delete', action: () => deleteState(stateId) },
-  ];
+  const deleteSelected = useStore(s => s.deleteSelected);
+  const selectedCount = selectedIds.size;
+  const contextMenuItems = (stateId: string) => {
+    const isMulti = selectedIds.has(stateId) && selectedCount > 1;
+    return [
+      ...(!isMulti ? [
+        { label: 'Set Initial', action: () => toggleInitial(stateId) },
+        { label: 'Set Accepting', action: () => toggleAccepting(stateId) },
+        { label: 'Rename', action: () => setEditingState(stateId) },
+      ] : []),
+      { label: isMulti ? `Delete ${selectedCount} items` : 'Delete', action: () => isMulti ? deleteSelected() : deleteState(stateId) },
+    ];
+  };
 
   return (
     <div
