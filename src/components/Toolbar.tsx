@@ -5,7 +5,7 @@ import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, Maximize2,
-  ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github,
+  ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github, FileText,
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 import type { State, Transition, Mode } from '@/types';
@@ -330,7 +330,10 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           </ToolBtn>
         </>
       )}
-      <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0 ml-1" title="GitHub">
+      <a href="/docs" className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0 ml-1" title="Docs">
+        <FileText size={isMobile ? 18 : 14} />
+      </a>
+      <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0" title="GitHub">
         <Github size={isMobile ? 18 : 14} />
       </a>
     </div>
