@@ -244,12 +244,12 @@ export const useStore = create<StoreState>()(
     addTransition: (from, to) => {
       const s = get();
       // In PDA mode, allow multiple transitions between same states
-      if (s.mode !== 'pda') {
+      if (s.mode !== 'pda' && s.mode !== 'tm') {
         const existing = s.transitions.find(t => t.from === from && t.to === to);
         if (existing) return;
       }
       s.pushUndo();
-      const defaultSymbol = s.mode === 'pda' ? 'a, Z → Z' : s.mode === 'nfa' ? 'ε' : 'a';
+      const defaultSymbol = s.mode === 'tm' ? 'a → a, R' : s.mode === 'pda' ? 'a, Z → Z' : s.mode === 'nfa' ? 'ε' : 'a';
       const newT: Transition = {
         id: genId(), from, to, symbols: [defaultSymbol],
         ...(s.mode === 'pda' ? { pdaTransitions: [{ input: 'a', pop: 'Z', push: 'Z' }] } : {}),

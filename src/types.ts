@@ -24,7 +24,7 @@ export interface PDATransitionEntry {
   push: string;      // string to push (or 'ε'), leftmost = top
 }
 
-export type Mode = 'dfa' | 'nfa' | 'grammar' | 'pda';
+export type Mode = 'dfa' | 'nfa' | 'grammar' | 'pda' | 'tm';
 export type Tool = 'pointer' | 'addState' | 'addTransition';
 
 export interface AutomatonData {
