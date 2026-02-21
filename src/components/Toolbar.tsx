@@ -242,103 +242,86 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
   /* ── MOBILE LAYOUT ──────────────────────────────────────── */
   if (isMobile) {
-    const mBtn = "w-10 h-10 flex items-center justify-center";
+    const mb = "w-9 h-9 flex items-center justify-center shrink-0";
     return (
       <div className="shrink-0 select-none bg-[var(--bg-surface)] border-b border-[var(--color-border)]">
-        {/* Row 1: Brand + Mode + Panel toggles */}
-        <div className="h-11 flex items-center px-2 gap-1 border-b border-[var(--color-border)]/50">
-          <button
-            onClick={onGallery}
-            className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-1 shrink-0"
-            title="Gallery"
-          >
-            <Home size={16} />
+        {/* Row 1: Brand + Mode + File actions + Panels */}
+        <div className="h-10 flex items-center px-1.5 gap-0.5 border-b border-[var(--color-border)]/50">
+          <button onClick={onGallery} className="shrink-0 p-1.5 text-[var(--color-accent)]" title="Gallery">
+            <Home size={15} />
           </button>
 
-          <div className="mx-1">
-            <ModeDropdown mode={mode} grammarMode={grammarMode} lsystemMode={lsystemMode} onModeChange={handleMode} />
-          </div>
+          <ModeDropdown mode={mode} grammarMode={grammarMode} lsystemMode={lsystemMode} onModeChange={handleMode} />
 
           {!isSpecialMode && (
-            <button
-              onClick={onConvert}
-              className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"
-            >
+            <button onClick={onConvert} className="p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] shrink-0">
               <ArrowRightLeft size={14} />
             </button>
           )}
 
-          <div className="flex-1" />
+          <div className="flex-1 min-w-1" />
 
-          {saved && <span className="font-mono text-[10px] text-[var(--color-text-muted)] animate-fade-in">saved</span>}
+          {saved && <span className="font-mono text-[10px] text-[var(--color-text-muted)] animate-fade-in shrink-0">saved</span>}
+
+          <ToolBtn onClick={handleShare} title="Share" className={mb}><Share2 size={15} /></ToolBtn>
+          <ToolBtn onClick={handleImport} title="Import" className={mb}><Upload size={15} /></ToolBtn>
+          <ToolBtn onClick={handleExport} title="Export" className={mb}><Download size={15} /></ToolBtn>
+
+          <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
 
           {!isSpecialMode && (
             <>
-              <ToolBtn onClick={toggleSimPanel} title="Simulation" className={mBtn}>
-                <PanelBottom size={16} />
-              </ToolBtn>
-              <ToolBtn onClick={toggleSidebar} title="Properties" className={mBtn}>
-                <Menu size={16} />
-              </ToolBtn>
+              <ToolBtn onClick={toggleSimPanel} title="Simulation" className={mb}><PanelBottom size={15} /></ToolBtn>
+              <ToolBtn onClick={toggleSidebar} title="Properties" className={mb}><Menu size={15} /></ToolBtn>
             </>
           )}
-
-          <a href="/docs" className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-accent)]" title="Docs">
-            <FileText size={16} />
-          </a>
-          <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-accent)]" title="GitHub">
-            <Github size={16} />
-          </a>
         </div>
 
-        {/* Row 2: Tools (only for canvas modes) */}
+        {/* Row 2: Canvas tools (only for canvas modes) */}
         {!isSpecialMode && (
-          <div className="h-10 flex items-center px-1 gap-0">
-            <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V" className={mBtn}>
-              <MousePointer2 size={16} />
+          <div className="h-9 flex items-center px-1 gap-0">
+            <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V" className={mb}>
+              <MousePointer2 size={15} />
             </ToolBtn>
-            <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S" className={mBtn}>
-              <Plus size={16} />
+            <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S" className={mb}>
+              <Plus size={15} />
             </ToolBtn>
-            <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T" className={mBtn}>
-              <ArrowRight size={16} />
-            </ToolBtn>
-
-            <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 shrink-0" />
-
-            <ToolBtn onClick={deleteSelected} title="Delete" shortcut="Del" className={mBtn}>
-              <Trash2 size={16} />
-            </ToolBtn>
-            <ToolBtn onClick={undo} title="Undo" shortcut="⌘Z" className={mBtn}>
-              <Undo2 size={16} className={undoStack.length === 0 ? 'opacity-30' : ''} />
-            </ToolBtn>
-            <ToolBtn onClick={redo} title="Redo" shortcut="⌘⇧Z" className={mBtn}>
-              <Redo2 size={16} className={redoStack.length === 0 ? 'opacity-30' : ''} />
+            <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T" className={mb}>
+              <ArrowRight size={15} />
             </ToolBtn>
 
-            <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 shrink-0" />
+            <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
 
-            <ToolBtn onClick={zoomToFit} title="Zoom to Fit" className={mBtn}>
-              <Maximize2 size={16} />
+            <ToolBtn onClick={deleteSelected} title="Delete" className={mb}>
+              <Trash2 size={15} />
             </ToolBtn>
-            <ToolBtn onClick={autoLayout} title="Auto Layout" className={mBtn}>
-              <LayoutGrid size={16} />
+            <ToolBtn onClick={undo} title="Undo" className={mb}>
+              <Undo2 size={15} className={undoStack.length === 0 ? 'opacity-30' : ''} />
             </ToolBtn>
-            <ToolBtn onClick={clearAll} title="Clear" className={mBtn}>
-              <RotateCcw size={16} />
+            <ToolBtn onClick={redo} title="Redo" className={mb}>
+              <Redo2 size={15} className={redoStack.length === 0 ? 'opacity-30' : ''} />
+            </ToolBtn>
+
+            <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
+
+            <ToolBtn onClick={zoomToFit} title="Zoom to Fit" className={mb}>
+              <Maximize2 size={15} />
+            </ToolBtn>
+            <ToolBtn onClick={autoLayout} title="Layout" className={mb}>
+              <LayoutGrid size={15} />
+            </ToolBtn>
+            <ToolBtn onClick={clearAll} title="Clear" className={mb}>
+              <RotateCcw size={15} />
             </ToolBtn>
 
             <div className="flex-1" />
 
-            <ToolBtn onClick={handleShare} title="Share" className={mBtn}>
-              <Share2 size={16} />
-            </ToolBtn>
-            <ToolBtn onClick={handleImport} title="Import" className={mBtn}>
-              <Upload size={16} />
-            </ToolBtn>
-            <ToolBtn onClick={handleExport} title="Export" className={mBtn}>
-              <Download size={16} />
-            </ToolBtn>
+            <a href="/docs" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="Docs">
+              <FileText size={15} />
+            </a>
+            <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="GitHub">
+              <Github size={15} />
+            </a>
           </div>
         )}
       </div>
