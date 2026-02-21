@@ -4,32 +4,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
-  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Menu, Maximize2,
+  LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Maximize2,
   ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github, FileText,
+  ChevronDown, Menu,
 } from 'lucide-react';
 import { encodeAutomaton } from '@/url';
 import type { State, Transition, Mode } from '@/types';
 import Tooltip from './Tooltip';
 
-function ToolBtn({ active, onClick, children, title, shortcut, disabled }: {
+/* ── Reusable button ─────────────────────────────────────── */
+function ToolBtn({ active, onClick, children, title, shortcut, disabled, className: cx }: {
   active?: boolean;
   onClick: () => void;
   children: React.ReactNode;
   title: string;
   shortcut?: string;
   disabled?: boolean;
+  className?: string;
 }) {
   const btn = (
     <button
       onClick={onClick}
       aria-label={title}
       disabled={disabled}
-      className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
+      className={`flex items-center justify-center transition-colors ${active
         ? 'bg-[var(--color-accent)] text-[var(--bg-primary)] glow-accent'
         : disabled
           ? 'text-[var(--color-text-dim)] opacity-30'
           : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] active:bg-[var(--color-accent)]/10'
-      }`}
+      } ${cx ?? ''}`}
     >
       {children}
     </button>
@@ -37,6 +40,64 @@ function ToolBtn({ active, onClick, children, title, shortcut, disabled }: {
   return <Tooltip label={title} shortcut={shortcut}>{btn}</Tooltip>;
 }
 
+/* ── Mobile mode selector dropdown ───────────────────────── */
+function ModeDropdown({ mode, grammarMode, lsystemMode, onModeChange }: {
+  mode: string;
+  grammarMode?: boolean;
+  lsystemMode?: boolean;
+  onModeChange: (m: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const allModes = [
+    { id: 'dfa', label: 'DFA' },
+    { id: 'nfa', label: 'NFA' },
+    { id: 'pda', label: 'PDA' },
+    { id: 'tm', label: 'TM' },
+    { id: 'mealy', label: 'Mealy' },
+    { id: 'moore', label: 'Moore' },
+    { id: 'grammar', label: 'CFG' },
+    { id: 'lsystem', label: 'L-Sys' },
+  ];
+  const current = grammarMode ? 'CFG' : lsystemMode ? 'L-Sys' : mode.toUpperCase();
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 px-2 py-1 font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 min-h-[36px]"
+      >
+        {current}
+        <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute top-full left-0 mt-1 z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[120px] animate-scale-in">
+            {allModes.map(m => (
+              <button
+                key={m.id}
+                onClick={() => { onModeChange(m.id); setOpen(false); }}
+                className={`w-full text-left px-3 py-2 font-mono text-xs tracking-wider flex items-center gap-2 transition-colors ${
+                  (m.id === mode && !grammarMode && !lsystemMode) ||
+                  (m.id === 'grammar' && grammarMode) ||
+                  (m.id === 'lsystem' && lsystemMode)
+                    ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/10'
+                    : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)]'
+                }`}
+              >
+                {m.id === 'grammar' && <BookOpen size={12} />}
+                {m.id === 'lsystem' && <TreePine size={12} />}
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Props ────────────────────────────────────────────────── */
 interface ToolbarProps {
   isMobile: boolean;
   onConvert: () => void;
@@ -48,6 +109,7 @@ interface ToolbarProps {
   onShortcuts?: () => void;
 }
 
+/* ── Main Toolbar ────────────────────────────────────────── */
 export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, grammarMode, lsystemMode, saved, onShortcuts }: ToolbarProps) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
@@ -65,7 +127,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
   const zoomToFit = useStore(s => s.zoomToFit);
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const toggleSimPanel = useStore(s => s.toggleSimPanel);
-
   const loadAutomaton = useStore(s => s.loadAutomaton);
 
   const [shareText, setShareText] = useState('SHARE');
@@ -104,7 +165,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       const text = await file.text();
       try {
         if (file.name.endsWith('.jff')) {
-          // JFLAP .jff XML import
           const parser = new DOMParser();
           const doc = parser.parseFromString(text, 'text/xml');
           const type = doc.querySelector('type')?.textContent ?? 'fa';
@@ -122,7 +182,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
             stateIdMap.set(jId, id);
             jStates.push({ id, label: name, x, y, isInitial, isAccepting });
           });
-          // Group transitions by from→to
           const transMap = new Map<string, string[]>();
           doc.querySelectorAll('transition').forEach((el) => {
             const from = stateIdMap.get(el.querySelector('from')?.textContent ?? '') ?? '';
@@ -138,7 +197,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
             const [from, to] = key.split('→');
             jTrans.push({ id: `jt_${tIdx++}`, from, to, symbols });
           }
-          const jMode: Mode = type === 'pda' ? 'pda' : type === 'turing' ? 'tm' : jStates.length > 0 ? 'nfa' : 'dfa';
+          const jMode: Mode = type === 'pda' ? 'pda' : type === 'turing' ? 'tm' : 'nfa';
           loadAutomaton(jStates, jTrans, jMode);
         } else {
           const data = JSON.parse(text);
@@ -153,7 +212,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
     input.click();
   }, [loadAutomaton]);
 
-  // Listen for keyboard shortcut events
   useEffect(() => {
     const onShare = () => handleShare();
     const onExport = () => handleExport();
@@ -169,8 +227,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
   }, [handleShare, handleExport, handleImport]);
 
   const handleMode = (m: string) => onModeChange?.(m);
-
-  const iconSize = isMobile ? 18 : 16;
   const isSpecialMode = grammarMode || lsystemMode;
 
   const modes: { id: string; label: string; shortcut: string }[] = [
@@ -184,67 +240,169 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
   const isActiveMode = (id: string) => !isSpecialMode && mode === id;
 
-  return (
-    <div className="h-11 md:h-9 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-1 gap-0.5 shrink-0 select-none overflow-x-auto scrollbar-hide">
-      {/* Logo / Home */}
-      <button
-        onClick={onGallery}
-        className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-2 mr-1 md:mr-2 border-r border-[var(--color-border)] h-full flex items-center shrink-0 hover:bg-[var(--bg-primary)] transition-colors"
-        title="Gallery"
-      >
-        {isMobile ? <Home size={16} /> : 'STATEFORGE'}
-      </button>
+  /* ── MOBILE LAYOUT ──────────────────────────────────────── */
+  if (isMobile) {
+    const mBtn = "w-10 h-10 flex items-center justify-center";
+    return (
+      <div className="shrink-0 select-none bg-[var(--bg-surface)] border-b border-[var(--color-border)]">
+        {/* Row 1: Brand + Mode + Panel toggles */}
+        <div className="h-11 flex items-center px-2 gap-1 border-b border-[var(--color-border)]/50">
+          <button
+            onClick={onGallery}
+            className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-1 shrink-0"
+            title="Gallery"
+          >
+            <Home size={16} />
+          </button>
 
-      {/* Canvas tools (hidden in special modes) */}
-      {!isSpecialMode && (
-        <>
-          <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V">
-            <MousePointer2 size={iconSize} />
-          </ToolBtn>
-          <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S">
-            <Plus size={iconSize} />
-          </ToolBtn>
-          <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T">
-            <ArrowRight size={iconSize} />
-          </ToolBtn>
+          <div className="mx-1">
+            <ModeDropdown mode={mode} grammarMode={grammarMode} lsystemMode={lsystemMode} onModeChange={handleMode} />
+          </div>
 
-          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+          {!isSpecialMode && (
+            <button
+              onClick={onConvert}
+              className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"
+            >
+              <ArrowRightLeft size={14} />
+            </button>
+          )}
 
-          <ToolBtn onClick={deleteSelected} title="Delete Selected" shortcut="Del">
-            <Trash2 size={iconSize} />
-          </ToolBtn>
-          <ToolBtn onClick={undo} title="Undo" shortcut="⌘Z">
-            <Undo2 size={iconSize} className={undoStack.length === 0 ? 'opacity-30' : ''} />
-          </ToolBtn>
-          <ToolBtn onClick={redo} title="Redo" shortcut="⌘⇧Z">
-            <Redo2 size={iconSize} className={redoStack.length === 0 ? 'opacity-30' : ''} />
-          </ToolBtn>
+          <div className="flex-1" />
 
-          {!isMobile && (
+          {saved && <span className="font-mono text-[10px] text-[var(--color-text-muted)] animate-fade-in">saved</span>}
+
+          {!isSpecialMode && (
             <>
-              <ToolBtn onClick={zoomToFit} title="Zoom to Fit" shortcut="⌘1">
-                <Maximize2 size={iconSize} />
+              <ToolBtn onClick={toggleSimPanel} title="Simulation" className={mBtn}>
+                <PanelBottom size={16} />
               </ToolBtn>
-              <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L">
-                <LayoutGrid size={iconSize} />
-              </ToolBtn>
-              <ToolBtn onClick={clearAll} title="Clear All" shortcut="⇧⌘X">
-                <RotateCcw size={iconSize} />
+              <ToolBtn onClick={toggleSidebar} title="Properties" className={mBtn}>
+                <Menu size={16} />
               </ToolBtn>
             </>
           )}
 
-          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+          <a href="/docs" className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-accent)]" title="Docs">
+            <FileText size={16} />
+          </a>
+          <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-accent)]" title="GitHub">
+            <Github size={16} />
+          </a>
+        </div>
+
+        {/* Row 2: Tools (only for canvas modes) */}
+        {!isSpecialMode && (
+          <div className="h-10 flex items-center px-1 gap-0">
+            <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V" className={mBtn}>
+              <MousePointer2 size={16} />
+            </ToolBtn>
+            <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S" className={mBtn}>
+              <Plus size={16} />
+            </ToolBtn>
+            <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T" className={mBtn}>
+              <ArrowRight size={16} />
+            </ToolBtn>
+
+            <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 shrink-0" />
+
+            <ToolBtn onClick={deleteSelected} title="Delete" shortcut="Del" className={mBtn}>
+              <Trash2 size={16} />
+            </ToolBtn>
+            <ToolBtn onClick={undo} title="Undo" shortcut="⌘Z" className={mBtn}>
+              <Undo2 size={16} className={undoStack.length === 0 ? 'opacity-30' : ''} />
+            </ToolBtn>
+            <ToolBtn onClick={redo} title="Redo" shortcut="⌘⇧Z" className={mBtn}>
+              <Redo2 size={16} className={redoStack.length === 0 ? 'opacity-30' : ''} />
+            </ToolBtn>
+
+            <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 shrink-0" />
+
+            <ToolBtn onClick={zoomToFit} title="Zoom to Fit" className={mBtn}>
+              <Maximize2 size={16} />
+            </ToolBtn>
+            <ToolBtn onClick={autoLayout} title="Auto Layout" className={mBtn}>
+              <LayoutGrid size={16} />
+            </ToolBtn>
+            <ToolBtn onClick={clearAll} title="Clear" className={mBtn}>
+              <RotateCcw size={16} />
+            </ToolBtn>
+
+            <div className="flex-1" />
+
+            <ToolBtn onClick={handleShare} title="Share" className={mBtn}>
+              <Share2 size={16} />
+            </ToolBtn>
+            <ToolBtn onClick={handleImport} title="Import" className={mBtn}>
+              <Upload size={16} />
+            </ToolBtn>
+            <ToolBtn onClick={handleExport} title="Export" className={mBtn}>
+              <Download size={16} />
+            </ToolBtn>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── DESKTOP LAYOUT ─────────────────────────────────────── */
+  return (
+    <div className="h-9 bg-[var(--bg-surface)] border-b border-[var(--color-border)] flex items-center px-1 gap-0.5 shrink-0 select-none overflow-x-auto scrollbar-hide">
+      {/* Logo / Home */}
+      <button
+        onClick={onGallery}
+        className="font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] px-2 mr-2 border-r border-[var(--color-border)] h-full flex items-center shrink-0 hover:bg-[var(--bg-primary)] transition-colors"
+        title="Gallery"
+      >
+        STATEFORGE
+      </button>
+
+      {/* Canvas tools */}
+      {!isSpecialMode && (
+        <>
+          <ToolBtn active={tool === 'pointer'} onClick={() => setTool('pointer')} title="Pointer" shortcut="V" className="p-1.5">
+            <MousePointer2 size={16} />
+          </ToolBtn>
+          <ToolBtn active={tool === 'addState'} onClick={() => setTool('addState')} title="Add State" shortcut="S" className="p-1.5">
+            <Plus size={16} />
+          </ToolBtn>
+          <ToolBtn active={tool === 'addTransition'} onClick={() => setTool('addTransition')} title="Add Transition" shortcut="T" className="p-1.5">
+            <ArrowRight size={16} />
+          </ToolBtn>
+
+          <div className="w-px h-5 bg-[var(--color-border)] mx-1 shrink-0" />
+
+          <ToolBtn onClick={deleteSelected} title="Delete Selected" shortcut="Del" className="p-1.5">
+            <Trash2 size={16} />
+          </ToolBtn>
+          <ToolBtn onClick={undo} title="Undo" shortcut="⌘Z" className="p-1.5">
+            <Undo2 size={16} className={undoStack.length === 0 ? 'opacity-30' : ''} />
+          </ToolBtn>
+          <ToolBtn onClick={redo} title="Redo" shortcut="⌘⇧Z" className="p-1.5">
+            <Redo2 size={16} className={redoStack.length === 0 ? 'opacity-30' : ''} />
+          </ToolBtn>
+
+          <ToolBtn onClick={zoomToFit} title="Zoom to Fit" shortcut="⌘1" className="p-1.5">
+            <Maximize2 size={16} />
+          </ToolBtn>
+          <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L" className="p-1.5">
+            <LayoutGrid size={16} />
+          </ToolBtn>
+          <ToolBtn onClick={clearAll} title="Clear All" shortcut="⇧⌘X" className="p-1.5">
+            <RotateCcw size={16} />
+          </ToolBtn>
+
+          <div className="w-px h-5 bg-[var(--color-border)] mx-1 shrink-0" />
         </>
       )}
 
-      {/* Mode toggle */}
-      <div className="flex items-center font-mono text-[11px] tracking-wider shrink-0 overflow-x-auto scrollbar-hide">
+      {/* Mode tabs */}
+      <div className="flex items-center font-mono text-[11px] tracking-wider shrink-0">
         {modes.map(m => (
           <Tooltip key={m.id} label={m.label} shortcut={m.shortcut}>
             <button
               onClick={() => handleMode(m.id)}
-              className={`px-1.5 md:px-2 py-1 min-h-[44px] md:min-h-0 flex items-center transition-colors whitespace-nowrap ${
+              className={`px-2 py-1 flex items-center transition-colors whitespace-nowrap ${
                 isActiveMode(m.id)
                   ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
                   : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
@@ -259,39 +417,36 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
         <button
           onClick={() => handleMode('grammar')}
-          className={`px-1.5 md:px-2 py-1 min-h-[44px] md:min-h-0 flex items-center gap-1 transition-colors ${grammarMode
+          className={`px-2 py-1 flex items-center gap-1 transition-colors ${grammarMode
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
         >
-          <BookOpen size={isMobile ? 12 : 11} />
-          CFG
+          <BookOpen size={11} /> CFG
         </button>
 
         <button
           onClick={() => handleMode('lsystem')}
-          className={`px-1.5 md:px-2 py-1 min-h-[44px] md:min-h-0 flex items-center gap-1 transition-colors ${lsystemMode
+          className={`px-2 py-1 flex items-center gap-1 transition-colors ${lsystemMode
             ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
             : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
           }`}
         >
-          <TreePine size={isMobile ? 12 : 11} />
-          {isMobile ? 'L' : 'L-SYS'}
+          <TreePine size={11} /> L-SYS
         </button>
       </div>
 
-      {/* Convert (only for automata modes) */}
+      {/* Convert */}
       {!isSpecialMode && (
         <>
-          <div className="w-px h-5 bg-[var(--color-border)] mx-0.5 md:mx-1 shrink-0" />
+          <div className="w-px h-5 bg-[var(--color-border)] mx-1 shrink-0" />
           <button
             onClick={onConvert}
             title="Conversions (⌘M)"
-            aria-label="Conversions"
             className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
           >
             <ArrowRightLeft size={14} />
-            {!isMobile && 'CONVERT'}
+            CONVERT
           </button>
         </>
       )}
@@ -301,40 +456,36 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
       {/* Right side */}
       {!isSpecialMode && (
         <>
-          {!isMobile && (
-            <>
-              <ToolBtn onClick={handleImport} title="Import" shortcut="⌘O">
-                <Upload size={iconSize} />
-              </ToolBtn>
-              <ToolBtn onClick={handleExport} title="Export" shortcut="⌘E">
-                <Download size={iconSize} />
-              </ToolBtn>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
-              >
-                <Share2 size={12} />
-                {shareText}
-              </button>
-            </>
-          )}
-          {saved && <span className="font-mono text-[11px] text-[var(--color-text-muted)] transition-opacity animate-fade-in shrink-0">saved</span>}
-          {!isMobile && onShortcuts && (
-            <button onClick={onShortcuts} title="Keyboard Shortcuts (?)" aria-label="Keyboard shortcuts" className="px-1.5 py-1 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0">?</button>
-          )}
-          <ToolBtn onClick={toggleSimPanel} title="Simulation Panel" shortcut="⌘.">
-            <PanelBottom size={iconSize} />
+          <ToolBtn onClick={handleImport} title="Import" shortcut="⌘O" className="p-1.5">
+            <Upload size={16} />
           </ToolBtn>
-          <ToolBtn onClick={toggleSidebar} title="Properties Panel" shortcut="⌘/">
-            {isMobile ? <Menu size={iconSize} /> : <PanelRight size={iconSize} />}
+          <ToolBtn onClick={handleExport} title="Export" shortcut="⌘E" className="p-1.5">
+            <Download size={16} />
           </ToolBtn>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+          >
+            <Share2 size={12} />
+            {shareText}
+          </button>
         </>
       )}
+      {saved && <span className="font-mono text-[11px] text-[var(--color-text-muted)] animate-fade-in shrink-0">saved</span>}
+      {onShortcuts && (
+        <button onClick={onShortcuts} title="Keyboard Shortcuts (?)" className="px-1.5 py-1 font-mono text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0">?</button>
+      )}
+      <ToolBtn onClick={toggleSimPanel} title="Simulation Panel" shortcut="⌘." className="p-1.5">
+        <PanelBottom size={16} />
+      </ToolBtn>
+      <ToolBtn onClick={toggleSidebar} title="Properties Panel" shortcut="⌘/" className="p-1.5">
+        <PanelRight size={16} />
+      </ToolBtn>
       <a href="/docs" className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0 ml-1" title="Docs">
-        <FileText size={isMobile ? 18 : 14} />
+        <FileText size={14} />
       </a>
       <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0" title="GitHub">
-        <Github size={isMobile ? 18 : 14} />
+        <Github size={14} />
       </a>
     </div>
   );
