@@ -19,6 +19,7 @@ function ToolBtn({ active, onClick, children, title, disabled }: {
     <button
       onClick={onClick}
       title={title}
+      aria-label={title}
       disabled={disabled}
       className={`min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 md:p-1.5 flex items-center justify-center transition-colors ${active
         ? 'bg-[var(--color-accent)] text-[var(--bg-primary)]'
@@ -79,8 +80,8 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
     { id: 'nfa', label: 'NFA' },
     { id: 'pda', label: 'PDA' },
     { id: 'tm', label: 'TM' },
-    { id: 'mealy', label: isMobile ? 'MEA' : 'MEALY' },
-    { id: 'moore', label: isMobile ? 'MOO' : 'MOORE' },
+    { id: 'mealy', label: 'MEALY' },
+    { id: 'moore', label: 'MOORE' },
   ];
 
   const isActiveMode = (id: string) => !isSpecialMode && mode === id;

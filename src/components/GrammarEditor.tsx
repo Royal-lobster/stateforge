@@ -10,8 +10,8 @@ import {
 } from '@/grammar';
 import type { Grammar, GrammarType, ParseTreeNode } from '@/types';
 import {
-  Play, RotateCcw, ChevronDown, ChevronRight, Copy,
-  Trash2, Wand2, TreePine, Table, BookOpen,
+  Play, RotateCcw, ChevronDown, ChevronRight,
+  Wand2, Table, BookOpen,
 } from 'lucide-react';
 
 const EXAMPLE_GRAMMARS: { name: string; text: string }[] = [

@@ -88,7 +88,7 @@ export default function App() {
       meta.setAttribute('name', 'viewport');
       document.head.appendChild(meta);
     }
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+    meta.setAttribute('content', 'width=device-width, initial-scale=1');
   }, []);
 
   const handleModeChange = (newMode: string) => {

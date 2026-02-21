@@ -736,7 +736,7 @@ export function faToRegex(
 
     // Self-loop on the eliminated state
     const selfLoop = edges.get(elimId)?.get(elimId) ?? null;
-    const selfLoopStr = selfLoop ? (needsParens(selfLoop) ? `(${selfLoop})*` : `${selfLoop}*`) : '';
+    const selfLoopStr = selfLoop ? `${wrapIfNeeded(selfLoop)}*` : '';
 
     // For every pair (p, q) where p → elim and elim → q
     const incoming: [string, string][] = [];
@@ -761,9 +761,9 @@ export function faToRegex(
         // New label: rIn · selfLoop* · rOut
         let newLabel: string;
         const parts: string[] = [];
-        if (rIn !== 'ε') parts.push(needsParens(rIn) && hasUnion(rIn) ? `(${rIn})` : rIn);
+        if (rIn !== 'ε') parts.push(hasUnion(rIn) ? `(${rIn})` : rIn);
         if (selfLoopStr) parts.push(selfLoopStr);
-        if (rOut !== 'ε') parts.push(needsParens(rOut) && hasUnion(rOut) ? `(${rOut})` : rOut);
+        if (rOut !== 'ε') parts.push(hasUnion(rOut) ? `(${rOut})` : rOut);
         newLabel = parts.length > 0 ? parts.join('') : 'ε';
 
         const existing = edges.get(p)!.get(q);
@@ -794,12 +794,20 @@ export function faToRegex(
   return { regex: simplifyRegex(finalRegex), steps };
 }
 
-function needsParens(re: string): boolean {
+function needsParensForConcat(re: string): boolean {
+  if (re.length <= 1) return false;
+  // Check if top-level has '|' or is a multi-char concat
+  let depth = 0;
+  for (const ch of re) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (ch === '|' && depth === 0) return true;
+  }
+  // Multi-char concat also needs parens when used before * or in concat
   return re.length > 1;
 }
 
 function hasUnion(re: string): boolean {
-  // Check if top-level has '|'
   let depth = 0;
   for (const ch of re) {
     if (ch === '(') depth++;
@@ -809,14 +817,31 @@ function hasUnion(re: string): boolean {
   return false;
 }
 
+function isWrapped(re: string): boolean {
+  if (re[0] !== '(' || re[re.length - 1] !== ')') return false;
+  let depth = 0;
+  for (let i = 0; i < re.length; i++) {
+    if (re[i] === '(') depth++;
+    else if (re[i] === ')') depth--;
+    if (depth === 0 && i < re.length - 1) return false;
+  }
+  return true;
+}
+
+function wrapIfNeeded(re: string): string {
+  if (re.length <= 1 || isWrapped(re)) return re;
+  return `(${re})`;
+}
+
 function simplifyRegex(re: string): string {
-  // Basic simplifications
   let s = re;
-  // Remove ε in concatenation contexts (but not standalone)
-  s = s.replace(/ε\|/g, (_, offset) => {
-    // Keep if it makes the expression optional
-    return 'ε|';
-  });
+  // Remove redundant ε in concatenation: εX → X, Xε → X (but not standalone ε)
+  s = s.replace(/ε(?=[^|$])/g, '');
+  s = s.replace(/(?<=[^|])ε/g, '');
+  // Clean up empty alternatives
+  s = s.replace(/\|\|+/g, '|');
+  s = s.replace(/^\||\|$/g, '');
+  if (s === '') s = 'ε';
   return s;
 }
 
@@ -850,7 +875,7 @@ export function faToGrammar(
   usedNames.add('S');
 
   // Others get A, B, C, ... or their label uppercased
-  const letters = 'ABCDEFGHIJKLMNOPQRTUVWXYZ'.split(''); // skip S
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(c => c !== 'S');
   let letterIdx = 0;
   for (const s of faStates) {
     if (nonTerminal.has(s.id)) continue;

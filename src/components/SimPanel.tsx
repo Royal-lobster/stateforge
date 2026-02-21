@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { useStore } from '@/store';
-import { Play, StepForward, FastForward, RotateCcw, ListChecks, ChevronUp, GripHorizontal } from 'lucide-react';
+import { Play, StepForward, FastForward, RotateCcw, ListChecks, GripHorizontal } from 'lucide-react';
 
 export default function SimPanel({ isMobile }: { isMobile: boolean }) {
   const showSimPanel = useStore(s => s.showSimPanel);

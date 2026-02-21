@@ -103,6 +103,11 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const lastTouchCenter = useRef<{ x: number; y: number } | null>(null);
   const touchDragState = useRef<{ id: string; pushed: boolean } | null>(null);
 
+  // Cleanup long press timer on unmount
+  useEffect(() => {
+    return () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
+  }, []);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.code === 'Space' && !e.repeat && !(e.target instanceof HTMLInputElement)) { e.preventDefault(); setSpaceHeld(true); }

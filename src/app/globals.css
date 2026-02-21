@@ -8,7 +8,7 @@
   --color-border: #1e1e1e;
   --color-grid: #151515;
   --color-text: #d4d4d4;
-  --color-text-dim: #666666;
+  --color-text-dim: #888888;
   --color-accent: #22d3ee;
   --color-accept: #22c55e;
   --color-reject: #ef4444;
@@ -58,6 +58,10 @@ input[type="checkbox"] {
 
 *:focus {
   outline: none;
+}
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 /* Mobile animations */

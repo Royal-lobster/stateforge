@@ -3,8 +3,8 @@
 import { useStore } from '@/store';
 import type { State, Transition, Mode } from '@/types';
 import {
-  CircleDot, GitBranch, BookOpen, Layers, Cpu,
-  Sparkles, ArrowRight,
+  CircleDot, GitBranch, Layers, Cpu,
+  ArrowRight,
 } from 'lucide-react';
 
 interface Example {

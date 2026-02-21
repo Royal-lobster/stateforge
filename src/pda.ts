@@ -177,10 +177,11 @@ export function pdaStep(
     }
   }
 
-  const done = newConfigs.length === 0;
+  const totalConfigs = simState.allConfigs.length + newConfigs.length;
+  const done = newConfigs.length === 0 || totalConfigs > 10000;
 
   return {
-    configs: newConfigs,
+    configs: done && newConfigs.length > 0 ? [] : newConfigs,
     accepted: newAccepted,
     rejected: [...simState.rejected, ...newRejected],
     allConfigs,

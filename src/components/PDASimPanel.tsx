@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/store';
 import { pdaInit, pdaStep, pdaFastRun, type PDASimState, type PDAConfig } from '@/pda';
 import {
@@ -68,25 +68,21 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
     : isDone ? 'REJECTED'
     : 'RUNNING';
 
-  // Get current active state IDs for canvas highlighting
-  const activeStateIds = simState ? new Set(simState.configs.map(c => c.stateId)) : new Set<string>();
-
-  // Expose to store for canvas highlighting
-  // (We'll use simCurrentStates from the store)
-  const store = useStore.getState();
-  if (simState && !isDone) {
-    // Update sim current states for canvas highlighting
-    if (store.simCurrentStates.size !== activeStateIds.size ||
-        ![...activeStateIds].every(id => store.simCurrentStates.has(id))) {
-      useStore.setState({ simCurrentStates: activeStateIds, simStatus: 'stepping' });
+  // Sync canvas highlighting via useEffect (not during render)
+  useEffect(() => {
+    if (simState && !simState.done) {
+      const activeIds = new Set(simState.configs.map(c => c.stateId));
+      useStore.setState({ simCurrentStates: activeIds, simStatus: 'stepping' });
+    } else if (simState && simState.done) {
+      const finalIds = new Set(simState.accepted.map(c => c.stateId));
+      useStore.setState({
+        simCurrentStates: finalIds,
+        simStatus: simState.accepted.length > 0 ? 'accepted' : 'rejected',
+      });
+    } else {
+      useStore.setState({ simCurrentStates: new Set(), simStatus: 'idle' });
     }
-  } else if (simState && isDone) {
-    const finalIds = new Set(simState.accepted.map(c => c.stateId));
-    useStore.setState({
-      simCurrentStates: finalIds,
-      simStatus: isAccepted ? 'accepted' : 'rejected',
-    });
-  }
+  }, [simState]);
 
   return (
     <div
