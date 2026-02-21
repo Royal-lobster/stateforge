@@ -15,6 +15,8 @@ export default function Tooltip({ label, shortcut, children, position = 'bottom'
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const [clamped, setClamped] = useState({ x: 0, ready: false });
 
   const handleEnter = useCallback(() => {
     timeout.current = setTimeout(() => {
@@ -24,6 +26,7 @@ export default function Tooltip({ label, shortcut, children, position = 'bottom'
           x: rect.left + rect.width / 2,
           y: position === 'top' ? rect.top : rect.bottom,
         });
+        setClamped({ x: 0, ready: false });
       }
       setShow(true);
     }, 300);
@@ -34,19 +37,40 @@ export default function Tooltip({ label, shortcut, children, position = 'bottom'
     setShow(false);
   }, []);
 
-  // Cleanup on unmount
+  // Clamp tooltip to viewport after it renders
+  useEffect(() => {
+    if (show && tipRef.current && !clamped.ready) {
+      const tip = tipRef.current.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const pad = 8;
+      let x = coords.x;
+      // Clamp right edge
+      if (x + tip.width / 2 > vw - pad) {
+        x = vw - pad - tip.width / 2;
+      }
+      // Clamp left edge
+      if (x - tip.width / 2 < pad) {
+        x = pad + tip.width / 2;
+      }
+      setClamped({ x, ready: true });
+    }
+  }, [show, coords, clamped.ready]);
+
   useEffect(() => {
     return () => { if (timeout.current) clearTimeout(timeout.current); };
   }, []);
+
+  const tipX = clamped.ready ? clamped.x : coords.x;
 
   return (
     <div ref={ref} className="relative inline-flex" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       {children}
       {show && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed z-[200] pointer-events-none animate-fade-in"
+          ref={tipRef}
+          className={`fixed z-[200] pointer-events-none ${clamped.ready ? 'animate-fade-in' : 'opacity-0'}`}
           style={{
-            left: coords.x,
+            left: tipX,
             top: position === 'top' ? coords.y - 6 : coords.y + 6,
             transform: position === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
           }}
