@@ -20,22 +20,56 @@ function getStateAt(x: number, y: number, states: State[]): State | null {
   return null;
 }
 
+function selfLoopDist(wx: number, wy: number, t: Transition, selfIdx: number, from: State): number {
+  const baseR = 18;
+  const loopR = baseR + selfIdx * 18;
+  const spread = 12 + selfIdx * 4;
+  const cx = from.x;
+  const p0x = cx - spread, p0y = from.y - STATE_RADIUS + 2;
+  const p1x = cx - spread - 18, p1y = from.y - STATE_RADIUS - loopR * 2;
+  const p2x = cx + spread + 18, p2y = from.y - STATE_RADIUS - loopR * 2;
+  const p3x = cx + spread, p3y = from.y - STATE_RADIUS + 2;
+  const samples = 20;
+  let minDist = Infinity;
+  for (let i = 0; i <= samples; i++) {
+    const s = i / samples;
+    const inv = 1 - s;
+    const px = inv*inv*inv*p0x + 3*inv*inv*s*p1x + 3*inv*s*s*p2x + s*s*s*p3x;
+    const py = inv*inv*inv*p0y + 3*inv*inv*s*p1y + 3*inv*s*s*p2y + s*s*s*p3y;
+    const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
+    if (d < minDist) minDist = d;
+  }
+  // Also check label area
+  const labelY = from.y - STATE_RADIUS - loopR * 1.5;
+  const ld = Math.sqrt((wx - cx) ** 2 + (wy - labelY) ** 2);
+  return Math.min(minDist, ld);
+}
+
 function getTransitionAt(wx: number, wy: number, transitions: Transition[], states: State[]): Transition | null {
   const stateMap = new Map(states.map(s => [s.id, s]));
+
+  // Self-loops: find the closest one by distance to actual curve path
+  let bestSelfLoop: Transition | null = null;
+  let bestSelfDist = Infinity;
+  for (const t of transitions) {
+    if (t.from !== t.to) continue;
+    const from = stateMap.get(t.from);
+    if (!from) continue;
+    const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
+    const selfIdx = selfLoops.indexOf(t);
+    const d = selfLoopDist(wx, wy, t, selfIdx, from);
+    if (d < 16 && d < bestSelfDist) {
+      bestSelfDist = d;
+      bestSelfLoop = t;
+    }
+  }
+  if (bestSelfLoop) return bestSelfLoop;
+
   for (const t of transitions) {
     const from = stateMap.get(t.from);
     const to = stateMap.get(t.to);
     if (!from || !to) continue;
-    if (t.from === t.to) {
-      // Hit area: self-loop arc and label area above state
-      const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
-      const selfIdx = selfLoops.indexOf(t);
-      const loopR = 18 + selfIdx * 18;
-      const cx = from.x, cy = from.y - STATE_RADIUS - loopR * 1.5;
-      const dx = wx - cx, dy = wy - cy;
-      if (dx * dx + dy * dy < 1600) return t;
-      continue;
-    }
+    if (t.from === t.to) continue; // already handled above
     // Account for curve offset on bidirectional edges
     const curveOff = getEdgeCurveOffset(t, transitions);
     const ax = from.x, ay = from.y, bx = to.x, by = to.y;
@@ -45,7 +79,7 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
     // Normal vector for curve offset
     const nx = -aby / len, ny = abx / len;
     // Sample points along the (possibly curved) path
-    const samples = 8;
+    const samples = 20;
     let minDist = Infinity;
     for (let i = 0; i <= samples; i++) {
       const p = i / samples;
@@ -57,7 +91,14 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
       const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
       if (d < minDist) minDist = d;
     }
-    if (minDist < 14) return t;
+    if (minDist < 20) return t;
+    // Check label area
+    const dx2 = bx - ax, dy2 = by - ay;
+    const pxn = -dy2 / len, pyn = dx2 / len;
+    const labelX = (ax + bx) / 2 + pxn * (curveOff * 2 + 14);
+    const labelY = (ay + by) / 2 + pyn * (curveOff * 2 + 14) - 4;
+    const ld = Math.sqrt((wx - labelX) ** 2 + (wy - labelY) ** 2);
+    if (ld < 18) return t;
   }
   return null;
 }
@@ -447,8 +488,8 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
           const ny = len > 0 ? abx / len : 0;
           const cmx = (ax + bx) / 2 + nx * curveOff;
           const cmy = (ay + by) / 2 + ny * curveOff;
-          for (let i = 0; i <= 8; i++) {
-            const p = i / 8;
+          for (let i = 0; i <= 20; i++) {
+            const p = i / 20;
             const px = ((1 - p) * (1 - p) * ax + 2 * (1 - p) * p * cmx + p * p * bx) * zoom + pan.x;
             const py = ((1 - p) * (1 - p) * ay + 2 * (1 - p) * p * cmy + p * p * by) * zoom + pan.y;
             if (px >= minX && px <= maxX && py >= minY && py <= maxY) { selected.add(t.id); break; }
@@ -592,10 +633,13 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
               const cx = from.x, cy = from.y, baseR = 18;
               const loopR = baseR + selfIdx * 18;
               const spread = 12 + selfIdx * 4;
+              const loopPath = `M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`;
               return (
                 <g key={t.id}>
-                  <path d={`M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
-                  <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
+                  {/* Invisible fat hit area */}
+                  <path d={loopPath} fill="none" stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                  <path d={loopPath} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12" style={{ cursor: 'pointer', pointerEvents: 'auto' }}>{t.symbols.join(', ')}</text>
                 </g>
               );
             }
@@ -617,11 +661,19 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             return (
               <g key={t.id}>
                 {curveOff > 0 ? (
-                  <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  <>
+                    {/* Invisible fat hit area */}
+                    <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                    <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  </>
                 ) : (
-                  <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  <>
+                    {/* Invisible fat hit area */}
+                    <line x1={startX} y1={startY} x2={endX} y2={endY} stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                    <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  </>
                 )}
-                <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
+                <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12" style={{ cursor: 'pointer', pointerEvents: 'auto' }}>{t.symbols.join(', ')}</text>
               </g>
             );
           })}
