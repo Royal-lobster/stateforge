@@ -92,6 +92,13 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
       if (d < minDist) minDist = d;
     }
     if (minDist < 20) return t;
+    // Check label area
+    const dx2 = bx - ax, dy2 = by - ay;
+    const pxn = -dy2 / len, pyn = dx2 / len;
+    const labelX = (ax + bx) / 2 + pxn * (curveOff * 2 + 14);
+    const labelY = (ay + by) / 2 + pyn * (curveOff * 2 + 14) - 4;
+    const ld = Math.sqrt((wx - labelX) ** 2 + (wy - labelY) ** 2);
+    if (ld < 18) return t;
   }
   return null;
 }
@@ -632,7 +639,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
                   {/* Invisible fat hit area */}
                   <path d={loopPath} fill="none" stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
                   <path d={loopPath} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
-                  <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
+                  <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12" style={{ cursor: 'pointer', pointerEvents: 'auto' }}>{t.symbols.join(', ')}</text>
                 </g>
               );
             }
@@ -666,7 +673,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
                     <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
                   </>
                 )}
-                <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
+                <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12" style={{ cursor: 'pointer', pointerEvents: 'auto' }}>{t.symbols.join(', ')}</text>
               </g>
             );
           })}
