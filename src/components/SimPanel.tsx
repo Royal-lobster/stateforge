@@ -259,7 +259,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
                       ? 'bg-[var(--color-accept)]/10 text-[var(--color-accept)] border-[var(--color-accept)]/20'
                       : 'bg-[var(--color-reject)]/10 text-[var(--color-reject)] border-[var(--color-reject)]/20'
                   }`}>
-                    {simStatus === 'accepted' ? '✓' : '✗'} String "{simInput || 'ε'}" is {simStatus === 'accepted' ? 'accepted' : 'rejected'} by the {mode.toUpperCase()}
+                    {simStatus === 'accepted' ? '✓' : '✗'} {!hasInitial ? '⚠ No initial state — right-click a state to set one' : `String "${simInput || 'ε'}" is ${simStatus === 'accepted' ? 'accepted' : 'rejected'} by the ${mode.toUpperCase()}`}
                   </div>
                 )}
               </>

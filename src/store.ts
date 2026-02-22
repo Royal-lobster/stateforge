@@ -39,6 +39,9 @@ interface StoreState {
   simRemaining: string;
   multiRunResults: MultiRunResult[];
 
+  // Snap
+  snapToGrid: boolean;
+
   // Panels
   showSidebar: boolean;
   showSimPanel: boolean;
@@ -88,6 +91,9 @@ interface StoreState {
   simFastRun: () => void;
   simReset: () => void;
   simMultiRun: (inputs: string[]) => void;
+
+  // Actions - snap
+  toggleSnapToGrid: () => void;
 
   // Actions - panels
   toggleSidebar: () => void;
@@ -179,6 +185,8 @@ export const useStore = create<StoreState>()(
     simRemaining: '',
     multiRunResults: [],
 
+    snapToGrid: false,
+
     showSidebar: true,
     showSimPanel: true,
 
@@ -224,14 +232,21 @@ export const useStore = create<StoreState>()(
     },
 
     moveState: (id, x, y) => {
-      set({ states: get().states.map(st => st.id === id ? { ...st, x, y } : st) });
+      const snap = get().snapToGrid;
+      const nx = snap ? Math.round(x / 20) * 20 : x;
+      const ny = snap ? Math.round(y / 20) * 20 : y;
+      set({ states: get().states.map(st => st.id === id ? { ...st, x: nx, y: ny } : st) });
     },
 
     moveStates: (ids, dx, dy) => {
+      const snap = get().snapToGrid;
       set({
-        states: get().states.map(st =>
-          ids.includes(st.id) ? { ...st, x: st.x + dx, y: st.y + dy } : st
-        ),
+        states: get().states.map(st => {
+          if (!ids.includes(st.id)) return st;
+          const nx = st.x + dx;
+          const ny = st.y + dy;
+          return { ...st, x: snap ? Math.round(nx / 20) * 20 : nx, y: snap ? Math.round(ny / 20) * 20 : ny };
+        }),
       });
     },
 
@@ -567,6 +582,7 @@ export const useStore = create<StoreState>()(
       set({ multiRunResults: results });
     },
 
+    toggleSnapToGrid: () => set({ snapToGrid: !get().snapToGrid }),
     toggleSidebar: () => set({ showSidebar: !get().showSidebar }),
     toggleSimPanel: () => set({ showSimPanel: !get().showSimPanel }),
   }))

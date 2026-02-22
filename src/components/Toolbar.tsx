@@ -6,7 +6,7 @@ import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Maximize2,
   ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github, FileText,
-  ChevronDown, Menu, Image, FileCode, Copy,
+  ChevronDown, Menu, Image, FileCode, Copy, Magnet,
 } from 'lucide-react';
 import { downloadSVG, downloadPNG, copyTikZ } from '@/lib/export';
 import { encodeAutomaton } from '@/url';
@@ -328,7 +328,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
           <ToolBtn onClick={handleShare} title="Share" className={mb}><Share2 size={15} /></ToolBtn>
           <ToolBtn onClick={handleImport} title="Import" className={mb}><Upload size={15} /></ToolBtn>
-          <ToolBtn onClick={handleExport} title="Export" className={mb}><Download size={15} /></ToolBtn>
+          <ExportDropdown states={states} transitions={transitions} mode={mode} onExportJSON={handleExport} />
 
           <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
 
@@ -505,9 +505,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           <ToolBtn onClick={handleImport} title="Import" shortcut="⌘O" className="p-1.5">
             <Upload size={16} />
           </ToolBtn>
-          <ToolBtn onClick={handleExport} title="Export" shortcut="⌘E" className="p-1.5">
-            <Download size={16} />
-          </ToolBtn>
+          <ExportDropdown states={states} transitions={transitions} mode={mode} onExportJSON={handleExport} />
           <button
             onClick={handleShare}
             className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"

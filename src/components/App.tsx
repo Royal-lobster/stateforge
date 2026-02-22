@@ -15,6 +15,7 @@ import TMSimPanel from './TMSimPanel';
 import MealyMoorePanel from './MealyMoorePanel';
 import LSystem from './LSystem';
 import Gallery from './Gallery';
+import CommandPalette from './CommandPalette';
 import { X } from 'lucide-react';
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [initialGrammarText, setInitialGrammarText] = useState<string | undefined>(undefined);
   const [showGallery, setShowGallery] = useState(() => {
     if (typeof window !== 'undefined') {
       return !window.location.hash && !localStorage.getItem('stateforge_autosave');
@@ -63,6 +65,12 @@ export default function App() {
     if (hash) {
       const data = decodeAutomaton(hash);
       if (data) {
+        if (data.grammarText) {
+          setInitialGrammarText(data.grammarText);
+          setShowGrammar(true);
+          setShowGallery(false);
+          return;
+        }
         loadAutomaton(data.states, data.transitions, data.mode);
         setShowGallery(false);
         return;
@@ -232,6 +240,7 @@ export default function App() {
 
   const overlays = (
     <>
+      <CommandPalette onModeChange={handleModeChange} />
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
@@ -284,7 +293,7 @@ export default function App() {
     return (
       <div className="h-[100dvh] w-screen flex flex-col overflow-hidden relative">
         <Toolbar {...toolbarProps} />
-        <GrammarEditor isMobile={isMobile} />
+        <GrammarEditor isMobile={isMobile} initialGrammarText={initialGrammarText} />
         {overlays}
       </div>
     );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   parseGrammarText, classifyGrammar, getTerminals, getNonTerminals,
   removeEpsilonProductions, removeUnitProductions, removeUselessSymbols,
@@ -8,9 +8,10 @@ import {
   cykParse, ll1Parse, bruteForceParse,
   type TransformResult, type CYKResult, type LL1Result,
 } from '@/grammar';
-import type { Grammar, GrammarType, ParseTreeNode } from '@/types';
+import type { Grammar, GrammarType } from '@/types';
+import ParseTreeView from './ParseTree';
 import {
-  Play, RotateCcw, ChevronDown, ChevronRight,
+  Play, RotateCcw,
   Wand2, Table, BookOpen,
 } from 'lucide-react';
 
@@ -35,41 +36,8 @@ F → (E) | a`,
   },
 ];
 
-function ParseTree({ node, depth = 0 }: { node: ParseTreeNode; depth?: number }) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  if (node.isTerminal) {
-    return (
-      <span className="font-mono text-xs text-[var(--color-accept)] inline-block mx-0.5">
-        {node.symbol === 'ε' ? 'ε' : `'${node.symbol}'`}
-      </span>
-    );
-  }
-
-  return (
-    <div className="ml-3" style={{ marginLeft: depth === 0 ? 0 : 12 }}>
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="font-mono text-xs text-[var(--color-accent)] hover:text-[var(--color-text)] flex items-center gap-0.5"
-      >
-        {node.children.length > 0 ? (
-          collapsed ? <ChevronRight size={10} /> : <ChevronDown size={10} />
-        ) : null}
-        {node.symbol}
-      </button>
-      {!collapsed && (
-        <div className="border-l border-[var(--color-border)] ml-1 pl-1">
-          {node.children.map((child, i) => (
-            <ParseTree key={i} node={child} depth={depth + 1} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
-  const [grammarText, setGrammarText] = useState(EXAMPLE_GRAMMARS[0].text);
+export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobile: boolean; initialGrammarText?: string }) {
+  const [grammarText, setGrammarText] = useState(initialGrammarText || EXAMPLE_GRAMMARS[0].text);
   const [parseInput, setParseInput] = useState('');
   const [activeTab, setActiveTab] = useState<'transform' | 'cyk' | 'll1' | 'brute'>('transform');
   const [activeTransform, setActiveTransform] = useState<string | null>(null);
@@ -84,6 +52,18 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
   const [ll1Result, setLl1Result] = useState<LL1Result | null>(null);
   const [ll1StepIdx, setLl1StepIdx] = useState(-1);
   const [bruteResult, setBruteResult] = useState<{ accepted: boolean; derivation: string[] } | null>(null);
+
+  // Sync grammar text to URL for sharing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (grammarText.trim()) {
+        const { encodeGrammar } = require('@/url');
+        const hash = encodeGrammar(grammarText);
+        window.history.replaceState(null, '', `#${hash}`);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [grammarText]);
 
   const grammar = useMemo(() => parseGrammarText(grammarText), [grammarText]);
   const grammarType = useMemo(() => classifyGrammar(grammar), [grammar]);
@@ -344,9 +324,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {cykResult.parseTree && (
                     <div>
                       <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
-                      <div className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
-                        <ParseTree node={cykResult.parseTree} />
-                      </div>
+                      <ParseTreeView node={cykResult.parseTree} />
                     </div>
                   )}
 
@@ -507,9 +485,7 @@ export default function GrammarEditor({ isMobile }: { isMobile: boolean }) {
                   {ll1Result.parseTree && (
                     <div>
                       <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">Parse Tree</div>
-                      <div className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-2 overflow-auto max-h-[200px]">
-                        <ParseTree node={ll1Result.parseTree} />
-                      </div>
+                      <ParseTreeView node={ll1Result.parseTree} />
                     </div>
                   )}
                 </div>
