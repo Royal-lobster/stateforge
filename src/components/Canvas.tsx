@@ -20,50 +20,56 @@ function getStateAt(x: number, y: number, states: State[]): State | null {
   return null;
 }
 
+function selfLoopDist(wx: number, wy: number, t: Transition, selfIdx: number, from: State): number {
+  const baseR = 18;
+  const loopR = baseR + selfIdx * 18;
+  const spread = 12 + selfIdx * 4;
+  const cx = from.x;
+  const p0x = cx - spread, p0y = from.y - STATE_RADIUS + 2;
+  const p1x = cx - spread - 18, p1y = from.y - STATE_RADIUS - loopR * 2;
+  const p2x = cx + spread + 18, p2y = from.y - STATE_RADIUS - loopR * 2;
+  const p3x = cx + spread, p3y = from.y - STATE_RADIUS + 2;
+  const samples = 20;
+  let minDist = Infinity;
+  for (let i = 0; i <= samples; i++) {
+    const s = i / samples;
+    const inv = 1 - s;
+    const px = inv*inv*inv*p0x + 3*inv*inv*s*p1x + 3*inv*s*s*p2x + s*s*s*p3x;
+    const py = inv*inv*inv*p0y + 3*inv*inv*s*p1y + 3*inv*s*s*p2y + s*s*s*p3y;
+    const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
+    if (d < minDist) minDist = d;
+  }
+  // Also check label area
+  const labelY = from.y - STATE_RADIUS - loopR * 1.5;
+  const ld = Math.sqrt((wx - cx) ** 2 + (wy - labelY) ** 2);
+  return Math.min(minDist, ld);
+}
+
 function getTransitionAt(wx: number, wy: number, transitions: Transition[], states: State[]): Transition | null {
   const stateMap = new Map(states.map(s => [s.id, s]));
-  // Check outer self-loops before inner ones: sort so highest selfIdx comes first
-  const sorted = [...transitions].sort((a, b) => {
-    if (a.from === a.to && b.from === b.to && a.from === b.from) {
-      const loopsA = transitions.filter(t => t.from === a.from && t.to === a.to);
-      return loopsA.indexOf(b) - loopsA.indexOf(a); // outer (higher index) first
+
+  // Self-loops: find the closest one by distance to actual curve path
+  let bestSelfLoop: Transition | null = null;
+  let bestSelfDist = Infinity;
+  for (const t of transitions) {
+    if (t.from !== t.to) continue;
+    const from = stateMap.get(t.from);
+    if (!from) continue;
+    const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
+    const selfIdx = selfLoops.indexOf(t);
+    const d = selfLoopDist(wx, wy, t, selfIdx, from);
+    if (d < 16 && d < bestSelfDist) {
+      bestSelfDist = d;
+      bestSelfLoop = t;
     }
-    return 0;
-  });
-  for (const t of sorted) {
+  }
+  if (bestSelfLoop) return bestSelfLoop;
+
+  for (const t of transitions) {
     const from = stateMap.get(t.from);
     const to = stateMap.get(t.to);
     if (!from || !to) continue;
-    if (t.from === t.to) {
-      // Sample points along the actual cubic Bézier self-loop path
-      const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
-      const selfIdx = selfLoops.indexOf(t);
-      const baseR = 18;
-      const loopR = baseR + selfIdx * 18;
-      const spread = 12 + selfIdx * 4;
-      const cx = from.x;
-      // Cubic Bézier control points (matching the SVG render)
-      const p0x = cx - spread, p0y = from.y - STATE_RADIUS + 2;
-      const p1x = cx - spread - 18, p1y = from.y - STATE_RADIUS - loopR * 2;
-      const p2x = cx + spread + 18, p2y = from.y - STATE_RADIUS - loopR * 2;
-      const p3x = cx + spread, p3y = from.y - STATE_RADIUS + 2;
-      const samples = 20;
-      let minDist = Infinity;
-      for (let i = 0; i <= samples; i++) {
-        const s = i / samples;
-        const inv = 1 - s;
-        const px = inv*inv*inv*p0x + 3*inv*inv*s*p1x + 3*inv*s*s*p2x + s*s*s*p3x;
-        const py = inv*inv*inv*p0y + 3*inv*inv*s*p1y + 3*inv*s*s*p2y + s*s*s*p3y;
-        const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
-        if (d < minDist) minDist = d;
-      }
-      // Also check label area
-      const labelX = cx, labelY = from.y - STATE_RADIUS - loopR * 1.5;
-      const ld = Math.sqrt((wx - labelX) ** 2 + (wy - labelY) ** 2);
-      if (ld < 16) minDist = Math.min(minDist, ld);
-      if (minDist < 16) return t;
-      continue;
-    }
+    if (t.from === t.to) continue; // already handled above
     // Account for curve offset on bidirectional edges
     const curveOff = getEdgeCurveOffset(t, transitions);
     const ax = from.x, ay = from.y, bx = to.x, by = to.y;
