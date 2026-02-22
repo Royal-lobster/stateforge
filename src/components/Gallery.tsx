@@ -521,23 +521,12 @@ export default function Gallery({ onSelect }: { onSelect: () => void }) {
 
         {/* Feature chips */}
         <div className="flex flex-wrap justify-center gap-2 mt-4 relative">
-          {['DFA', 'NFA', 'PDA', 'TM', 'Mealy', 'Moore'].map(t => (
+          {['DFA', 'NFA', 'PDA', 'TM', 'Mealy', 'Moore', 'CFG', 'L-Systems'].map(t => (
             <span key={t} className="font-mono text-[10px] px-2 py-0.5 border border-[var(--color-accent)]/40 text-[var(--color-accent)] bg-[var(--color-accent)]/5">
               {t}
             </span>
           ))}
-          <span className="font-mono text-[10px] px-2 py-0.5 border border-[var(--color-border)] text-[var(--color-text-muted)]">
-            CFG
-          </span>
-          <span className="font-mono text-[10px] px-2 py-0.5 border border-[var(--color-border)] text-[var(--color-text-muted)]">
-            L-Systems
-          </span>
         </div>
-
-        {/* Stats line */}
-        <p className="font-mono text-[11px] text-[var(--color-text-muted)] mt-4 relative">
-          8 automaton types · 6 conversion algorithms · No backend required
-        </p>
       </div>
 
       {/* Examples */}
