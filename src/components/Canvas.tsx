@@ -45,7 +45,7 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
     // Normal vector for curve offset
     const nx = -aby / len, ny = abx / len;
     // Sample points along the (possibly curved) path
-    const samples = 8;
+    const samples = 20;
     let minDist = Infinity;
     for (let i = 0; i <= samples; i++) {
       const p = i / samples;
@@ -57,7 +57,7 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
       const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
       if (d < minDist) minDist = d;
     }
-    if (minDist < 14) return t;
+    if (minDist < 20) return t;
   }
   return null;
 }
@@ -447,8 +447,8 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
           const ny = len > 0 ? abx / len : 0;
           const cmx = (ax + bx) / 2 + nx * curveOff;
           const cmy = (ay + by) / 2 + ny * curveOff;
-          for (let i = 0; i <= 8; i++) {
-            const p = i / 8;
+          for (let i = 0; i <= 20; i++) {
+            const p = i / 20;
             const px = ((1 - p) * (1 - p) * ax + 2 * (1 - p) * p * cmx + p * p * bx) * zoom + pan.x;
             const py = ((1 - p) * (1 - p) * ay + 2 * (1 - p) * p * cmy + p * p * by) * zoom + pan.y;
             if (px >= minX && px <= maxX && py >= minY && py <= maxY) { selected.add(t.id); break; }
@@ -592,9 +592,12 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
               const cx = from.x, cy = from.y, baseR = 18;
               const loopR = baseR + selfIdx * 18;
               const spread = 12 + selfIdx * 4;
+              const loopPath = `M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`;
               return (
                 <g key={t.id}>
-                  <path d={`M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  {/* Invisible fat hit area */}
+                  <path d={loopPath} fill="none" stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                  <path d={loopPath} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
                   <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
                 </g>
               );
@@ -617,9 +620,17 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             return (
               <g key={t.id}>
                 {curveOff > 0 ? (
-                  <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  <>
+                    {/* Invisible fat hit area */}
+                    <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                    <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  </>
                 ) : (
-                  <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  <>
+                    {/* Invisible fat hit area */}
+                    <line x1={startX} y1={startY} x2={endX} y2={endY} stroke="transparent" strokeWidth={16} style={{ cursor: 'pointer' }} />
+                    <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
+                  </>
                 )}
                 <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
               </g>
