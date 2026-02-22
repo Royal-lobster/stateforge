@@ -175,7 +175,7 @@ export default function App() {
   }, [undo, redo, deleteSelected, clearSelection, setTool, setSelected, states,
       showGrammar, showLSystem, showGallery, showToast, handleModeChange,
       autoLayout, clearAll, toggleSidebar, toggleSimPanel, addTrapState,
-      simStart, simStep, simFastRun, simReset, zoomToFit]);
+      simStart, simStep, simFastRun, simReset, zoomToFit, toggleSnapToGrid]);
 
   useEffect(() => {
     let meta = document.querySelector('meta[name="viewport"]');
