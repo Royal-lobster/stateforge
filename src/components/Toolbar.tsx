@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useFloating, offset, flip, shift, autoUpdate } from '@floating-ui/react-dom';
 import { useStore } from '@/lib/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
@@ -49,6 +50,12 @@ function ModeDropdown({ mode, grammarMode, lsystemMode, onModeChange }: {
   onModeChange: (m: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { refs, floatingStyles } = useFloating({
+    open,
+    placement: 'bottom-start',
+    middleware: [offset(4), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
   const allModes = [
     { id: 'dfa', label: 'DFA' },
     { id: 'nfa', label: 'NFA' },
@@ -64,6 +71,7 @@ function ModeDropdown({ mode, grammarMode, lsystemMode, onModeChange }: {
   return (
     <div className="relative">
       <button
+        ref={refs.setReference}
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1 px-2 py-1 font-mono text-xs font-bold tracking-wider text-[var(--color-accent)] bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 min-h-[36px]"
       >
@@ -73,7 +81,7 @@ function ModeDropdown({ mode, grammarMode, lsystemMode, onModeChange }: {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute top-full left-0 mt-1 z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[120px] animate-scale-in">
+          <div ref={refs.setFloating} style={floatingStyles} className="z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[120px] animate-scale-in">
             {allModes.map(m => (
               <button
                 key={m.id}
@@ -107,7 +115,18 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
 }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const { refs, floatingStyles } = useFloating({
+    open,
+    placement: 'bottom-end',
+    middleware: [offset(4), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
+  const { refs: toastRefs, floatingStyles: toastStyles } = useFloating({
+    open: !!toast,
+    placement: 'bottom-end',
+    middleware: [offset(4), flip(), shift({ padding: 8 })],
+    whileElementsMounted: autoUpdate,
+  });
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -125,13 +144,15 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
     }},
   ];
 
-  // Get button position for fixed dropdown
-  const rect = btnRef.current?.getBoundingClientRect();
+  const setRef = useCallback((el: HTMLButtonElement | null) => {
+    refs.setReference(el);
+    toastRefs.setReference(el);
+  }, [refs, toastRefs]);
 
   return (
     <div className="relative">
       <button
-        ref={btnRef}
+        ref={setRef}
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1 p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] transition-colors"
         title="Export (⌘E)"
@@ -142,10 +163,7 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div
-            className="fixed z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[130px] animate-scale-in"
-            style={rect ? { top: rect.bottom + 4, right: window.innerWidth - rect.right } : {}}
-          >
+          <div ref={refs.setFloating} style={floatingStyles} className="z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[130px] animate-scale-in">
             {items.map(item => (
               <button
                 key={item.label}
@@ -160,10 +178,7 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
         </>
       )}
       {toast && (
-        <div
-          className="fixed z-50 bg-[var(--color-accent)] text-[var(--bg-primary)] px-3 py-1.5 font-mono text-xs whitespace-nowrap animate-scale-in"
-          style={rect ? { top: rect.bottom + 4, right: window.innerWidth - rect.right } : {}}
-        >
+        <div ref={toastRefs.setFloating} style={toastStyles} className="z-50 bg-[var(--color-accent)] text-[var(--bg-primary)] px-3 py-1.5 font-mono text-xs whitespace-nowrap animate-scale-in">
           {toast}
         </div>
       )}
