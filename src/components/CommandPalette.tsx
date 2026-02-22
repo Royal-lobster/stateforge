@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, Maximize2,
-  BookOpen, TreePine, Download, Upload, FileText, Image, Code,
+  BookOpen, TreePine, Download, Upload, FileText, Image as ImageIcon, Code,
   Search, ArrowRightLeft, Zap, RotateCcw, XCircle, CheckSquare,
   Command,
 } from 'lucide-react';
@@ -37,9 +37,10 @@ export default function CommandPalette({ onModeChange, onPumpingLemma }: { onMod
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const store = useStore();
+  const storeRef = useRef(useStore.getState());
+  useEffect(() => useStore.subscribe(s => { storeRef.current = s; }), []);
 
-  const commands: CmdItem[] = [
+  const commands: CmdItem[] = useMemo(() => [
     // Modes
     { id: 'mode-dfa', label: 'DFA', shortcut: '1', icon: <Zap size={14} />, category: 'Mode', action: () => onModeChange('dfa') },
     { id: 'mode-nfa', label: 'NFA', shortcut: '2', icon: <Zap size={14} />, category: 'Mode', action: () => onModeChange('nfa') },
@@ -51,34 +52,34 @@ export default function CommandPalette({ onModeChange, onPumpingLemma }: { onMod
     { id: 'mode-lsystem', label: 'L-Systems', shortcut: '8', icon: <TreePine size={14} />, category: 'Mode', action: () => onModeChange('lsystem') },
 
     // Tools
-    { id: 'tool-pointer', label: 'Pointer', shortcut: 'V', icon: <MousePointer2 size={14} />, category: 'Tool', action: () => store.setTool('pointer') },
-    { id: 'tool-state', label: 'Add State', shortcut: 'S', icon: <Plus size={14} />, category: 'Tool', action: () => store.setTool('addState') },
-    { id: 'tool-transition', label: 'Add Transition', shortcut: 'T', icon: <ArrowRight size={14} />, category: 'Tool', action: () => store.setTool('addTransition') },
-    { id: 'tool-delete', label: 'Delete Selected', shortcut: 'Del', icon: <Trash2 size={14} />, category: 'Tool', action: () => store.deleteSelected() },
+    { id: 'tool-pointer', label: 'Pointer', shortcut: 'V', icon: <MousePointer2 size={14} />, category: 'Tool', action: () => storeRef.current.setTool('pointer') },
+    { id: 'tool-state', label: 'Add State', shortcut: 'S', icon: <Plus size={14} />, category: 'Tool', action: () => storeRef.current.setTool('addState') },
+    { id: 'tool-transition', label: 'Add Transition', shortcut: 'T', icon: <ArrowRight size={14} />, category: 'Tool', action: () => storeRef.current.setTool('addTransition') },
+    { id: 'tool-delete', label: 'Delete Selected', shortcut: 'Del', icon: <Trash2 size={14} />, category: 'Tool', action: () => storeRef.current.deleteSelected() },
 
     // Actions
-    { id: 'act-undo', label: 'Undo', shortcut: '⌘Z', icon: <Undo2 size={14} />, category: 'Action', action: () => store.undo() },
-    { id: 'act-redo', label: 'Redo', shortcut: '⌘⇧Z', icon: <Redo2 size={14} />, category: 'Action', action: () => store.redo() },
-    { id: 'act-selectall', label: 'Select All', shortcut: '⌘A', icon: <CheckSquare size={14} />, category: 'Action', action: () => store.setSelected(new Set(store.states.map(s => s.id))) },
-    { id: 'act-clear', label: 'Clear All', shortcut: '⌘⇧X', icon: <XCircle size={14} />, category: 'Action', action: () => store.clearAll() },
-    { id: 'act-layout', label: 'Auto Layout', shortcut: '⌘⇧L', icon: <LayoutGrid size={14} />, category: 'Action', action: () => store.autoLayout() },
-    { id: 'act-zoomfit', label: 'Zoom to Fit', shortcut: '⌘1', icon: <Maximize2 size={14} />, category: 'Action', action: () => store.zoomToFit() },
+    { id: 'act-undo', label: 'Undo', shortcut: '⌘Z', icon: <Undo2 size={14} />, category: 'Action', action: () => storeRef.current.undo() },
+    { id: 'act-redo', label: 'Redo', shortcut: '⌘⇧Z', icon: <Redo2 size={14} />, category: 'Action', action: () => storeRef.current.redo() },
+    { id: 'act-selectall', label: 'Select All', shortcut: '⌘A', icon: <CheckSquare size={14} />, category: 'Action', action: () => { const s = storeRef.current; s.setSelected(new Set(s.states.map(st => st.id))); } },
+    { id: 'act-clear', label: 'Clear All', shortcut: '⌘⇧X', icon: <XCircle size={14} />, category: 'Action', action: () => storeRef.current.clearAll() },
+    { id: 'act-layout', label: 'Auto Layout', shortcut: '⌘⇧L', icon: <LayoutGrid size={14} />, category: 'Action', action: () => storeRef.current.autoLayout() },
+    { id: 'act-zoomfit', label: 'Zoom to Fit', shortcut: '⌘1', icon: <Maximize2 size={14} />, category: 'Action', action: () => storeRef.current.zoomToFit() },
 
     // Panels
-    { id: 'panel-sidebar', label: 'Toggle Sidebar', shortcut: '⌘/', icon: <PanelRight size={14} />, category: 'Panel', action: () => store.toggleSidebar() },
-    { id: 'panel-sim', label: 'Toggle Simulation', shortcut: '⌘.', icon: <PanelBottom size={14} />, category: 'Panel', action: () => store.toggleSimPanel() },
+    { id: 'panel-sidebar', label: 'Toggle Sidebar', shortcut: '⌘/', icon: <PanelRight size={14} />, category: 'Panel', action: () => storeRef.current.toggleSidebar() },
+    { id: 'panel-sim', label: 'Toggle Simulation', shortcut: '⌘.', icon: <PanelBottom size={14} />, category: 'Panel', action: () => storeRef.current.toggleSimPanel() },
     { id: 'panel-convert', label: 'Toggle Conversions', shortcut: '⌘M', icon: <ArrowRightLeft size={14} />, category: 'Panel', action: () => window.dispatchEvent(new CustomEvent('stateforge:toggle-convert')) },
 
     // Export
     { id: 'exp-share', label: 'Share URL', shortcut: '⌘S', icon: <Share2 size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:share')) },
     { id: 'exp-json', label: 'Export JSON', shortcut: '⌘E', icon: <FileText size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export')) },
-    { id: 'exp-png', label: 'Export PNG', icon: <Image size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export-png')) },
+    { id: 'exp-png', label: 'Export PNG', icon: <ImageIcon size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export-png')) },
     { id: 'exp-svg', label: 'Export SVG', icon: <Code size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export-svg')) },
     { id: 'exp-import', label: 'Import File', shortcut: '⌘O', icon: <Upload size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:import')) },
 
     // Games
     ...(onPumpingLemma ? [{ id: 'game-pumping', label: 'Pumping Lemma Game', icon: <Zap size={14} />, category: 'Game', action: () => onPumpingLemma() }] : []),
-  ];
+  ], [onModeChange, onPumpingLemma]);
 
   const filtered = query
     ? commands.filter(c => fuzzyMatch(query, c.label) || fuzzyMatch(query, c.category))
