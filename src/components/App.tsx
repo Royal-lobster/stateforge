@@ -63,25 +63,41 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const data = decodeAutomaton(hash);
-      if (data) {
-        if (data.grammarText) {
-          setInitialGrammarText(data.grammarText);
-          setShowGrammar(true);
+    // Clear stale localStorage from older versions
+    try {
+      const ver = localStorage.getItem('stateforge_ver');
+      if (ver !== '2') {
+        localStorage.removeItem('stateforge_autosave');
+        localStorage.setItem('stateforge_ver', '2');
+      }
+    } catch {}
+
+    try {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const data = decodeAutomaton(hash);
+        if (data) {
+          if (data.grammarText) {
+            setInitialGrammarText(data.grammarText);
+            setShowGrammar(true);
+            setShowGallery(false);
+            return;
+          }
+          loadAutomaton(data.states, data.transitions, data.mode);
           setShowGallery(false);
           return;
         }
-        loadAutomaton(data.states, data.transitions, data.mode);
-        setShowGallery(false);
-        return;
       }
-    }
-    const saved = loadFromLocalStorage();
-    if (saved && saved.states.length > 0) {
-      loadAutomaton(saved.states, saved.transitions, saved.mode);
-      setShowGallery(false);
+      const saved = loadFromLocalStorage();
+      if (saved && saved.states.length > 0) {
+        loadAutomaton(saved.states, saved.transitions, saved.mode);
+        setShowGallery(false);
+      }
+    } catch (e) {
+      console.error('Failed to load saved state:', e);
+      // Clear corrupted state
+      try { localStorage.removeItem('stateforge_autosave'); } catch {}
+      window.history.replaceState(null, '', window.location.pathname);
     }
   }, [loadAutomaton]);
 
