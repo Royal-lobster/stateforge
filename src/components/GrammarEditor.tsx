@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import SymbolPalette from './SymbolPalette';
+import { useSymbolShortcuts } from '@/hooks/useSymbolShortcuts';
 import {
   parseGrammarText, classifyGrammar, getTerminals, getNonTerminals,
   removeEpsilonProductions, removeUnitProductions, removeUselessSymbols,
@@ -40,6 +42,7 @@ F → (E) | a`,
 
 export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobile: boolean; initialGrammarText?: string }) {
   const [grammarText, setGrammarText] = useState(initialGrammarText || EXAMPLE_GRAMMARS[0].text);
+  const grammarTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [parseInput, setParseInput] = useState('');
   const [activeTab, setActiveTab] = useState<'transform' | 'cyk' | 'll1' | 'slr1' | 'brute'>('transform');
   const [activeTransform, setActiveTransform] = useState<string | null>(null);
@@ -152,6 +155,8 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
     setSlr1Table(null); setSlr1ParseResult(null);
   };
 
+  const handleGrammarChange = useSymbolShortcuts(v => { setGrammarText(v); resetParse(); setTransformResult(null); });
+
   const transforms = [
     { id: 'epsilon', label: 'Remove ε-prod' },
     { id: 'unit', label: 'Remove unit prod' },
@@ -186,13 +191,19 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
         </div>
 
         {/* Text area */}
-        <textarea
-          value={grammarText}
-          onChange={e => { setGrammarText(e.target.value); resetParse(); setTransformResult(null); }}
-          className="flex-1 bg-[var(--bg-canvas)] text-[var(--color-text)] font-mono text-xs px-3 py-2 outline-none resize-none border-b border-[var(--color-border)]"
-          placeholder={`S → aSb | ε\nUse → or -> for arrow\n| for alternatives`}
-          spellCheck={false}
-        />
+        <div className="relative flex-1 flex flex-col border-b border-[var(--color-border)]">
+          <textarea
+            ref={grammarTextareaRef}
+            value={grammarText}
+            onChange={handleGrammarChange}
+            className="flex-1 bg-[var(--bg-canvas)] text-[var(--color-text)] font-mono text-xs px-3 py-2 outline-none resize-none"
+            placeholder={`S → aSb | ε\nUse → or -> for arrow\n| for alternatives`}
+            spellCheck={false}
+          />
+          <div className="absolute top-1 right-1">
+            <SymbolPalette inputRef={grammarTextareaRef} />
+          </div>
+        </div>
 
         {/* Stats */}
         <div className="px-3 py-1.5 flex items-center gap-3 text-[11px] font-mono text-[var(--color-text-dim)]">

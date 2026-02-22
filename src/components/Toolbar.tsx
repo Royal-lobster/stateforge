@@ -336,6 +336,15 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
 
           <div className="flex-1 min-w-1" />
 
+          <a href="/docs" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="Docs">
+            <FileText size={15} />
+          </a>
+          <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="GitHub">
+            <Github size={15} />
+          </a>
+
+          <div className="w-px h-4 bg-[var(--color-border)] mx-0.5 shrink-0" />
+
           {saved && <span className="font-mono text-[10px] text-[var(--color-text-muted)] animate-fade-in shrink-0">saved</span>}
 
           <ToolBtn onClick={handleShare} title="Share" className={mb}><Share2 size={15} /></ToolBtn>
@@ -389,14 +398,6 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
               <RotateCcw size={15} />
             </ToolBtn>
 
-            <div className="flex-1" />
-
-            <a href="/docs" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="Docs">
-              <FileText size={15} />
-            </a>
-            <a href="https://github.com/Royal-lobster/stateforge" target="_blank" rel="noopener noreferrer" className={`${mb} text-[var(--color-text-muted)] hover:text-[var(--color-accent)]`} title="GitHub">
-              <Github size={15} />
-            </a>
           </div>
         )}
       </div>
