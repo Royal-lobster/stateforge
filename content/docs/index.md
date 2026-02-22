@@ -1,7 +1,7 @@
 # <span class="text-[var(--color-accent)]">STATE</span><span class="text-[var(--color-text-bright)]">FORGE</span> <span class="text-sm text-[var(--color-text-dim)] ml-3 font-normal tracking-normal">Documentation</span>
 
 StateForge is a browser-based tool for building, simulating, and converting formal automata.
-It supports DFA, NFA, PDA, Turing machines, Mealy/Moore machines, context-free grammars, and L-systems — all in one interface with zero installation.
+It supports DFA, NFA, PDA, Turing machines, Mealy/Moore machines, context-free grammars, and L-systems, all in one interface with zero installation.
 Everything runs client-side: your automaton is encoded into the URL hash on every change, so sharing is as simple as copying the link.
 
 ![Full app view — DFA with states, transitions, sidebar, and simulation panel](/docs/canvas-dfa.png)

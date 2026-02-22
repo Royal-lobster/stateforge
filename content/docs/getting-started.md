@@ -2,18 +2,18 @@
 
 ## The gallery
 
-When you first visit StateForge, you'll see the **Gallery** — a collection of example automata organized by type. Click any example to load it onto the canvas, or click **Start from Scratch** to begin with an empty canvas.
+When you first visit StateForge, you'll see the **Gallery**, a collection of example automata organized by type. Click any example to load it onto the canvas, or click **Start from Scratch** to begin with an empty canvas.
 
 ![Gallery — pick a pre-built example or start from scratch](/docs/gallery.png)
 
-Your automaton is automatically saved to localStorage and encoded into the URL hash on every change. You can share your work by simply copying the URL — no account needed.
+Your automaton is automatically saved to localStorage and encoded into the URL hash on every change. You can share your work by simply copying the URL, no account needed.
 
 ## Creating your first automaton
 
-1. **Double-click** the canvas to add your first state — it's automatically labeled q0 and set as the initial state
+1. **Double-click** the canvas to add your first state (it's automatically labeled q0 and set as the initial state)
 2. Double-click again to add more states (q1, q2, ... auto-numbered)
 3. Press <kbd>T</kbd> to switch to the transition tool, then **drag from one state to another**
-4. Edit the transition label in the popup that appears — type symbols separated by commas
+4. Edit the transition label in the popup that appears, typing symbols separated by commas
 5. **Right-click** a state to toggle Initial or Accepting (on mobile, long-press)
 6. Open the simulation panel with <kbd>Ctrl</kbd>+<kbd>.</kbd> and test your automaton with input strings
 
@@ -41,7 +41,7 @@ The infinite SVG workspace where you build your automaton. Features:
 
 → **Zoom** with scroll wheel or pinch gesture (0.25×–3× range)
 
-→ **Zoom to fit** with <kbd>⌘</kbd>+<kbd>1</kbd> or the maximize button — auto-frames all states
+→ **Zoom to fit** with <kbd>⌘</kbd>+<kbd>1</kbd> or the maximize button, auto-frames all states
 
 → **Select** states by clicking, shift-clicking for multi-select, or box-selecting by dragging on empty canvas
 
@@ -75,7 +75,7 @@ Toggle with <kbd>Ctrl</kbd>+<kbd>.</kbd>. Two modes:
 
 **Auto-save:** Your work is saved to localStorage every 500ms. When you return, it loads automatically.
 
-**URL sharing:** The URL hash encodes your entire automaton. Copy the URL to share — anyone who opens it gets your exact automaton with all states, transitions, and positions.
+**URL sharing:** The URL hash encodes your entire automaton. Copy the URL to share; anyone who opens it gets your exact automaton with all states, transitions, and positions.
 
 **Priority:** URL hash > localStorage. If a shared URL is opened, it overrides any local save.
 

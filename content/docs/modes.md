@@ -1,9 +1,9 @@
 # Automaton modes
 
 Switch modes using the toolbar buttons or number keys <kbd>1</kbd>–<kbd>6</kbd> (7 and 8 switch to Grammar Editor and L-Systems).
-Switching modes preserves your states and transitions — the mode only affects how transitions are parsed, how simulation works, and what the properties panel displays. An undo snapshot is pushed when switching modes.
+Switching modes preserves your states and transitions. The mode only affects how transitions are parsed, how simulation works, and what the properties panel displays. An undo snapshot is pushed when switching modes.
 
-## DFA — Deterministic Finite Automaton (Key: 1)
+## DFA: Deterministic Finite Automaton (Key: 1)
 
 Standard DFA with strict validation. The properties panel shows errors for DFA violations:
 
@@ -15,7 +15,7 @@ Standard DFA with strict validation. The properties panel shows errors for DFA v
 
 Simulation treats DFA the same as NFA internally (using the set-based engine), but a valid DFA will always have exactly one active state at each step.
 
-## NFA — Nondeterministic Finite Automaton (Key: 2)
+## NFA: Nondeterministic Finite Automaton (Key: 2)
 
 Supports ε-transitions and nondeterminism. During simulation, all reachable configurations are tracked simultaneously:
 
@@ -27,11 +27,11 @@ Supports ε-transitions and nondeterminism. During simulation, all reachable con
 
 → Dead branches (no transitions available) are silently dropped
 
-## PDA — Pushdown Automaton (Key: 3)
+## PDA: Pushdown Automaton (Key: 3)
 
 PDA mode enables a full nondeterministic pushdown automaton simulator with stack visualization.
 
-→ **Transition format:** `input, pop → push` — parsed using regex matching for the arrow (→ or ->)
+→ **Transition format:** `input, pop → push`, parsed using regex matching for the arrow (→ or ->)
 
 → **Stack initialization:** The stack starts with a single symbol `Z` (the initial stack marker)
 
@@ -51,14 +51,14 @@ PDA mode enables a full nondeterministic pushdown automaton simulator with stack
 
 → **Fast Run:** Runs up to 500 steps automatically
 
-## TM — Turing Machine (Key: 4)
+## TM: Turing Machine (Key: 4)
 
 
 ![Turing Machine simulation — tape visualization with head position](/docs/tm-sim.png)
 
 A single-tape, single-head Turing machine with configurable step limit.
 
-→ **Transition format:** `read → write, direction` — direction is R (right), L (left), or S (stay). Also accepts `read/write,dir` format.
+→ **Transition format:** `read → write, direction`, where direction is R (right), L (left), or S (stay). Also accepts `read/write,dir` format.
 
 → **Wildcard:** Use `*` as the read symbol to match any symbol; use `*` as the write symbol to keep the current symbol unchanged
 
@@ -79,11 +79,11 @@ A single-tape, single-head Turing machine with configurable step limit.
 
 A transducer where output is associated with transitions.
 
-→ **Transition format:** `input/output` — e.g., `a/1` means "on input a, produce output 1"
+→ **Transition format:** `input/output`, e.g., `a/1` means "on input a, produce output 1"
 
 → **Simulation:** For each input symbol, the machine finds a matching transition, moves to the next state, and appends the transition's output to the output string
 
-→ **Step table:** Shows columns: #, State, Input, Output, Next — each row is one input symbol consumed
+→ **Step table:** Shows columns: #, State, Input, Output, Next (each row is one input symbol consumed)
 
 → **Output display:** The accumulated output string is shown prominently with the label "OUTPUT"
 
@@ -95,9 +95,9 @@ A transducer where output is associated with transitions.
 
 A transducer where output is associated with states rather than transitions.
 
-→ **State label format:** `name/output` — e.g., `q0/0` means state q0 outputs "0". The output is extracted by splitting on the last `/`.
+→ **State label format:** `name/output`, e.g., `q0/0` means state q0 outputs "0". The output is extracted by splitting on the last `/`.
 
-→ **Transition format:** Plain input symbols (same as DFA/NFA) — e.g., `a, b`
+→ **Transition format:** Plain input symbols (same as DFA/NFA), e.g., `a, b`
 
 → **Initial output:** The output begins with the initial state's output (before consuming any input)
 

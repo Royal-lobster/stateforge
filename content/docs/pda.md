@@ -5,7 +5,7 @@ description: "Theory and usage guide for Pushdown Automata in StateForge"
 
 # Pushdown Automaton (PDA)
 
-A **Pushdown Automaton** extends finite automata with a stack — an unlimited memory structure that lets it recognize languages no DFA or NFA can handle. If you've ever matched nested parentheses or parsed a programming language, you've encountered problems that need a PDA.
+A **Pushdown Automaton** extends finite automata with a stack, an unlimited memory structure that lets it recognize languages no DFA or NFA can handle. If you've ever matched nested parentheses or parsed a programming language, you've encountered problems that need a PDA.
 
 ![PDA simulation](/docs/pda-sim.png)
 
@@ -31,13 +31,13 @@ The key difference from finite automata is **Γ** (the stack alphabet) and **Z�
 
 ### The stack
 
-The stack is a **LIFO** (Last In, First Out) data structure. Think of it as a spring-loaded plate dispenser — you can only see and remove the top plate, and new plates go on top.
+The stack is a **LIFO** (Last In, First Out) data structure. Think of it as a spring-loaded plate dispenser: you can only see and remove the top plate, and new plates go on top.
 
 - **Push**: Place a symbol on top of the stack
 - **Pop**: Remove the top symbol from the stack
 - **Peek**: Read the top symbol without removing it
 
-This stack gives PDAs "memory" that finite automata lack. A DFA has no way to count — it can't remember how many `a`'s it's seen to match them with `b`'s. A PDA can push a symbol for each `a`, then pop one for each `b`, accepting only when the counts match.
+This stack gives PDAs "memory" that finite automata lack. A DFA has no way to count; it can't remember how many `a`'s it's seen to match them with `b`'s. A PDA can push a symbol for each `a`, then pop one for each `b`, accepting only when the counts match.
 
 ### Transition function
 
@@ -47,9 +47,9 @@ Each PDA transition reads three things and produces two:
 δ(current_state, input_symbol, stack_top) → (new_state, symbols_to_push)
 ```
 
-- **input_symbol** can be ε (don't consume any input — an epsilon transition)
+- **input_symbol** can be ε (don't consume any input, i.e., an epsilon transition)
 - **stack_top** can be ε (don't require any particular stack top)
-- **symbols_to_push** can be ε (push nothing — effectively just popping)
+- **symbols_to_push** can be ε (push nothing, effectively just popping)
 
 For example, δ(q₀, a, Z) → (q₀, AZ) means: "In state q₀, reading `a` from input, with `Z` on top of the stack, move to state q₀, pop `Z`, and push `AZ`." The net effect is pushing `A` on top of `Z`.
 
@@ -61,7 +61,7 @@ There are two ways a PDA can accept a string:
 
 **By empty stack:** The PDA accepts if, after consuming all input, the stack is completely empty. The current state doesn't matter.
 
-These two modes are **equivalent in power** — for any PDA accepting by final state, there exists a PDA accepting by empty stack for the same language, and vice versa. The constructions are straightforward but the resulting PDAs may look quite different.
+These two modes are **equivalent in power**: for any PDA accepting by final state, there exists a PDA accepting by empty stack for the same language, and vice versa. The constructions are straightforward but the resulting PDAs may look quite different.
 
 ### Context-free languages
 
@@ -81,10 +81,10 @@ Regular Languages ⊂ Context-Free Languages ⊂ Context-Sensitive Languages ⊂
 
 Unlike finite automata (where DFA = NFA in power), **nondeterministic PDAs are strictly more powerful than deterministic PDAs (DPDAs)**.
 
-- A **DPDA** has at most one move in any configuration — no choices. DPDAs recognize a proper subset of CFLs called deterministic context-free languages (used in most programming language parsers).
+- A **DPDA** has at most one move in any configuration (no choices). DPDAs recognize a proper subset of CFLs called deterministic context-free languages (used in most programming language parsers).
 - A **nondeterministic PDA** (NPDA) can have multiple possible transitions from the same configuration. It accepts if *any* computation path leads to acceptance.
 
-The classic example: the language of **even-length palindromes** {wwᴿ | w ∈ {a,b}*} requires nondeterminism — the PDA must "guess" the middle of the string. No DPDA can recognize this language.
+The classic example: the language of **even-length palindromes** {wwᴿ | w ∈ {a,b}*} requires nondeterminism because the PDA must "guess" the middle of the string. No DPDA can recognize this language.
 
 StateForge simulates the full nondeterministic PDA, exploring all possible computation paths simultaneously.
 
@@ -99,7 +99,7 @@ StateForge simulates the full nondeterministic PDA, exploring all possible compu
 
 ### Limitations
 
-PDAs cannot recognize everything. The language {aⁿbⁿcⁿ | n ≥ 0} (equal numbers of a's, b's, *and* c's) is **not context-free** — a single stack can't simultaneously track two independent counts. This language is context-sensitive, requiring a more powerful model (like a linear bounded automaton or Turing machine).
+PDAs cannot recognize everything. The language {aⁿbⁿcⁿ | n ≥ 0} (equal numbers of a's, b's, *and* c's) is **not context-free** because a single stack can't simultaneously track two independent counts. This language is context-sensitive, requiring a more powerful model (like a linear bounded automaton or Turing machine).
 
 Other non-CFL examples: {aⁿ | n is prime}, {aⁿ² | n ≥ 0}, and the copy language {ww | w ∈ {a,b}*} (note: **ww**, not **wwᴿ**).
 
@@ -131,15 +131,15 @@ input, pop → push
 
 **Examples:**
 
-- `a, Z → AZ` — Read `a`, pop `Z`, push `AZ` (net: push `A` on top of existing `Z`)
-- `b, A → ε` — Read `b`, pop `A`, push nothing (net: just pop `A`)
-- `ε, Z → ε` — Read nothing, pop `Z`, push nothing (used for empty-stack acceptance)
-- `ε, ε → S` — Read nothing, require nothing on stack, push `S`
+- `a, Z → AZ`: read `a`, pop `Z`, push `AZ` (net: push `A` on top of existing `Z`)
+- `b, A → ε`: read `b`, pop `A`, push nothing (net: just pop `A`)
+- `ε, Z → ε`: read nothing, pop `Z`, push nothing (used for empty-stack acceptance)
+- `ε, ε → S`: read nothing, require nothing on stack, push `S`
 
 ### Stack symbol conventions
 
-- **Z** — The initial bottom-of-stack marker. Every PDA in StateForge starts with `Z` on the stack. It's a sentinel — when you see `Z` on top, the stack is logically empty.
-- **ε** — Represents "nothing." As pop: don't check the stack. As push: don't push anything. As input: don't consume any character.
+- **Z**: the initial bottom-of-stack marker. Every PDA in StateForge starts with `Z` on the stack. It's a sentinel; when you see `Z` on top, the stack is logically empty.
+- **ε**: represents "nothing." As pop: don't check the stack. As push: don't push anything. As input: don't consume any character.
 
 ### Push convention
 
@@ -149,19 +149,19 @@ For `push = AZ`:
 1. `Z` is pushed first (goes deeper)
 2. `A` is pushed second (becomes the new top)
 
-So after `a, Z → AZ`, the stack reads `A` on top, `Z` below — identical to the original stack with `A` added on top.
+So after `a, Z → AZ`, the stack reads `A` on top, `Z` below, identical to the original stack with `A` added on top.
 
 Internally, the push string is reversed and each character is pushed individually, so `AZ` means the top-of-stack (TOS) is `A`.
 
 ### Multiple transitions
 
-Unlike DFA (where each state has exactly one transition per symbol), PDA allows **multiple transitions between the same pair of states** — and even multiple transitions from the same state on the same input. This is where nondeterminism comes from.
+Unlike DFA (where each state has exactly one transition per symbol), PDA allows **multiple transitions between the same pair of states**, and even multiple transitions from the same state on the same input. This is where nondeterminism comes from.
 
 Each transition edge can carry multiple PDA transition entries. Click a transition to edit, and add as many `input, pop → push` rules as needed.
 
 ### Simulation
 
-The PDA simulator explores **all possible computation paths** simultaneously. Each path is tracked as a **configuration**: a triple of (current state, input position, stack contents).
+The PDA simulator explores **all possible computation paths** simultaneously. Each path is tracked as a **configuration**, a triple of (current state, input position, stack contents).
 
 **Controls:**
 
@@ -191,7 +191,7 @@ Choose the mode that matches your PDA's design. Some PDAs are naturally designed
 
 ### Safety limits
 
-Nondeterministic PDAs can produce an exponential number of configurations — especially with ε-transitions that loop. StateForge enforces a **10,000 configuration limit**. If the total number of configurations created during simulation exceeds this, the simulation halts to prevent your browser from freezing.
+Nondeterministic PDAs can produce an exponential number of configurations, especially with ε-transitions that loop. StateForge enforces a **10,000 configuration limit**. If the total number of configurations created during simulation exceeds this, the simulation halts to prevent your browser from freezing.
 
 If you hit this limit:
 - Check for ε-transition loops (ε-transitions that cycle without consuming input or changing the stack)
@@ -207,10 +207,10 @@ StateForge includes pre-built PDA examples in the gallery:
 
 | Example | Language | Description |
 |---------|----------|-------------|
-| **aⁿbⁿ** | {aⁿbⁿ \| n ≥ 0} | The classic PDA example — push for a's, pop for b's |
+| **aⁿbⁿ** | {aⁿbⁿ \| n ≥ 0} | The classic PDA example: push for a's, pop for b's |
 | **Balanced Parentheses** | Matched ( and ) with nesting | Push on open, pop on close |
-| **Palindromes** | {wwᴿ \| w ∈ {a,b}*} | Nondeterministic — must guess the middle |
-| **wcwᴿ** | {wcwᴿ \| w ∈ {a,b}*} | Deterministic — center marker `c` eliminates guessing |
+| **Palindromes** | {wwᴿ \| w ∈ {a,b}*} | Nondeterministic: must guess the middle |
+| **wcwᴿ** | {wcwᴿ \| w ∈ {a,b}*} | Deterministic: center marker `c` eliminates guessing |
 
 Load these from the sidebar gallery to study how they work, then modify them or build your own.
 
@@ -218,14 +218,14 @@ Load these from the sidebar gallery to study how they work, then modify them or 
 
 ## Tips
 
-- **Always use Z as your bottom marker.** StateForge initializes every PDA stack with `Z`. Design your transitions around it — checking for `Z` tells you when the stack is "logically empty," which is essential for clean acceptance conditions.
+- **Always use Z as your bottom marker.** StateForge initializes every PDA stack with `Z`. Design your transitions around it; checking for `Z` tells you when the stack is "logically empty," which is essential for clean acceptance conditions.
 
-- **Push ε to pop without pushing.** The transition `b, A → ε` pops `A` and pushes nothing. This is how you consume stack symbols during the matching phase (e.g., popping one `A` for each `b` in the aⁿbⁿ language).
+- **Push ε to pop without pushing.** The transition `b, A → ε` pops `A` and pushes nothing. This is how you consume stack symbols during the matching phase, like popping one `A` for each `b` in the aⁿbⁿ language.
 
-- **Multiple active configurations = nondeterminism in action.** If you see more than one active config during simulation, your PDA is exploring multiple branches. This is normal and expected — remember, a nondeterministic PDA accepts if *any* branch accepts.
+- **Multiple active configurations = nondeterminism in action.** If you see more than one active config during simulation, your PDA is exploring multiple branches. This is normal and expected. Remember, a nondeterministic PDA accepts if *any* branch accepts.
 
 - **Test with empty string.** Don't forget edge cases! The empty string (ε) should be accepted by {aⁿbⁿ} (when n=0) but rejected by many other languages.
 
-- **Beware ε-loops.** An ε-transition that doesn't change the stack or state creates an infinite loop. The 10,000-config safety limit will catch this, but it's better to design your PDA to avoid it.
+- **Beware ε-loops.** An ε-transition that doesn't change the stack or state creates an infinite loop. The 10,000-config safety limit will catch this, but it's better to design around it.
 
-- **Start simple.** Build the aⁿbⁿ PDA first — it's the "hello world" of pushdown automata. Once that clicks, palindromes and more complex languages follow naturally.
+- **Start simple.** Build the aⁿbⁿ PDA first. It's the "hello world" of pushdown automata. Once that clicks, palindromes and more complex languages follow naturally.

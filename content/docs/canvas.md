@@ -19,7 +19,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 ## Adding states
 
-→ **Double-click** empty canvas in pointer mode — adds a state at that world coordinate
+→ **Double-click** empty canvas in pointer mode to add a state at that world coordinate
 
 → Press <kbd>S</kbd> for Add State tool, then click anywhere to place (cursor changes to crosshair)
 
@@ -35,7 +35,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 ## Editing states
 
-→ **Double-click** a state to rename it — an inline text input appears centered on the state
+→ **Double-click** a state to rename it (an inline text input appears centered on the state)
 
 → **Right-click** a state for context menu: Set Initial, Set Accepting, Rename, Delete
 
@@ -53,7 +53,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → **Shift+Click** to add to / toggle selection (multi-select)
 
-→ **Click+Drag** on empty space for box select — a dashed rectangle appears and selects all states within
+→ **Click+Drag** on empty space for box select (a dashed rectangle appears and selects all states within)
 
 → <kbd>⌘A</kbd> to select all states
 
@@ -65,7 +65,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 ## Dragging & layout
 
-→ Drag states to reposition them — multi-select drag moves all selected states together
+→ Drag states to reposition them; multi-select drag moves all selected states together
 
 → Dragging pushes an undo snapshot on first pixel moved (not on every frame), so undo restores original positions
 

@@ -1,6 +1,6 @@
 # Turing Machine
 
-A **Turing Machine** (TM) is the most powerful standard model of computation. Unlike finite automata and pushdown automata, a Turing Machine can read *and* write to an unbounded tape, giving it the ability to compute anything that is computable.
+A **Turing Machine** (TM) is the most powerful standard model of computation. Unlike finite automata and pushdown automata, a Turing Machine can read *and* write to an unbounded tape, giving it the ability to compute anything computable.
 
 ![TM simulation](/docs/tm-sim.png)
 
@@ -36,16 +36,16 @@ At each step the machine:
    - **Moves** the head left (L), right (R), or stays (S)
    - **Transitions** to a new state
 
-The machine halts when it enters the accepting state or the rejecting state — or when no applicable transition exists.
+The machine halts when it enters the accepting state, the rejecting state, or when no applicable transition exists.
 
 ### Church-Turing thesis
 
-The **Church-Turing thesis** states that any function which can be computed by an algorithm can be computed by a Turing Machine. This isn't a mathematical theorem (it can't be proven), but it is universally accepted. Every programming language, from Python to assembly, computes exactly what a TM can — no more, no less.
+The **Church-Turing thesis** states that any function which can be computed by an algorithm can be computed by a Turing Machine. This isn't a mathematical theorem (it can't be proven), but it is universally accepted. Every programming language, from Python to assembly, computes exactly what a TM can, no more and no less.
 
 ### Decidable vs recognizable languages
 
-- A language is **decidable** (recursive) if a TM always halts on every input — either accepting or rejecting.
-- A language is **recognizable** (recursively enumerable) if a TM accepts every string in the language, but may loop forever on strings not in the language.
+- A language is **decidable** (recursive) if a TM always halts on every input, either accepting or rejecting.
+- A language is **recognizable** (recursively enumerable) if a TM accepts every string in the language but may loop forever on strings not in the language.
 
 Every decidable language is recognizable, but not vice versa.
 
@@ -53,7 +53,7 @@ Every decidable language is recognizable, but not vice versa.
 
 > Given a TM *M* and input *w*, does *M* halt on *w*?
 
-Alan Turing proved this is **undecidable** — no algorithm can solve it for all possible TM/input pairs. This is proven by contradiction (diagonalization). The halting problem places a fundamental limit on what computation can achieve and has deep implications: you cannot write a perfect bug detector, a universal optimizer, or a program that decides all mathematical truths.
+Alan Turing proved this is **undecidable**: no algorithm can solve it for all possible TM/input pairs. This is proven by contradiction (diagonalization). The halting problem places a fundamental limit on what computation can achieve and has deep implications: you cannot write a perfect bug detector, a universal optimizer, or a program that decides all mathematical truths.
 
 ### Complexity classes
 
@@ -62,7 +62,7 @@ Alan Turing proved this is **undecidable** — no algorithm can solve it for all
 
 ### Universal Turing machine
 
-A **Universal Turing Machine** (UTM) takes as input the description of *any* TM and an input string, then simulates that TM on that input. This is the theoretical foundation of general-purpose computers — one machine that can run any program.
+A **Universal Turing Machine** (UTM) takes as input the description of *any* TM and an input string, then simulates that TM on that input. This is the theoretical foundation of general-purpose computers: one machine that can run any program.
 
 ### Classic examples
 
@@ -84,11 +84,11 @@ Turing Machine (Type 0 / unrestricted grammars)
     ⊃ NFA / DFA (Type 3 / regular grammars)
 ```
 
-- **DFA/NFA**: Fixed memory (states only). Can match regular expressions.
-- **PDA**: Stack-based memory. Can match balanced parentheses, palindromes of even length.
-- **TM**: Unlimited read/write tape. Can compute anything computable.
+- **DFA/NFA**: fixed memory (states only); can match regular expressions.
+- **PDA**: stack-based memory; can match balanced parentheses, palindromes of even length.
+- **TM**: unlimited read/write tape; can compute anything computable.
 
-Each level strictly increases in power. A TM can simulate any PDA, and a PDA can simulate any DFA — but not the other way around.
+Each level strictly increases in power. A TM can simulate any PDA, and a PDA can simulate any DFA, but not the other way around.
 
 ---
 
@@ -127,7 +127,7 @@ For example:
 
 ### Wildcard `*`
 
-The wildcard `*` matches **any symbol** on the tape. This is useful for "skip over" transitions where you want to scan past characters without caring what they are.
+The wildcard `*` matches **any symbol** on the tape. This is useful for "skip over" transitions where you want to scan past characters regardless of what they are.
 
 - `* → *, R` — move right over any symbol without changing it
 - `* → *, L` — move left over any symbol without changing it
@@ -140,11 +140,11 @@ The blank symbol `⊔` represents empty tape cells. You can read and write it li
 
 ### Multiple transitions
 
-Multiple transitions between the same pair of states are allowed. Each transition label is treated independently — the simulator tries them in order and uses the first match.
+Multiple transitions between the same pair of states are allowed. Each transition label is treated independently; the simulator tries them in order and uses the first match.
 
 ### The tape
 
-StateForge uses a **sparse Map-based tape**: only non-blank cells are stored in memory. This means the tape is effectively infinite in both directions without allocating unbounded memory.
+StateForge uses a **sparse Map-based tape** where only non-blank cells are stored in memory, making the tape effectively infinite in both directions without allocating unbounded memory.
 
 The tape visualization shows cells around the head position, with a **▼** marker indicating the current head position. The head cell is highlighted.
 
@@ -161,7 +161,7 @@ You can also press **Enter** to start or step through.
 
 ### Step limit
 
-The default step limit is **1000**. This prevents infinite loops from freezing the simulator. If a machine exceeds the limit, it reports **HALTED** status. You can adjust the limit in the header bar — increase it for complex machines that need more steps.
+The default step limit is **1000**. This prevents infinite loops from freezing the simulator. If a machine exceeds the limit, it reports **HALTED** status. You can adjust the limit in the header bar; increase it for complex machines that need more steps.
 
 ### Three outcomes
 
@@ -169,7 +169,7 @@ The default step limit is **1000**. This prevents infinite loops from freezing t
 |---|---|
 | **ACCEPTED** | The machine reached an **accepting state** |
 | **REJECTED** | The machine reached a state with no valid transition (and it's not accepting), or a rejecting state |
-| **HALTED** | The step limit was exceeded — the machine may be in an infinite loop |
+| **HALTED** | The step limit was exceeded; the machine may be in an infinite loop |
 
 ### Info display
 
@@ -202,10 +202,10 @@ Load these from the gallery to study how real TM designs work.
 
 - **Wildcard `*` saves many transitions.** Instead of writing separate transitions for every symbol in your alphabet, use `* → *, R` to scan past characters. This keeps your state diagram clean.
 
-- **Step limit protects against infinite loops.** If your machine legitimately needs more than 1000 steps (e.g., operating on long input), increase the limit. If it consistently hits the limit on short input, you likely have a bug causing an infinite loop.
+- **Step limit protects against infinite loops.** If your machine legitimately needs more than 1000 steps (e.g., for long input), increase the limit. If it consistently hits the limit on short input, you likely have a bug causing an infinite loop.
 
-- **Name states descriptively.** Use names like `scan-right`, `carry`, `return`, `done` instead of `q0`, `q1`, `q2`. Meaningful names make the machine's logic self-documenting and much easier to debug.
+- **Name states descriptively.** Use names like `scan-right`, `carry`, `return`, `done` instead of `q0`, `q1`, `q2`. Meaningful names make the machine's logic self-documenting.
 
 - **Test with edge cases.** Try empty input (ε), single-character input, and the smallest non-trivial case. TMs often have off-by-one bugs at tape boundaries.
 
-- **Think in phases.** Most TMs work in distinct phases (scan, mark, return, repeat). Design each phase as a group of states, then connect them. This modular approach scales better than trying to design the whole machine at once.
+- **Think in phases.** Most TMs work in distinct phases (scan, mark, return, repeat). Design each phase as a group of states, then connect them.

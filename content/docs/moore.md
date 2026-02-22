@@ -1,6 +1,6 @@
 # Moore Machine
 
-A **Moore machine** is a finite-state transducer whose output depends solely on the current state — not the transition being taken. This makes Moore machines particularly intuitive: if you know what state you're in, you know exactly what output is being produced.
+A **Moore machine** is a finite-state transducer whose output depends solely on the current state, not the transition being taken. This makes Moore machines particularly intuitive: if you know what state you're in, you know exactly what output is being produced.
 
 ---
 
@@ -19,7 +19,7 @@ A Moore machine is a 6-tuple **(Q, Σ, Λ, δ, ω, q₀)** where:
 | **ω: Q → Λ** | Output function (maps **states** to outputs) |
 | **q₀ ∈ Q** | Initial state |
 
-The critical distinction is **ω: Q → Λ** — the output function is defined on *states*, not on transitions. Every state has exactly one output symbol permanently associated with it.
+The critical distinction is **ω: Q → Λ**, where the output function is defined on *states*, not on transitions. Every state has exactly one output symbol permanently associated with it.
 
 ### Output behavior
 
@@ -48,16 +48,16 @@ This "output-length = input-length + 1" property is a signature of Moore machine
 **Equivalence.** Every Moore machine has an equivalent Mealy machine and vice versa — they recognize the same class of transductions (up to the initial output symbol). The conversion is constructive:
 
 - **Moore → Mealy:** Move each state's output onto all *incoming* transitions.
-- **Mealy → Moore:** Split states. If state *q* can be reached with transitions producing different outputs, create one copy of *q* per distinct output. This can cause **state explosion** — a Mealy machine with *n* states and *k* distinct outputs per state may become a Moore machine with up to *n × k* states.
+- **Mealy → Moore:** Split states. If state *q* can be reached with transitions producing different outputs, create one copy of *q* per distinct output. This can cause **state explosion**: a Mealy machine with *n* states and *k* distinct outputs per state may become a Moore machine with up to *n × k* states.
 
 ### Use cases
 
 Moore machines naturally model systems where **output is a property of the current state**:
 
-- **Traffic lights** — the state *is* the light color (red, yellow, green)
-- **Elevator controllers** — the state encodes the current floor and direction
-- **Vending machines** — state indicators (idle, selecting, dispensing)
-- **Synchronous digital circuits** — output is stable between clock edges, avoiding glitches that plague combinational (Mealy-style) outputs
+- **Traffic lights**: the state *is* the light color (red, yellow, green)
+- **Elevator controllers**: the state encodes the current floor and direction
+- **Vending machines**: state indicators (idle, selecting, dispensing)
+- **Synchronous digital circuits**: output is stable between clock edges, avoiding glitches that plague combinational (Mealy-style) outputs
 
 ---
 
@@ -94,7 +94,7 @@ Open the simulation panel to test your Moore machine:
 2. **Step** (Enter) to advance one symbol at a time, or **Fast Run** to process the entire input
 3. **Reset** to start over
 
-The step table shows each transition: the current state, input symbol consumed, the output produced by the *next* state, and which state is entered. The **output sequence** displayed is one character longer than the input — the initial state's output appears first.
+The step table shows each transition: the current state, input symbol consumed, the output produced by the *next* state, and which state is entered. The **output sequence** displayed is one character longer than the input, since the initial state's output appears first.
 
 ![Mealy/Moore simulation](/docs/mealy-sim.png)
 
@@ -120,7 +120,7 @@ Use meaningful names that describe *what the state represents*, not just sequent
 | `q1/1` | `odd/1` |
 | `q2/0` | `init/0` |
 
-The name before the `/` is documentation — make it count.
+The name before the `/` is documentation, so make it count.
 
 ### Output stability
 
@@ -134,6 +134,6 @@ The upside: reasoning is simpler. You can look at any state and immediately know
 
 ### Common mistakes
 
-- **Forgetting the `/output` in state labels** — a label like `q0` without a slash has no output. The simulator won't know what to produce. Always include `name/output`.
-- **Putting output on transitions** — that's Mealy, not Moore. In Moore mode, transition labels should be plain input symbols (e.g., `0`, `1`, `a`), not `input/output` pairs.
-- **Forgetting the initial output** — remember that the output sequence starts *before* the first input is consumed. The initial state's output is always the first character of the output string.
+- **Forgetting the `/output` in state labels.** A label like `q0` without a slash has no output. The simulator won't know what to produce. Always include `name/output`.
+- **Putting output on transitions.** That's Mealy, not Moore. In Moore mode, transition labels should be plain input symbols (e.g., `0`, `1`, `a`), not `input/output` pairs.
+- **Forgetting the initial output.** Remember that the output sequence starts *before* the first input is consumed. The initial state's output is always the first character of the output string.

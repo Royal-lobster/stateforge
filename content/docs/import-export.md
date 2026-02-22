@@ -30,4 +30,4 @@ After import, Zoom to Fit is automatically called to frame the loaded automaton.
 
 ## Auto-Save
 
-Your work is automatically saved to localStorage via Zustand's subscription mechanism. On reload, it restores your last automaton (states, transitions, mode, viewport). The URL hash takes priority over localStorage if present — this means opening a shared link always loads that specific automaton regardless of what was saved locally.
+Your work is automatically saved to localStorage via Zustand's subscription mechanism. On reload, it restores your last automaton (states, transitions, mode, viewport). The URL hash takes priority over localStorage if present, so opening a shared link always loads that specific automaton regardless of what was saved locally.

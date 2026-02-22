@@ -3,18 +3,18 @@
 The simulation panel sits at the bottom of the screen. Toggle it with <kbd>⌘.</kbd>. It has two tabs: **Single** (step-through one string) and **Multi** (batch test multiple strings).
 The panel is 192px tall on desktop and adapts to a compact mobile layout.
 
-## Single mode — controls
+## Single mode: controls
 
 Type an input string in the input field and use these controls:
 
 | Shortcut | Action |
 |----------|--------|
-| <kbd>⌘ Enter</kbd> | Start simulation — compute epsilon closure of initial state and enter stepping mode |
-| <kbd>⌘ '</kbd> | Step — consume one input symbol, compute next states via transition function + epsilon closure |
-| <kbd>⇧⌘ Enter</kbd> | Fast Run — instantly compute final accept/reject result without stepping |
-| <kbd>⌘0</kbd> | Reset — clear simulation state, return to idle |
+| <kbd>⌘ Enter</kbd> | Start simulation: compute epsilon closure of initial state and enter stepping mode |
+| <kbd>⌘ '</kbd> | Step: consume one input symbol, compute next states via transition function + epsilon closure |
+| <kbd>⇧⌘ Enter</kbd> | Fast Run: instantly compute final accept/reject result without stepping |
+| <kbd>⌘0</kbd> | Reset: clear simulation state, return to idle |
 
-## Single mode — visual feedback
+## Single mode: visual feedback
 
 → The **input tape** visualization shows each character in a cell: consumed symbols are dimmed (sunken background), the current symbol is highlighted in yellow, and remaining symbols have a normal background
 

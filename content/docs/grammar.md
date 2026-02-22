@@ -66,7 +66,7 @@ The Cocke-Younger-Kasami algorithm for parsing context-free grammars.
 
 → **Auto-CNF:** If the grammar is not in CNF, it is automatically converted first
 
-→ **Empty string:** Handled specially — checks if S → ε exists in the grammar
+→ **Empty string:** Handled specially; checks if S → ε exists in the grammar
 
 → **Table display:** Shows the triangular CYK table where cell [l][i] contains the set of non-terminals that derive the substring from position i with length l+1. Populated cells show non-terminals in accent color; empty cells show ∅.
 

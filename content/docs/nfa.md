@@ -1,4 +1,4 @@
-# NFA — Nondeterministic Finite Automaton
+# NFA: Nondeterministic Finite Automaton
 
 A **Nondeterministic Finite Automaton** extends the DFA model by allowing multiple possible transitions from a single state on the same input symbol, including transitions on no input at all (ε-transitions). NFAs recognize exactly the regular languages, just like DFAs, but are often more concise to construct.
 
@@ -21,19 +21,19 @@ An NFA is a 5-tuple **(Q, Σ, δ, q₀, F)** where:
 The critical difference from a DFA is the transition function **δ**. Instead of mapping to a single next state, it maps to a **set of states** (the power set P(Q)). This means:
 
 - A state may have **zero, one, or many** transitions on the same symbol.
-- A state may have **ε-transitions** — transitions that happen without consuming any input.
+- A state may have **ε-transitions**, which happen without consuming any input.
 
 ### Nondeterminism
 
 Nondeterminism means the machine can be in **multiple states simultaneously**. Think of it as the NFA "guessing" the right path, or equivalently, exploring all possible paths in parallel:
 
 - **Multiple transitions on the same symbol:** From state q₁, reading `a` might lead to both q₂ and q₃.
-- **ε-transitions:** The machine can move from one state to another "for free" — without reading any input character.
+- **ε-transitions:** The machine can move from one state to another "for free," without reading any input character.
 - **No transition (dead end):** If no transition exists for a given symbol, that computation branch simply dies.
 
 ### Acceptance
 
-A string **w** is accepted by an NFA if there **exists at least one** computation path from q₀ that consumes all of w and ends in an accepting state. It doesn't matter if other paths reject or get stuck — one accepting path is enough.
+A string **w** is accepted by an NFA if there **exists at least one** computation path from q₀ that consumes all of w and ends in an accepting state. It doesn't matter if other paths reject or get stuck; one accepting path is enough.
 
 > **Key insight:** DFA acceptance requires *the* path to accept. NFA acceptance requires *some* path to accept.
 
@@ -60,7 +60,7 @@ The ε-closure is computed at the start of simulation (from the initial state) a
 
 ### Equivalence with DFA
 
-**Every NFA has an equivalent DFA**, and vice versa — they recognize exactly the same class of languages (the regular languages).
+**Every NFA has an equivalent DFA**, and vice versa. They recognize exactly the same class of languages (the regular languages).
 
 The **subset construction** (also called the powerset construction) converts an NFA with *n* states into an equivalent DFA where:
 
@@ -69,7 +69,7 @@ The **subset construction** (also called the powerset construction) converts an 
 - A DFA state is accepting if it contains **any** NFA accepting state.
 - Transitions are computed by: for each symbol, take the union of all NFA transitions from states in the current subset, then compute the ε-closure.
 
-**Blowup:** An NFA with *n* states can produce a DFA with up to **2ⁿ** states. In practice the reachable subset is usually much smaller, but worst-case exponential blowup is possible.
+**Blowup.** An NFA with *n* states can produce a DFA with up to **2ⁿ** states. In practice the reachable subset is usually much smaller, but worst-case exponential blowup is possible.
 
 ### Thompson's construction
 
@@ -89,9 +89,9 @@ Each construction produces exactly **two new states** (plus the sub-NFA states),
 
 ### Use cases
 
-- **Regular expression matching** — regex engines often compile patterns to NFAs
-- **Compiler lexers** — tokenizers use NFAs (converted to DFAs) for fast lexical analysis
-- **Protocol modeling** — nondeterminism naturally models concurrent or ambiguous behavior
+- **Regular expression matching**: regex engines often compile patterns to NFAs
+- **Compiler lexers**: tokenizers use NFAs (converted to DFAs) for fast lexical analysis
+- **Protocol modeling**: nondeterminism naturally models concurrent or ambiguous behavior
 
 ---
 
@@ -99,15 +99,15 @@ Each construction produces exactly **two new states** (plus the sub-NFA states),
 
 ### Switching to NFA mode
 
-Press <kbd>2</kbd> or select **NFA** from the mode switcher in the sidebar. When you create a new transition in NFA mode, the default symbol is **ε** (epsilon), reflecting the central role of ε-transitions in NFAs.
+Press <kbd>2</kbd> or select **NFA** from the mode switcher in the sidebar. When you create a new transition in NFA mode, the default symbol is **ε** (epsilon), reflecting the central role of ε-transitions.
 
 ### Building an NFA
 
-1. **Add states** — click the canvas (or use the state tool). The first state is automatically marked as initial.
-2. **Add transitions** — drag from one state to another. The default label is `ε`; double-click the transition to edit symbols.
-3. **Multiple symbols** — enter comma-separated symbols on a single transition (e.g., `a, b`). Each symbol creates a separate logical transition.
-4. **ε-transitions** — keep the default `ε` symbol or add it alongside other symbols for "free" state changes.
-5. **Self-loops** — drag from a state back to itself for repetition patterns.
+1. **Add states**: click the canvas (or use the state tool). The first state is automatically marked as initial.
+2. **Add transitions**: drag from one state to another. The default label is `ε`; double-click the transition to edit symbols.
+3. **Multiple symbols**: enter comma-separated symbols on a single transition (e.g., `a, b`). Each symbol creates a separate logical transition.
+4. **ε-transitions**: keep the default `ε` symbol or add it alongside other symbols for "free" state changes.
+5. **Self-loops**: drag from a state back to itself for repetition patterns.
 
 ### Simulating an NFA
 
@@ -115,7 +115,7 @@ Open the simulation panel (bottom of the screen) and enter an input string.
 
 **How NFA simulation works in StateForge:**
 
-1. **Start** (<kbd>Enter</kbd> or ▶): The simulator computes the **ε-closure** of the initial state. All states in this closure become active — you'll see them highlighted on the canvas and listed as chips in the simulation panel.
+1. **Start** (<kbd>Enter</kbd> or ▶): The simulator computes the **ε-closure** of the initial state. All states in this closure become active, highlighted on the canvas and listed as chips in the simulation panel.
 
 2. **Step** (<kbd>Enter</kbd> or ⏭): For each active state, the simulator finds all transitions matching the next input symbol, collects the target states, then computes the **ε-closure** of that set. The result becomes the new set of active states.
 
@@ -125,7 +125,7 @@ Open the simulation panel (bottom of the screen) and enter an input string.
 
 ![NFA simulation](/docs/sim-accepted.png)
 
-**Key difference from DFA simulation:** A DFA always has exactly one active state. An NFA tracks **all possible states simultaneously** — you'll see multiple highlighted states on the canvas and multiple chips in the "Active States" display.
+**Key difference from DFA simulation:** A DFA always has exactly one active state. An NFA tracks **all possible states simultaneously**, so you'll see multiple highlighted states on the canvas and multiple chips in the "Active States" display.
 
 ### Multi-run testing
 
@@ -167,14 +167,14 @@ A DFA state is marked accepting if its subset contains **any** NFA accepting sta
 
 ## Tips
 
-- **ε-transitions for "free" moves** — use them to connect sub-automata without consuming input. They're the glue that makes Thompson's construction work and lets you build complex NFAs from simple pieces.
+- **ε-transitions for "free" moves.** Use them to connect sub-automata without consuming input. They're the glue that makes Thompson's construction work and lets you build complex NFAs from simple pieces.
 
-- **NFAs can be much smaller than equivalent DFAs** — a classic example: the language "strings where the n-th symbol from the end is `a`" needs only O(n) NFA states but O(2ⁿ) DFA states. When modeling, start with an NFA if it's more natural.
+- **NFAs can be much smaller than equivalent DFAs.** A classic example: the language "strings where the n-th symbol from the end is `a`" needs only O(n) NFA states but O(2ⁿ) DFA states. When modeling, start with an NFA if it's more natural.
 
-- **Simulation shows all active states** — during stepping, watch the highlighted states on the canvas. If **any** active state is accepting when input is consumed, the string is accepted. This parallel exploration is the essence of nondeterminism.
+- **Simulation shows all active states.** During stepping, watch the highlighted states on the canvas. If **any** active state is accepting when input is consumed, the string is accepted. This parallel exploration is the essence of nondeterminism.
 
-- **Comma-separated symbols** — put multiple symbols on one transition edge to keep the diagram clean. `a, b` on one arrow is equivalent to two separate arrows.
+- **Comma-separated symbols.** Put multiple symbols on one transition edge to keep the diagram clean. `a, b` on one arrow is equivalent to two separate arrows.
 
-- **Convert and compare** — build an NFA, then convert to DFA to see the subset construction in action. Compare the state counts to appreciate the size tradeoff.
+- **Convert and compare.** Build an NFA, then convert to DFA to see the subset construction in action. Compare the state counts to appreciate the size tradeoff.
 
-- **Test with Multi-Run** — after building your NFA, batch-test edge cases (empty string, single characters, long strings) to build confidence in your design.
+- **Test with Multi-Run.** After building your NFA, batch-test edge cases (empty string, single characters, long strings) to build confidence in your design.
