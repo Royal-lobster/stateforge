@@ -6,7 +6,7 @@ Everything runs client-side: your automaton is encoded into the URL hash on ever
 
 ![Full app view — DFA with states, transitions, sidebar, and simulation panel](/docs/canvas-dfa.png)
 
-## Why StateForge?
+## Why StateForge
 
 → **No install, no accounts** — runs in any browser, works offline
 

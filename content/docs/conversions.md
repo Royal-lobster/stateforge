@@ -2,7 +2,7 @@
 
 Open the conversions panel with <kbd>⌘M</kbd> or the CONVERT button in the toolbar. The panel has 6 tabs, each with its own step-through interface. All conversions support: ▶ Run (compute full result), ⏩ Step (advance one step), ⏭ Fast Forward (show all steps), and ↺ Reset.
 
-## NFA → DFA (Subset Construction)
+## NFA → DFA (subset construction)
 
 Converts the current NFA to an equivalent DFA using the standard subset construction algorithm. Requires the automaton to be in NFA mode.
 
@@ -20,7 +20,7 @@ Converts the current NFA to an equivalent DFA using the standard subset construc
 
 → **Layout:** Result states are arranged in a circle with radius proportional to count
 
-## DFA Minimization (Table-Filling)
+## DFA minimization (table-filling)
 
 Minimizes the current DFA using the table-filling (Myhill-Nerode) algorithm. Requires DFA mode.
 
@@ -36,7 +36,7 @@ Minimizes the current DFA using the table-filling (Myhill-Nerode) algorithm. Req
 
 → **Result:** Reports how many states were removed. If already minimal, shows "DFA is already minimal!"
 
-## RE → NFA (Thompson's Construction)
+## RE → NFA (Thompson's construction)
 
 Enter a regular expression and convert it to an NFA using Thompson's construction.
 
@@ -50,7 +50,7 @@ Enter a regular expression and convert it to an NFA using Thompson's constructio
 
 → **Error handling:** Parse errors are displayed in red (e.g., "Unexpected character at position 5")
 
-## FA → RE (State Elimination)
+## FA → RE (state elimination)
 
 Converts the current finite automaton to a regular expression using the GNFA state elimination method.
 
@@ -62,7 +62,7 @@ Converts the current finite automaton to a regular expression using the GNFA sta
 
 → **Result:** The final regex is the label on the edge from GNFA start to GNFA accept. A COPY RE button copies it to clipboard. Basic simplification removes redundant ε concatenations.
 
-## FA → Grammar
+## FA → grammar
 
 Generates a right-linear grammar from the current finite automaton.
 
@@ -74,7 +74,7 @@ Generates a right-linear grammar from the current finite automaton.
 
 → **Output:** Productions displayed with start symbol indicated. COPY GRAMMAR button copies in standard notation.
 
-## Combine (DFA Operations)
+## Combine (DFA operations)
 
 Combine the canvas DFA (automaton A) with a second automaton B (specified as a regular expression). Requires DFA mode.
 

@@ -1,10 +1,10 @@
-# Import/Export & Sharing
+# Import/export & sharing
 
-## URL Sharing
+## URL sharing
 
 Your automaton is automatically encoded in the URL hash on every change. The encoding includes all state positions, labels, flags (initial/accepting), transitions with symbols, and the current mode. Press <kbd>⌘S</kbd> or click **SHARE** to copy the full URL to clipboard. Anyone opening the URL will see your exact automaton with identical layout.
 
-## JSON Export
+## JSON export
 
 Press <kbd>⌘E</kbd> to download your automaton as a JSON file. The format is:
 

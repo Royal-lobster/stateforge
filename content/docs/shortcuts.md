@@ -1,4 +1,4 @@
-# Keyboard Shortcuts
+# Keyboard shortcuts
 
 Press <kbd>?</kbd> in the app to see the shortcuts overlay. Full list:
 
@@ -71,5 +71,3 @@ Press <kbd>?</kbd> in the app to see the shortcuts overlay. Full list:
 | <kbd>?</kbd> | Show shortcuts overlay |
 
 ---
-
-StateForge — No install, no accounts, just a URL.

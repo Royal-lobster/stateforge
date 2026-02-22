@@ -8,7 +8,7 @@ A **Mealy machine** is a finite-state transducer whose outputs are determined by
 
 ## Theory
 
-### Formal Definition
+### Formal definition
 
 A Mealy machine is a 6-tuple **(Q, Σ, Λ, δ, ω, q₀)** where:
 
@@ -23,7 +23,7 @@ A Mealy machine is a 6-tuple **(Q, Σ, Λ, δ, ω, q₀)** where:
 
 The key distinction: **ω depends on both the current state and the input symbol**. Each transition edge carries both an input and an output, written as `input/output`.
 
-### Transducer Concept
+### Transducer concept
 
 Unlike acceptors (DFA, NFA) that classify strings as accepted or rejected, a Mealy machine is a **transducer** — it transforms an input sequence into an output sequence. For every input symbol consumed, exactly one output symbol is produced. Therefore:
 
@@ -45,7 +45,7 @@ The two classical transducer models differ in where output is associated:
 
 **Equivalence theorem:** Every Mealy machine has an equivalent Moore machine and vice versa. The equivalent Moore machine may require up to |Q| × |Λ| states (one for each state–output pair), while converting Moore → Mealy never increases the state count.
 
-### Use Cases
+### Use cases
 
 - **Serial protocol design** — encoding/decoding bit streams (e.g., Manchester encoding)
 - **Signal processing** — edge detection, filtering
@@ -54,7 +54,7 @@ The two classical transducer models differ in where output is associated:
 - **Parity checkers** — track even/odd parity of a bit stream
 - **Sequence transformers** — map one symbol stream to another (e.g., complement, delay, cipher)
 
-### Classic Examples
+### Classic examples
 
 **Parity Checker** — Outputs `0` when the number of `1`s seen so far is even, `1` when odd:
 
@@ -74,7 +74,7 @@ The two classical transducer models differ in where output is associated:
 
 ## Using Mealy in StateForge
 
-### Switching to Mealy Mode
+### Switching to Mealy mode
 
 Press **`5`** to switch the editor to **Mealy machine** mode. The mode indicator in the toolbar updates, and the simulation panel switches to the Mealy transducer interface. You can also select Mealy from the mode dropdown in the sidebar.
 
@@ -82,7 +82,7 @@ In Mealy mode:
 - **Accepting states are disabled.** Transducers don't accept or reject — they transform. The toggle-accepting action has no effect.
 - **Transition labels use `input/output` format.** Each symbol on a transition is written as a pair separated by `/`.
 
-### Transition Format
+### Transition format
 
 When editing a transition, enter symbols in the format:
 
@@ -113,7 +113,7 @@ The panel displays:
 - **Output**: the accumulated output string, built symbol-by-symbol as the machine processes input
 - **Step counter**: `(current/total)` showing progress through the input
 
-#### Step Table
+#### Step table
 
 As you step through the simulation, a table shows each processing step:
 
@@ -134,7 +134,7 @@ The canvas highlights the current state as you step through, giving visual feedb
 
 If no valid transition exists for the current input symbol, the simulation halts with an **ERROR** status and displays "No valid transition found."
 
-### Gallery Examples
+### Gallery examples
 
 The gallery includes pre-built Mealy machines you can load:
 
@@ -147,18 +147,18 @@ Load a gallery example to see a working Mealy machine with transitions already l
 
 ## Tips & Mealy vs Moore
 
-### When to Choose Mealy
+### When to choose Mealy
 
 - **Faster response**: output appears on the *same clock cycle* as the input, whereas Moore output is delayed by one cycle (output depends only on state, which updates after the transition). In hardware design, this one-cycle advantage matters.
 - **Fewer states**: since output is encoded in transitions rather than states, a Mealy machine often needs fewer states than the equivalent Moore machine. A Moore machine must split states to distinguish different outputs.
 
-### Common Mistakes
+### Common mistakes
 
 - **Forgetting the output on transitions** — every transition in a Mealy machine must have the `input/output` format. A bare symbol like `0` (without `/output`) will not be recognized by the simulator. Always write `0/0`, `0/1`, etc.
 - **Expecting accept/reject behavior** — Mealy machines are transducers, not acceptors. There are no accepting states. If you need acceptance, use DFA or NFA mode.
 - **Mismatched output length** — in a correct Mealy machine, every input symbol produces exactly one output symbol. If simulation shows an error partway through, check that all input symbols have corresponding transitions from every reachable state.
 
-### Quick Reference
+### Quick reference
 
 | Want to... | Do this |
 |------------|---------|

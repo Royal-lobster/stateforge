@@ -8,7 +8,7 @@ A **Deterministic Finite Automaton** is one of the simplest models of computatio
 
 The key word is *deterministic*: for every state and input symbol, there is **exactly one** next state. No ambiguity, no choices, no backtracking.
 
-### Formal Definition
+### Formal definition
 
 A DFA is defined as a 5-tuple **(Q, Σ, δ, q₀, F)**:
 
@@ -22,7 +22,7 @@ A DFA is defined as a 5-tuple **(Q, Σ, δ, q₀, F)**:
 
 The transition function δ is **total** — it must be defined for every (state, symbol) pair. If you have 3 states and 2 symbols, you need exactly 6 transitions defined.
 
-### How It Works
+### How it works
 
 1. The DFA starts in the initial state q₀
 2. It reads the input string left-to-right, one symbol at a time
@@ -42,7 +42,7 @@ Input "abba":  even →a→ odd →b→ odd →b→ odd →a→ even  ✓ Accept
 Input "ab":    even →a→ odd →b→ odd                     ✗ Reject
 ```
 
-### DFA vs NFA: Determinism Explained
+### DFA vs NFA: determinism explained
 
 In a **Nondeterministic Finite Automaton (NFA)**:
 - A state can have **multiple transitions** on the same symbol (or none at all)
@@ -56,7 +56,7 @@ In a **DFA**:
 
 Despite the NFA's apparent flexibility, **DFAs and NFAs are equivalent in power** — they recognize exactly the same class of languages (regular languages). Any NFA can be converted to a DFA via the **subset construction** algorithm, though the DFA may have exponentially more states.
 
-### Language Recognition
+### Language recognition
 
 The **language** of a DFA *M*, written L(M), is the set of all strings it accepts:
 
@@ -64,7 +64,7 @@ The **language** of a DFA *M*, written L(M), is the set of all strings it accept
 
 where δ* extends δ to strings (processing one symbol at a time). A string is **accepted** if processing it from q₀ lands in an accepting state; otherwise it is **rejected**. Every string gets a definitive answer — there's no "maybe."
 
-### Practical Applications
+### Practical applications
 
 - **Lexical analysis** — Compilers use DFAs to tokenize source code (recognizing keywords, identifiers, numbers)
 - **Pattern matching** — Regular expressions compile to DFAs for fast string searching
@@ -72,7 +72,7 @@ where δ* extends δ to strings (processing one symbol at a time). A string is *
 - **Hardware design** — Digital circuits implement DFAs for control logic
 - **Text processing** — grep, sed, and similar tools use DFA-based engines
 
-### Key Properties
+### Key properties
 
 **Closure properties** — Regular languages (those recognized by DFAs) are closed under:
 - **Union**: L₁ ∪ L₂ is regular if L₁ and L₂ are regular
@@ -104,7 +104,7 @@ For anything beyond regular languages, you need pushdown automata or Turing mach
 
 ![DFA canvas view](/docs/canvas-dfa.png)
 
-### Switching to DFA Mode
+### Switching to DFA mode
 
 DFA is the default mode when you open StateForge. You can switch to it anytime:
 
@@ -113,20 +113,20 @@ DFA is the default mode when you open StateForge. You can switch to it anytime:
 
 ### Building a DFA
 
-#### Adding States
+#### Adding states
 
 - **Double-click** on the canvas to create a new state
 - Or select the **S tool** from the toolbar and click anywhere on the canvas
 - States are labeled automatically (q₀, q₁, q₂, …)
 
-#### Setting State Properties
+#### Setting state properties
 
 Right-click a state to access its context menu:
 
 - **Set as Initial** — marks the state as the start state (shown with an arrow)
 - **Set as Accepting** — marks the state as an accepting/final state (shown with a double circle)
 
-#### Adding Transitions
+#### Adding transitions
 
 - Select the **T tool** from the toolbar
 - Click a source state, then click the destination state
@@ -134,7 +134,7 @@ Right-click a state to access its context menu:
 - Click the transition label to edit — you can change the symbol or add multiple symbols separated by commas
 - Self-loops: click a state and then click it again
 
-### DFA Validation
+### DFA validation
 
 The **Properties panel** in the sidebar automatically validates your DFA and shows errors:
 
@@ -150,7 +150,7 @@ Fix all validation errors to ensure your automaton is a valid DFA.
 
 StateForge provides two simulation modes for testing your DFA.
 
-#### Single Run
+#### Single run
 
 1. Enter an input string in the simulation input field
 2. **Start** (<kbd>Enter</kbd>) — begins the simulation, highlighting the initial state
@@ -164,7 +164,7 @@ The simulation panel shows:
 - Active transition labels during stepping
 - Final result: **Accepted** (landed on accepting state) or **Rejected**
 
-#### Multi-Run (Batch Testing)
+#### Multi-run (batch testing)
 
 1. Click the **Multi** tab in the simulation panel
 2. Enter multiple test strings, one per line
@@ -174,7 +174,7 @@ The simulation panel shows:
 
 This is ideal for verifying your DFA against a suite of test cases.
 
-### Trap State (Dead State)
+### Trap state (dead state)
 
 A valid DFA requires transitions for **every** (state, symbol) pair. In practice, many transitions lead to a non-accepting "trap" or "dead" state from which there is no escape.
 
@@ -205,33 +205,33 @@ For combine operations, you'll import or define a second automaton. Complement o
 
 ---
 
-## Tips & Common Mistakes
+## Tips & common mistakes
 
-### ❌ Forgetting the Trap State
+### Forgetting the trap state
 
 A DFA's transition function must be **total** — every state needs a transition for every symbol in the alphabet. If your DFA is missing transitions, it's technically incomplete.
 
 **Fix:** Click **+ Add Trap State** in the sidebar to auto-generate missing transitions to a dead state.
 
-### ❌ Multiple Initial States
+### Multiple initial states
 
 A DFA has **exactly one** initial state. If you accidentally mark multiple states as initial, the properties panel will flag this error.
 
 **Fix:** Right-click the extra initial states and deselect "Initial."
 
-### ❌ Using ε-Transitions
+### Using ε-transitions
 
 Epsilon (ε) transitions are an NFA feature. They are **not allowed** in a DFA. If you add one, the validator will report an error.
 
 **Fix:** Remove the ε-transition, or switch to NFA mode (<kbd>2</kbd>) if your design requires it. You can then convert NFA → DFA using subset construction.
 
-### ❌ Duplicate Transitions on the Same Symbol
+### Duplicate transitions on the same symbol
 
 If state q₁ has two different transitions on symbol `a` (going to different states), the automaton is nondeterministic — not a valid DFA.
 
 **Fix:** Remove the duplicate transition. If you need nondeterminism, use NFA mode and convert to DFA afterward.
 
-### 💡 General Tips
+### General tips
 
 - **Start simple** — sketch the DFA on paper first, identifying what each state "remembers"
 - **Think in terms of state meaning** — label states by what property they track (e.g., "seen odd number of a's")

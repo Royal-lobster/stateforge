@@ -1,8 +1,8 @@
-# Grammar Editor
+# Grammar editor
 
 Press <kbd>7</kbd> or click **CFG** in the toolbar to open the grammar editor. It replaces the canvas with a split-pane view: grammar text editor on the left (320px wide on desktop, 40% height on mobile), tools panel on the right.
 
-## Grammar Syntax
+## Grammar syntax
 
 → Write productions with `→`, `->`, or `::=` as the arrow
 
@@ -18,7 +18,7 @@ Press <kbd>7</kbd> or click **CFG** in the toolbar to open the grammar editor. I
 
 → The first production's head becomes the start symbol
 
-## Built-in Examples
+## Built-in examples
 
 Load from the dropdown:
 
@@ -30,7 +30,7 @@ Load from the dropdown:
 
 → **Palindrome:** `S → aSa | bSb | a | b | ε`
 
-## Grammar Classification
+## Grammar classification
 
 The grammar is automatically classified and shown in the header:
 
@@ -60,7 +60,7 @@ Five standard grammar transformations, each with step-by-step explanations:
 
 Each transform shows intermediate productions at each step. Click **APPLY TO EDITOR** to replace the grammar text with the result.
 
-## CYK Parser
+## CYK parser
 
 The Cocke-Younger-Kasami algorithm for parsing context-free grammars.
 
@@ -74,7 +74,7 @@ The Cocke-Younger-Kasami algorithm for parsing context-free grammars.
 
 → **Steps:** Each step shows which substring was analyzed and what non-terminals were found
 
-## LL(1) Parser
+## LL(1) parser
 
 A predictive top-down parser using FIRST and FOLLOW sets.
 
@@ -90,7 +90,7 @@ A predictive top-down parser using FIRST and FOLLOW sets.
 
 → **Parse tree:** If successful, an interactive collapsible parse tree is displayed
 
-## Brute Force Parser
+## Brute force parser
 
 A BFS exhaustive search parser that works with any grammar type.
 

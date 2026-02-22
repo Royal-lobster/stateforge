@@ -1,8 +1,8 @@
-# L-Systems
+# L-systems
 
 Press <kbd>8</kbd> or click **L-SYS** in the toolbar. The L-system view shows controls on the left (264px on desktop, 35% on mobile) and a real-time turtle graphics canvas on the right, rendered using HTML Canvas 2D with device pixel ratio scaling.
 
-## How L-Systems Work
+## How L-systems work
 
 An L-system (Lindenmayer system) defines a string rewriting system:
 
@@ -11,7 +11,7 @@ An L-system (Lindenmayer system) defines a string rewriting system:
 3. Repeat for the specified number of **iterations**
 4. Interpret the final string as **turtle graphics** drawing commands
 
-## Turtle Graphics Commands
+## Turtle graphics commands
 
 | Command | Action |
 |---------|--------|
@@ -24,7 +24,7 @@ An L-system (Lindenmayer system) defines a string rewriting system:
 
 The turtle starts at (0, 0) pointing upward (−π/2 radians). The drawing is automatically scaled and centered to fit the canvas with 20px padding.
 
-## Built-in Presets
+## Built-in presets
 
 | Preset | Axiom | Angle | Iterations | Rules |
 |--------|-------|-------|------------|-------|
@@ -35,7 +35,7 @@ The turtle starts at (0, 0) pointing upward (−π/2 radians). The drawing is au
 | Hilbert Curve | `A` | 90° | 4 | A=-BF+AFA+FB-, B=+AF-BFB-FA+ |
 | Penrose Tiling (P3) | `[7]++[7]++[7]++[7]++[7]` | 36° | 4 | 4 rules for digits 6-9 |
 
-## Custom Rules
+## Custom rules
 
 → Set the **axiom** (starting string) in the Axiom field
 

@@ -6,7 +6,7 @@ A **Moore machine** is a finite-state transducer whose output depends solely on 
 
 ## Theory
 
-### Formal Definition
+### Formal definition
 
 A Moore machine is a 6-tuple **(Q, Σ, Λ, δ, ω, q₀)** where:
 
@@ -21,7 +21,7 @@ A Moore machine is a 6-tuple **(Q, Σ, Λ, δ, ω, q₀)** where:
 
 The critical distinction is **ω: Q → Λ** — the output function is defined on *states*, not on transitions. Every state has exactly one output symbol permanently associated with it.
 
-### Output Behavior
+### Output behavior
 
 For an input string of length *n*, a Moore machine produces an output of length **n + 1**. The extra symbol comes from the initial state, which produces output before any input is consumed.
 
@@ -50,7 +50,7 @@ This "output-length = input-length + 1" property is a signature of Moore machine
 - **Moore → Mealy:** Move each state's output onto all *incoming* transitions.
 - **Mealy → Moore:** Split states. If state *q* can be reached with transitions producing different outputs, create one copy of *q* per distinct output. This can cause **state explosion** — a Mealy machine with *n* states and *k* distinct outputs per state may become a Moore machine with up to *n × k* states.
 
-### Use Cases
+### Use cases
 
 Moore machines naturally model systems where **output is a property of the current state**:
 
@@ -63,11 +63,11 @@ Moore machines naturally model systems where **output is a property of the curre
 
 ## Using Moore in StateForge
 
-### Switching to Moore Mode
+### Switching to Moore mode
 
 Press **`6`** or select **Moore** from the mode switcher in the toolbar. The canvas and simulation panel adapt to Moore semantics.
 
-### State Label Format
+### State label format
 
 In Moore mode, each state's label encodes both the name and the output, separated by a forward slash:
 
@@ -98,7 +98,7 @@ The step table shows each transition: the current state, input symbol consumed, 
 
 ![Mealy/Moore simulation](/docs/mealy-sim.png)
 
-### Gallery Examples
+### Gallery examples
 
 StateForge ships with two Moore gallery examples:
 
@@ -108,9 +108,9 @@ StateForge ships with two Moore gallery examples:
 
 ---
 
-## Tips & Best Practices
+## Tips & best practices
 
-### Naming States
+### Naming states
 
 Use meaningful names that describe *what the state represents*, not just sequential numbers:
 
@@ -122,17 +122,17 @@ Use meaningful names that describe *what the state represents*, not just sequent
 
 The name before the `/` is documentation — make it count.
 
-### Output Stability
+### Output stability
 
 A Moore machine's output **only changes when the state changes**. Between transitions, the output is rock-steady. This is exactly why hardware designers favor Moore machines for synchronous circuits — no transient glitches.
 
-### State Count Trade-off
+### State count trade-off
 
 Moore machines typically require **more states** than an equivalent Mealy machine because the output must be "baked into" the state. If two transitions into the same logical state would produce different outputs (in Mealy), Moore needs separate states for each output variant.
 
 The upside: reasoning is simpler. You can look at any state and immediately know its output without considering how you arrived there.
 
-### Common Mistakes
+### Common mistakes
 
 - **Forgetting the `/output` in state labels** — a label like `q0` without a slash has no output. The simulator won't know what to produce. Always include `name/output`.
 - **Putting output on transitions** — that's Mealy, not Moore. In Moore mode, transition labels should be plain input symbols (e.g., `0`, `1`, `a`), not `input/output` pairs.

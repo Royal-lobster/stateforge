@@ -3,7 +3,7 @@
 The simulation panel sits at the bottom of the screen. Toggle it with <kbd>⌘.</kbd>. It has two tabs: **Single** (step-through one string) and **Multi** (batch test multiple strings).
 The panel is 192px tall on desktop and adapts to a compact mobile layout.
 
-## Single Mode — Controls
+## Single mode — controls
 
 Type an input string in the input field and use these controls:
 
@@ -14,7 +14,7 @@ Type an input string in the input field and use these controls:
 | <kbd>⇧⌘ Enter</kbd> | Fast Run — instantly compute final accept/reject result without stepping |
 | <kbd>⌘0</kbd> | Reset — clear simulation state, return to idle |
 
-## Single Mode — Visual Feedback
+## Single mode — visual feedback
 
 → The **input tape** visualization shows each character in a cell: consumed symbols are dimmed (sunken background), the current symbol is highlighted in yellow, and remaining symbols have a normal background
 
@@ -32,7 +32,7 @@ Type an input string in the input field and use these controls:
 
 → The idle state shows useful info: mode, state count, alphabet set, and warnings for missing initial or accepting states
 
-## NFA Simulation Algorithm
+## NFA simulation algorithm
 
 For NFA mode (and generally for DFA too, since the same engine handles both), simulation uses a set-based approach:
 
@@ -43,7 +43,7 @@ For NFA mode (and generally for DFA too, since the same engine handles both), si
 
 The epsilon closure is computed using a stack-based DFS: start with the given states, and for each state, follow all ε-transitions and add newly discovered states to the closure.
 
-## Multi-Run (Batch Testing)
+## Multi-run (batch testing)
 
 Switch to the "Multi" tab to test multiple strings at once. Enter one string per line in the textarea (an empty line represents ε), then click **RUN ALL**. Each string is run through the full automaton simulation independently.
 

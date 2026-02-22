@@ -1,12 +1,12 @@
 # NFA — Nondeterministic Finite Automaton
 
-A **Nondeterministic Finite Automaton** extends the DFA model by allowing multiple possible transitions from a single state on the same input symbol—including transitions on no input at all (ε-transitions). NFAs recognize exactly the regular languages, just like DFAs, but are often more concise to construct.
+A **Nondeterministic Finite Automaton** extends the DFA model by allowing multiple possible transitions from a single state on the same input symbol, including transitions on no input at all (ε-transitions). NFAs recognize exactly the regular languages, just like DFAs, but are often more concise to construct.
 
 ---
 
 ## Theory
 
-### Formal Definition
+### Formal definition
 
 An NFA is a 5-tuple **(Q, Σ, δ, q₀, F)** where:
 
@@ -37,7 +37,7 @@ A string **w** is accepted by an NFA if there **exists at least one** computatio
 
 > **Key insight:** DFA acceptance requires *the* path to accept. NFA acceptance requires *some* path to accept.
 
-### Epsilon Closure
+### Epsilon closure
 
 The **ε-closure** of a set of states S is the set of all states reachable from any state in S by following only ε-transitions (zero or more of them). This includes the states in S themselves.
 
@@ -71,7 +71,7 @@ The **subset construction** (also called the powerset construction) converts an 
 
 **Blowup:** An NFA with *n* states can produce a DFA with up to **2ⁿ** states. In practice the reachable subset is usually much smaller, but worst-case exponential blowup is possible.
 
-### Thompson's Construction
+### Thompson's construction
 
 **Thompson's construction** builds an NFA from a regular expression inductively:
 
@@ -87,7 +87,7 @@ The **subset construction** (also called the powerset construction) converts an 
 
 Each construction produces exactly **two new states** (plus the sub-NFA states), keeping the NFA linear in the size of the regex.
 
-### Use Cases
+### Use cases
 
 - **Regular expression matching** — regex engines often compile patterns to NFAs
 - **Compiler lexers** — tokenizers use NFAs (converted to DFAs) for fast lexical analysis
@@ -97,7 +97,7 @@ Each construction produces exactly **two new states** (plus the sub-NFA states),
 
 ## Using NFA in StateForge
 
-### Switching to NFA Mode
+### Switching to NFA mode
 
 Press <kbd>2</kbd> or select **NFA** from the mode switcher in the sidebar. When you create a new transition in NFA mode, the default symbol is **ε** (epsilon), reflecting the central role of ε-transitions in NFAs.
 
@@ -127,7 +127,7 @@ Open the simulation panel (bottom of the screen) and enter an input string.
 
 **Key difference from DFA simulation:** A DFA always has exactly one active state. An NFA tracks **all possible states simultaneously** — you'll see multiple highlighted states on the canvas and multiple chips in the "Active States" display.
 
-### Multi-Run Testing
+### Multi-run testing
 
 Switch to the **Multi** tab in the simulation panel to batch-test multiple strings at once. Enter one string per line (empty line = ε). This is useful for verifying your NFA against a set of expected accepts/rejects.
 

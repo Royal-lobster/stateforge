@@ -1,6 +1,6 @@
-# Getting Started
+# Getting started
 
-## The Gallery
+## The gallery
 
 When you first visit StateForge, you'll see the **Gallery** — a collection of example automata organized by type. Click any example to load it onto the canvas, or click **Start from Scratch** to begin with an empty canvas.
 
@@ -8,7 +8,7 @@ When you first visit StateForge, you'll see the **Gallery** — a collection of 
 
 Your automaton is automatically saved to localStorage and encoded into the URL hash on every change. You can share your work by simply copying the URL — no account needed.
 
-## Creating Your First Automaton
+## Creating your first automaton
 
 1. **Double-click** the canvas to add your first state — it's automatically labeled q0 and set as the initial state
 2. Double-click again to add more states (q1, q2, ... auto-numbered)
@@ -19,7 +19,7 @@ Your automaton is automatically saved to localStorage and encoded into the URL h
 
 > **Tip:** You can also press <kbd>S</kbd> to switch to the state tool and click anywhere to place states, or press <kbd>V</kbd> to go back to the pointer tool.
 
-## Interface Layout
+## Interface layout
 
 The interface has four main areas:
 
@@ -45,7 +45,7 @@ The infinite SVG workspace where you build your automaton. Features:
 
 → **Select** states by clicking, shift-clicking for multi-select, or box-selecting by dragging on empty canvas
 
-### Properties Sidebar (right)
+### Properties sidebar (right)
 
 Toggle with <kbd>/</kbd>. Shows:
 
@@ -61,7 +61,7 @@ Toggle with <kbd>/</kbd>. Shows:
 
 ![Properties panel](/docs/sidebar.png)
 
-### Simulation Panel (bottom)
+### Simulation panel (bottom)
 
 Toggle with <kbd>Ctrl</kbd>+<kbd>.</kbd>. Two modes:
 
@@ -71,7 +71,7 @@ Toggle with <kbd>Ctrl</kbd>+<kbd>.</kbd>. Two modes:
 
 ![Simulation panel](/docs/sim-accepted.png)
 
-## Saving and Sharing
+## Saving and sharing
 
 **Auto-save:** Your work is saved to localStorage every 500ms. When you return, it loads automatically.
 
@@ -81,7 +81,7 @@ Toggle with <kbd>Ctrl</kbd>+<kbd>.</kbd>. Two modes:
 
 **Export:** Download as JSON (StateForge format) or import JFLAP .jff files.
 
-## Keyboard Shortcuts
+## Keyboard shortcuts
 
 Press <kbd>?</kbd> to see all keyboard shortcuts. Key ones:
 

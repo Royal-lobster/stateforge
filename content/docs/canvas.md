@@ -1,11 +1,11 @@
-# Canvas & States
+# Canvas & states
 
 
 ![Canvas with DFA states, transitions, and toolbar](/docs/canvas-dfa.png)
 
 The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a transform-based coordinate system where all state positions are stored in "world" coordinates, and the viewport is controlled by pan (translation) and zoom (scale) values.
 
-## Viewport Controls
+## Viewport controls
 
 → **Pan:** Hold <kbd>Space</kbd> + drag, or use middle mouse button. On mobile, drag on empty canvas area with one finger
 
@@ -17,7 +17,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → Two-finger gestures on mobile support simultaneous pan and zoom
 
-## Adding States
+## Adding states
 
 → **Double-click** empty canvas in pointer mode — adds a state at that world coordinate
 
@@ -33,7 +33,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → When only one state exists, the canvas auto-centers on it
 
-## Editing States
+## Editing states
 
 → **Double-click** a state to rename it — an inline text input appears centered on the state
 
@@ -63,7 +63,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → Clicking a transition edge or label also selects it (shown in accent color); clicking empty space deselects
 
-## Dragging & Layout
+## Dragging & layout
 
 → Drag states to reposition them — multi-select drag moves all selected states together
 
@@ -73,7 +73,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → <kbd>⌘1</kbd> — Zoom to Fit: calculates bounding box of all states, adds 80px padding, and sets zoom/pan to frame everything
 
-## Undo / Redo
+## Undo / redo
 
 → <kbd>⌘Z</kbd> — Undo (up to 50 snapshots in the undo stack)
 

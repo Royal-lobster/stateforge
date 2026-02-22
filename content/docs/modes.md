@@ -1,4 +1,4 @@
-# Automaton Modes
+# Automaton modes
 
 Switch modes using the toolbar buttons or number keys <kbd>1</kbd>–<kbd>6</kbd> (7 and 8 switch to Grammar Editor and L-Systems).
 Switching modes preserves your states and transitions — the mode only affects how transitions are parsed, how simulation works, and what the properties panel displays. An undo snapshot is pushed when switching modes.

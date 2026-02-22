@@ -8,7 +8,7 @@ A **Turing Machine** (TM) is the most powerful standard model of computation. Un
 
 ## Theory
 
-### Formal Definition
+### Formal definition
 
 A Turing Machine is formally defined as a **7-tuple** (Q, Σ, Γ, δ, q₀, q\_accept, q\_reject):
 
@@ -22,7 +22,7 @@ A Turing Machine is formally defined as a **7-tuple** (Q, Σ, Γ, δ, q₀, q\_a
 | **q\_accept** | Accepting state |
 | **q\_reject** | Rejecting state (q\_reject ≠ q\_accept) |
 
-### The Tape
+### The tape
 
 The TM operates on an **infinite bidirectional tape** divided into cells. Each cell holds a symbol from the tape alphabet Γ. A **read/write head** points to the current cell. All cells not explicitly written to contain the **blank symbol ⊔**.
 
@@ -38,33 +38,33 @@ At each step the machine:
 
 The machine halts when it enters the accepting state or the rejecting state — or when no applicable transition exists.
 
-### Church-Turing Thesis
+### Church-Turing thesis
 
 The **Church-Turing thesis** states that any function which can be computed by an algorithm can be computed by a Turing Machine. This isn't a mathematical theorem (it can't be proven), but it is universally accepted. Every programming language, from Python to assembly, computes exactly what a TM can — no more, no less.
 
-### Decidable vs Recognizable Languages
+### Decidable vs recognizable languages
 
 - A language is **decidable** (recursive) if a TM always halts on every input — either accepting or rejecting.
 - A language is **recognizable** (recursively enumerable) if a TM accepts every string in the language, but may loop forever on strings not in the language.
 
 Every decidable language is recognizable, but not vice versa.
 
-### The Halting Problem
+### The halting problem
 
 > Given a TM *M* and input *w*, does *M* halt on *w*?
 
 Alan Turing proved this is **undecidable** — no algorithm can solve it for all possible TM/input pairs. This is proven by contradiction (diagonalization). The halting problem places a fundamental limit on what computation can achieve and has deep implications: you cannot write a perfect bug detector, a universal optimizer, or a program that decides all mathematical truths.
 
-### Complexity Classes
+### Complexity classes
 
 - **P**: Problems solvable by a deterministic TM in polynomial time. These are "efficiently solvable" (sorting, shortest path, etc.).
 - **NP**: Problems where a solution can be *verified* in polynomial time. Includes P, but also problems like SAT, graph coloring, and the traveling salesman problem. Whether P = NP is the most famous open question in computer science.
 
-### Universal Turing Machine
+### Universal Turing machine
 
 A **Universal Turing Machine** (UTM) takes as input the description of *any* TM and an input string, then simulates that TM on that input. This is the theoretical foundation of general-purpose computers — one machine that can run any program.
 
-### Classic Examples
+### Classic examples
 
 | Machine | Input | Behavior |
 |---|---|---|
@@ -74,7 +74,7 @@ A **Universal Turing Machine** (UTM) takes as input the description of *any* TM 
 | **Unary addition** | `111+11` | Computes 3+2 in unary → `11111` |
 | **String copy** | `abc` | Produces `abc⊔abc` on the tape |
 
-### Computational Hierarchy
+### Computational hierarchy
 
 Turing Machines sit at the top of the Chomsky hierarchy:
 
@@ -94,11 +94,11 @@ Each level strictly increases in power. A TM can simulate any PDA, and a PDA can
 
 ## Using TM in StateForge
 
-### Switching to TM Mode
+### Switching to TM mode
 
 Press **4** (or select from the mode menu) to switch to Turing Machine mode. The simulation panel changes to show tape-specific controls.
 
-### Building Transitions
+### Building transitions
 
 Transitions use the format:
 
@@ -134,21 +134,21 @@ The wildcard `*` matches **any symbol** on the tape. This is useful for "skip ov
 
 When `*` appears in the **write** position, it means "write back whatever was read" (the symbol is preserved).
 
-### Blank Symbol ⊔
+### Blank symbol ⊔
 
 The blank symbol `⊔` represents empty tape cells. You can read and write it like any other symbol. Use it to detect the end of input or to erase cells.
 
-### Multiple Transitions
+### Multiple transitions
 
 Multiple transitions between the same pair of states are allowed. Each transition label is treated independently — the simulator tries them in order and uses the first match.
 
-### The Tape
+### The tape
 
 StateForge uses a **sparse Map-based tape**: only non-blank cells are stored in memory. This means the tape is effectively infinite in both directions without allocating unbounded memory.
 
 The tape visualization shows cells around the head position, with a **▼** marker indicating the current head position. The head cell is highlighted.
 
-### Running the Simulation
+### Running the simulation
 
 | Control | Action |
 |---|---|
@@ -159,11 +159,11 @@ The tape visualization shows cells around the head position, with a **▼** mark
 
 You can also press **Enter** to start or step through.
 
-### Step Limit
+### Step limit
 
 The default step limit is **1000**. This prevents infinite loops from freezing the simulator. If a machine exceeds the limit, it reports **HALTED** status. You can adjust the limit in the header bar — increase it for complex machines that need more steps.
 
-### Three Outcomes
+### Three outcomes
 
 | Status | Meaning |
 |---|---|
@@ -171,7 +171,7 @@ The default step limit is **1000**. This prevents infinite loops from freezing t
 | **REJECTED** | The machine reached a state with no valid transition (and it's not accepting), or a rejecting state |
 | **HALTED** | The step limit was exceeded — the machine may be in an infinite loop |
 
-### Info Display
+### Info display
 
 While running, the panel shows:
 
@@ -179,11 +179,11 @@ While running, the panel shows:
 - **HEAD** — the head's position on the tape (integer index)
 - **STEP** — how many transitions have been executed
 
-### History Log
+### History log
 
 Every step is logged with the action taken (e.g., `Read '0', write '1', move R → carry`). The history panel shows the full trace, with the most recent step highlighted.
 
-### Gallery Examples
+### Gallery examples
 
 StateForge includes several built-in TM examples in the gallery:
 

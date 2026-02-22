@@ -3,7 +3,7 @@
 
 ![Transitions — curved edges, self-loops, and labels](/docs/transitions.png)
 
-## Adding Transitions
+## Adding transitions
 
 → Press <kbd>T</kbd> for the transition tool (cursor becomes crosshair)
 
@@ -17,7 +17,7 @@
 
 → On touch devices, the same drag gesture works: tap a state and drag to the target
 
-## Duplicate Handling
+## Duplicate handling
 
 → For **DFA, NFA, Mealy, and Moore** modes: if a transition between two states already exists, dragging between them opens the existing transition for editing instead of creating a duplicate. This lets you add more symbols to the same edge.
 
@@ -25,7 +25,7 @@
 
 → Multiple self-loops on the same state stack vertically — each loop is offset 18px higher than the previous, with spread increasing by 4px per loop
 
-## Editing Transitions
+## Editing transitions
 
 → **Click** a transition edge or label to select it (highlighted in accent color with a brighter arrowhead)
 
@@ -39,7 +39,7 @@
 
 → The label editor shows a placeholder hint based on the current mode (e.g., `a, Z → AZ` for PDA, `a → b, R` for TM)
 
-## Default Symbols by Mode
+## Default symbols by mode
 
 When a new transition is created, it gets a default symbol based on the current mode:
 
@@ -55,7 +55,7 @@ When a new transition is created, it gets a default symbol based on the current 
 
 → **Moore:** `a` (output is in the state label)
 
-## Transition Format Reference
+## Transition format reference
 
 | Mode | Format | Example | Notes |
 |------|--------|---------|-------|

@@ -1,8 +1,8 @@
-# Properties Panel
+# Properties panel
 
 The right sidebar (264px wide on desktop) shows properties and is toggled with <kbd>⌘/</kbd>. On desktop, it animates width with a 200ms ease-out transition for smooth canvas resize. On mobile, it slides in as a drawer overlay (max 85vw) with a close button.
 
-## Formal Definition
+## Formal definition
 
 Shows the standard tuple definition of the current automaton, adapting to the current mode:
 
@@ -16,7 +16,7 @@ Shows the standard tuple definition of the current automaton, adapting to the cu
 
 → Summary: "N states · M transitions"
 
-## Transition Table (δ)
+## Transition table (δ)
 
 A compact table listing every transition. Each row shows:
 
@@ -26,7 +26,7 @@ A compact table listing every transition. Each row shows:
 
 → The currently selected transition is shown in accent color
 
-## Selected State/Transition
+## Selected state/transition
 
 When a state is selected, the panel shows:
 
@@ -44,7 +44,7 @@ When a transition is selected:
 
 → "Edit symbols…" link to open the inline editor
 
-## Trap State
+## Trap state
 
 For DFA/NFA modes, a "+ Add Trap State" button appears when there are states. This automatically:
 
@@ -64,7 +64,7 @@ For DFA/NFA modes, a "+ Add Trap State" button appears when there are states. Th
 
 ![Properties panel — formal definition, transition table, state list](/docs/sidebar.png)
 
-## DFA Validation Errors
+## DFA validation errors
 
 In DFA mode, the panel shows an "Errors" section in red for any violations:
 
@@ -74,10 +74,10 @@ In DFA mode, the panel shows an "Errors" section in red for any violations:
 
 → "qN: multiple on 'a'" — for each state that has multiple transitions on the same symbol (nondeterminism)
 
-## States List
+## States list
 
 At the bottom, a scrollable list of all states. Each shows: a circle icon (filled if accepting), the label, a "START" badge for initial states, and an "ACCEPT" badge for accepting states. Click any state to select it on the canvas.
 
-## Mobile Actions
+## Mobile actions
 
 On mobile, the sidebar includes action buttons not available in the compact toolbar: SHARE, LAYOUT, CLEAR, EXPORT, and IMPORT. These mirror the desktop toolbar functionality.
