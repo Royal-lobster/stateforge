@@ -3,7 +3,7 @@ export const docsNav = [
     group: 'Getting Started',
     items: [
       { href: '/docs', label: 'Overview', match: '/docs' },
-      { href: '/docs#getting-started', label: 'Getting Started', match: null },
+      { href: '/docs/getting-started', label: 'Getting Started', match: '/docs/getting-started' },
     ],
   },
   {
@@ -51,6 +51,7 @@ export const docsNav = [
 // Flat ordered list for prev/next
 export const docsPagesOrdered = [
   { href: '/docs', label: 'Overview' },
+  { href: '/docs/getting-started', label: 'Getting Started' },
   { href: '/docs/canvas', label: 'Canvas & States' },
   { href: '/docs/transitions', label: 'Transitions' },
   { href: '/docs/simulation', label: 'Simulation' },
