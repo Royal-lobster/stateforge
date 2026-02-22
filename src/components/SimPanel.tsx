@@ -20,6 +20,8 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
   const mode = useStore(s => s.mode);
 
   const setSimInput = useStore(s => s.setSimInput);
+  const simInputRef = useRef<HTMLInputElement>(null);
+  const handleSimInputChange = useSymbolShortcuts(setSimInput);
   const simStart = useStore(s => s.simStart);
   const simStep = useStore(s => s.simStep);
   const simFastRun = useStore(s => s.simFastRun);
@@ -90,10 +92,11 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
           <div className="p-2.5 flex flex-col gap-2">
             {/* Input + controls in one row */}
             <div className="flex items-center gap-1">
-              <input value={simInput} onChange={e => setSimInput(e.target.value)} disabled={simStatus === 'stepping'}
+              <input ref={simInputRef} value={simInput} onChange={handleSimInputChange} disabled={simStatus === 'stepping'}
                 className="flex-1 min-w-0 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1.5 outline-none focus:border-[var(--color-accent)]"
                 placeholder="Input..."
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); simStatus === 'idle' ? simStart() : simStep(); }}} />
+              <SymbolPalette inputRef={simInputRef} />
               <div className="flex items-center gap-0 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] shrink-0">
                 <button onClick={simStart} disabled={simStatus === 'stepping'} className="p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={13} /></button>
                 <button onClick={simStep} disabled={simStatus !== 'stepping'} className="p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={13} /></button>
@@ -177,10 +180,11 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
           <div className="flex flex-col gap-2 p-3 w-72 border-r border-[var(--color-border)]">
             <div className="flex items-center gap-1">
               <span className="font-mono text-[11px] text-[var(--color-text-dim)] w-10 shrink-0">INPUT</span>
-              <input value={simInput} onChange={e => setSimInput(e.target.value)} disabled={simStatus === 'stepping'}
+              <input value={simInput} onChange={handleSimInputChange} disabled={simStatus === 'stepping'}
                 className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1.5 outline-none focus:border-[var(--color-accent)]"
                 placeholder="Enter string..."
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); simStatus === 'idle' ? simStart() : simStep(); }}} />
+              <SymbolPalette inputRef={simInputRef} />
             </div>
             <div className="flex items-center gap-0.5 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] w-fit">
               {controlBtn(simStart, simStatus === 'stepping', 'Start', <Play size={14} />, 'Enter')}

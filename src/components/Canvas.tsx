@@ -731,8 +731,8 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         if (t.from === t.to) { lx = from.x * zoom + pan.x; ly = (from.y - STATE_RADIUS - 35) * zoom + pan.y; }
         else { lx = ((from.x + to.x) / 2) * zoom + pan.x; ly = ((from.y + to.y) / 2) * zoom + pan.y - 20; }
         return (
-          <div className="absolute flex items-center gap-0" style={{ left: lx - 60, top: ly - 12 }}>
-            <input ref={editInputRef} autoFocus className="bg-[var(--bg-surface-sunken)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[140px] outline-none" value={editInput} onChange={handleEditInputChange} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} onBlur={commitTransitionEdit} placeholder={mode === 'pda' ? 'a, Z → AZ' : mode === 'tm' ? 'a → b, R' : mode === 'mealy' ? 'a/0' : 'a, b'} />
+          <div className="absolute flex items-center gap-0" style={{ left: lx - 60, top: ly - 12 }} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) commitTransitionEdit(); }}>
+            <input ref={editInputRef} autoFocus className="bg-[var(--bg-surface-sunken)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[140px] outline-none" value={editInput} onChange={handleEditInputChange} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} placeholder={mode === 'pda' ? 'a, Z → AZ' : mode === 'tm' ? 'a → b, R' : mode === 'mealy' ? 'a/0' : 'a, b'} />
             <SymbolPalette inputRef={editInputRef} />
           </div>
         );
