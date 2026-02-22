@@ -346,12 +346,76 @@ export const useStore = create<StoreState>()(
       const s = get();
       if (s.states.length === 0) return;
       s.pushUndo();
-      // Simple circular layout
-      const cx = 400, cy = 300, radius = Math.max(120, s.states.length * 40);
-      const newStates = s.states.map((st, i) => {
-        const angle = (2 * Math.PI * i) / s.states.length - Math.PI / 2;
-        return { ...st, x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+
+      if (s.states.length === 1) {
+        set({ states: [{ ...s.states[0], x: 400, y: 300 }], redoStack: [] });
+        setTimeout(() => get().zoomToFit(), 50);
+        return;
+      }
+
+      // Force-directed layout
+      const n = s.states.length;
+      const pos: { x: number; y: number }[] = s.states.map((st, i) => {
+        // Initialize in a circle to avoid overlap
+        const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+        const r = Math.max(120, n * 40);
+        return { x: 400 + r * Math.cos(angle), y: 300 + r * Math.sin(angle) };
       });
+
+      const idToIdx = new Map(s.states.map((st, i) => [st.id, i]));
+      const edges = s.transitions
+        .map(t => ({ a: idToIdx.get(t.from)!, b: idToIdx.get(t.to)! }))
+        .filter(e => e.a !== undefined && e.b !== undefined && e.a !== e.b);
+
+      const REPULSION = 8000;
+      const SPRING_K = 0.02;
+      const IDEAL_LEN = 150;
+      const DAMPING = 0.9;
+      const ITERATIONS = 100;
+
+      const vel = pos.map(() => ({ x: 0, y: 0 }));
+
+      for (let iter = 0; iter < ITERATIONS; iter++) {
+        const force = pos.map(() => ({ x: 0, y: 0 }));
+
+        // Repulsion between all pairs
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            let dx = pos[i].x - pos[j].x;
+            let dy = pos[i].y - pos[j].y;
+            let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const f = REPULSION / (dist * dist);
+            const fx = (dx / dist) * f;
+            const fy = (dy / dist) * f;
+            force[i].x += fx; force[i].y += fy;
+            force[j].x -= fx; force[j].y -= fy;
+          }
+        }
+
+        // Attraction along edges
+        for (const { a, b } of edges) {
+          const dx = pos[b].x - pos[a].x;
+          const dy = pos[b].y - pos[a].y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const f = SPRING_K * (dist - IDEAL_LEN);
+          const fx = (dx / dist) * f;
+          const fy = (dy / dist) * f;
+          force[a].x += fx; force[a].y += fy;
+          force[b].x -= fx; force[b].y -= fy;
+        }
+
+        // Update positions
+        for (let i = 0; i < n; i++) {
+          vel[i].x = (vel[i].x + force[i].x) * DAMPING;
+          vel[i].y = (vel[i].y + force[i].y) * DAMPING;
+          pos[i].x += vel[i].x;
+          pos[i].y += vel[i].y;
+        }
+      }
+
+      const newStates = s.states.map((st, i) => ({
+        ...st, x: Math.round(pos[i].x), y: Math.round(pos[i].y),
+      }));
       set({ states: newStates, redoStack: [] });
       setTimeout(() => get().zoomToFit(), 50);
     },
