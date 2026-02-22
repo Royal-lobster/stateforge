@@ -18,6 +18,34 @@ Press <kbd>⌘E</kbd> to download your automaton as a JSON file. The format is:
 
 → File is named `stateforge-MODE.json` (e.g., stateforge-dfa.json)
 
+## PNG export
+
+Export your automaton as a PNG image at 2x resolution (retina). The export captures all states and transitions with proper padding, rendered against a dark background. The canvas grid is excluded. Access via the command palette (<kbd>⌘K</kbd> then "Export PNG") or the toolbar export menu.
+
+→ File is named `stateforge-MODE.png` (e.g., stateforge-dfa.png)
+
+## SVG export
+
+Export as a standalone SVG file with all CSS custom properties inlined as actual color values. The SVG includes embedded font declarations and a dark background, so it renders correctly in any viewer without needing StateForge's stylesheet.
+
+→ Grid pattern is removed for a clean export
+
+→ File is named `stateforge-MODE.svg`
+
+## Copy as LaTeX/TikZ
+
+Copy your automaton as a `tikzpicture` environment using the `tikz-automata` format. State positions are scaled from pixels to centimeters (50px = 1cm), with the Y axis flipped for LaTeX conventions.
+
+→ States include `initial` and `accepting` options as appropriate
+
+→ State labels are formatted as `$q_{n}$` for standard q-labels
+
+→ Bidirectional transitions use `bend left` to avoid overlap
+
+→ Self-loops render with `loop above`
+
+→ Access via toolbar export menu or command palette
+
 ## Import
 
 Press <kbd>⌘O</kbd> to import a file. Supported formats:

@@ -4,6 +4,12 @@ Press <kbd>?</kbd> in the app to see the shortcuts overlay. Full list:
 
 ![Keyboard shortcuts modal — press ? to toggle](/docs/shortcuts.png)
 
+## General
+
+| Shortcut | Action |
+|----------|--------|
+| <kbd>⌘K</kbd> | Command palette |
+
 ## Tools
 
 | Shortcut | Action |
@@ -53,6 +59,8 @@ Press <kbd>?</kbd> in the app to see the shortcuts overlay. Full list:
 | <kbd>⌘S</kbd> | Share / Copy URL |
 | <kbd>⌘E</kbd> | Export JSON |
 | <kbd>⌘O</kbd> | Import file |
+
+PNG, SVG, and LaTeX exports are available from the command palette (<kbd>⌘K</kbd>) or the toolbar export menu.
 
 ## Canvas
 

@@ -92,4 +92,18 @@ Combine the canvas DFA (automaton A) with a second automaton B (specified as a r
 
 → **Step display:** Each step shows δ(pair, symbol) = result, with NEW flags for newly discovered product states
 
+## Auto-play and step-through controls
+
+All conversion tabs share a common set of playback controls:
+
+→ **Auto-play:** Click the play button (▶) to automatically advance through steps at a configurable speed. Click pause (⏸) to stop.
+
+→ **Speed slider:** Adjust the step interval from fast (100ms) to slow (1500ms). The slider is in the conversion panel header next to the playback controls.
+
+→ **Canvas highlighting:** During step-through, the relevant states on the main canvas are highlighted in accent color so you can see which parts of the automaton each step affects.
+
+→ **Step label banner:** A banner below the panel header shows a description of the current step in accent-colored monospace text (e.g., "δ({q0,q1}, a) = {q2}").
+
+→ **Controls:** ▶ Run (compute all), ⏩ Step (advance one), ⏭ Fast Forward (show all steps), ↺ Reset, ▶/⏸ Auto-play toggle.
+
 ![Conversions panel — NFA→DFA, Minimize, RE, Grammar tools](/docs/conversions.png)

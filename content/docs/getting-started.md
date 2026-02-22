@@ -43,6 +43,8 @@ The infinite SVG workspace where you build your automaton. Features:
 
 → **Zoom to fit** with <kbd>⌘</kbd>+<kbd>1</kbd> or the maximize button, auto-frames all states
 
+→ **Minimap** appears automatically when you have 2 or more states, showing a bird's-eye view in the bottom-left corner. Click to navigate or drag the viewport rectangle.
+
 → **Select** states by clicking, shift-clicking for multi-select, or box-selecting by dragging on empty canvas
 
 ### Properties sidebar (right)
@@ -79,14 +81,15 @@ Toggle with <kbd>Ctrl</kbd>+<kbd>.</kbd>. Two modes:
 
 **Priority:** URL hash > localStorage. If a shared URL is opened, it overrides any local save.
 
-**Export:** Download as JSON (StateForge format) or import JFLAP .jff files.
+**Export:** Download as JSON, PNG (2x retina), SVG (standalone), or copy as LaTeX/TikZ. Import JFLAP .jff files.
 
 ## Keyboard shortcuts
 
-Press <kbd>?</kbd> to see all keyboard shortcuts. Key ones:
+Press <kbd>?</kbd> to see all keyboard shortcuts, or use <kbd>⌘K</kbd> to open the command palette for quick access to any action. Key shortcuts:
 
 | Shortcut | Action |
 |----------|--------|
+| <kbd>⌘K</kbd> | Command palette |
 | <kbd>V</kbd> | Pointer tool |
 | <kbd>S</kbd> | Add State tool |
 | <kbd>T</kbd> | Add Transition tool |

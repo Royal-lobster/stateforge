@@ -36,6 +36,7 @@ export const docsNav = [
       { href: '/docs/conversions', label: 'Conversions', match: '/docs/conversions' },
       { href: '/docs/grammar', label: 'Grammar Editor', match: '/docs/grammar' },
       { href: '/docs/l-systems', label: 'L-Systems', match: '/docs/l-systems' },
+      { href: '/docs/pumping-lemma', label: 'Pumping Lemma', match: '/docs/pumping-lemma' },
     ],
   },
   {
@@ -43,6 +44,7 @@ export const docsNav = [
     items: [
       { href: '/docs/properties', label: 'Properties Panel', match: '/docs/properties' },
       { href: '/docs/import-export', label: 'Import/Export', match: '/docs/import-export' },
+      { href: '/docs/command-palette', label: 'Command Palette', match: '/docs/command-palette' },
       { href: '/docs/shortcuts', label: 'Keyboard Shortcuts', match: '/docs/shortcuts' },
     ],
   },
@@ -64,7 +66,9 @@ export const docsPagesOrdered = [
   { href: '/docs/conversions', label: 'Conversions' },
   { href: '/docs/grammar', label: 'Grammar Editor' },
   { href: '/docs/l-systems', label: 'L-Systems' },
+  { href: '/docs/pumping-lemma', label: 'Pumping Lemma' },
   { href: '/docs/properties', label: 'Properties Panel' },
   { href: '/docs/import-export', label: 'Import/Export' },
+  { href: '/docs/command-palette', label: 'Command Palette' },
   { href: '/docs/shortcuts', label: 'Keyboard Shortcuts' },
 ];

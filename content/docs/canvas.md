@@ -69,7 +69,7 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 
 → Dragging pushes an undo snapshot on first pixel moved (not on every frame), so undo restores original positions
 
-→ <kbd>⇧⌘L</kbd> — Auto Layout: arranges all states in a circle centered at (400, 300) with radius proportional to state count (minimum 120px, 40px per state). Automatically calls Zoom to Fit after 50ms
+→ <kbd>⇧⌘L</kbd> — Auto Layout: uses a force-directed algorithm to arrange states. Repulsion forces push states apart, spring forces pull connected states together, and a centering force keeps everything anchored around (400, 300). The layout runs for 200 iterations and then calls Zoom to Fit. For a single state, it centers at (400, 300).
 
 → <kbd>⌘1</kbd> — Zoom to Fit: calculates bounding box of all states, adds 80px padding, and sets zoom/pan to frame everything
 
@@ -82,5 +82,17 @@ The canvas is an infinite SVG workspace rendered on a 20px dot grid. It uses a t
 → Snapshots capture states, transitions, and mode. Any mutating action (add state, delete, rename, toggle initial/accepting, change mode, etc.) pushes an undo snapshot and clears the redo stack
 
 → Moving states only pushes a snapshot once per drag operation (not every frame)
+
+## Minimap
+
+A minimap appears in the bottom-left corner of the canvas when there are 2 or more states.
+
+→ **Overview:** Shows all states and transitions in a 160×100px bird's-eye view, with a rectangle indicating the current viewport
+
+→ **Click to navigate:** Click anywhere on the minimap to center the viewport on that world position
+
+→ **Drag viewport:** Drag the viewport rectangle within the minimap to pan the canvas
+
+→ **Auto-hide:** The minimap is hidden when there are fewer than 2 states
 
 ![Canvas with states, transitions, initial arrow, and context menu](/docs/context-menu.png)

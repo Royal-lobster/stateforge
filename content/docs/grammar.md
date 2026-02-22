@@ -90,6 +90,32 @@ A predictive top-down parser using FIRST and FOLLOW sets.
 
 → **Parse tree:** If successful, an interactive collapsible parse tree is displayed
 
+## SLR(1) parser
+
+A bottom-up shift-reduce parser using SLR(1) parsing tables.
+
+→ **Build Table:** Click "Build Table" to compute the LR(0) item sets, GOTO function, and SLR(1) ACTION/GOTO table from FIRST and FOLLOW sets.
+
+→ **Item sets:** The parser first computes the canonical collection of LR(0) item sets using closure and goto operations. Each item set is displayed showing all items (productions with a dot indicating the parser position).
+
+→ **ACTION table:** For each state and terminal (including $), shows shift (s*n*), reduce (r*n*), or accept. Displayed as a grid.
+
+→ **GOTO table:** For each state and non-terminal, shows the next state. Displayed alongside the ACTION table.
+
+→ **Conflict detection:** If multiple actions map to the same (state, terminal) cell, conflicts are listed. Shift-reduce and reduce-reduce conflicts indicate the grammar is not SLR(1).
+
+→ **Step-through parsing:** Enter a string and click "Parse" to see step-by-step shift-reduce parsing. Each step shows the stack contents, remaining input, and action taken (shift, reduce by production, or accept).
+
+## Parse tree visualization
+
+CYK and LL(1) parsers display an interactive parse tree when parsing succeeds.
+
+→ **SVG tree:** The tree is rendered as a collapsible SVG diagram with non-terminal nodes and terminal leaves.
+
+→ **Expand/collapse:** Click any non-terminal node to collapse or expand its subtree.
+
+→ **Layout:** Nodes are arranged top-down with automatic spacing. Terminal leaves are shown in accent color, non-terminals in the default text color.
+
 ## Brute force parser
 
 A BFS exhaustive search parser that works with any grammar type.
