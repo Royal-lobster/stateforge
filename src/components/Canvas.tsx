@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '@/store';
 import type { State, Transition } from '@/types';
-import Minimap from './Minimap';
 
 const STATE_RADIUS = 28;
 const GRID_SIZE = 20;
@@ -714,8 +713,6 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         </div>
       )}
 
-      {/* Minimap */}
-      <Minimap />
 
       {/* Zoom indicator */}
       <div className="absolute bottom-2 right-2 text-[10px] font-mono text-[var(--color-text-dim)] bg-[var(--bg-surface)] border border-[var(--color-border)] px-2 py-0.5">
