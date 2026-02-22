@@ -92,7 +92,7 @@ export default function MealyMoorePanel({ isMobile }: { isMobile: boolean }) {
   );
 
   return (
-    <div className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${isMobile ? '' : 'h-48'}`}>
+    <div className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${isMobile ? '' : 'h-56'}`}>
       {/* Header */}
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
         <Zap size={11} className="text-[var(--color-accent)]" />

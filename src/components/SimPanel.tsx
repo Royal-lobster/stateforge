@@ -157,7 +157,7 @@ export default function SimPanel({ isMobile }: { isMobile: boolean }) {
 
   // Desktop layout
   return (
-    <div className="h-48 bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none">
+    <div className="h-56 bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none">
       {/* Header */}
       <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-3">
         <Zap size={11} className="text-[var(--color-accent)]" />

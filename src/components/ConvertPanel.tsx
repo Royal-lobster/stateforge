@@ -369,14 +369,23 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     onReset: () => void,
     warning?: string,
   ) => (
-    <div className="px-3 py-1 border-b border-[var(--color-border)] flex items-center gap-2">
+    <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
       {warning && <span className="font-mono text-[11px] text-[var(--color-reject)]">{warning}</span>}
       <div className="flex-1" />
-      <div className="flex items-center gap-0.5">
-        <button onClick={onRun} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
-        <button onClick={onStep} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
-        <button onClick={onFfwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><FastForward size={14} /></button>
-        <button onClick={onReset} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
+      <div className="flex items-center gap-1">
+        <button onClick={onRun} disabled={!canRun} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors">
+          <Play size={12} /> Run
+        </button>
+        <button onClick={onStep} disabled={!canRun} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors">
+          <StepForward size={12} /> Step
+        </button>
+        <button onClick={onFfwd} disabled={!canRun} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors">
+          <FastForward size={12} /> All
+        </button>
+        <div className="w-px h-4 bg-[var(--color-border)] mx-0.5" />
+        <button onClick={onReset} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-surface-sunken)] transition-colors">
+          <RotateCcw size={12} /> Reset
+        </button>
       </div>
     </div>
   );
@@ -388,27 +397,29 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     onApply: () => void,
     extra?: string,
   ) => (
-    <div className={`border-l border-[var(--color-border)] px-3 py-2 flex flex-col gap-2 shrink-0 ${isMobile ? 'w-36' : 'w-44'}`}>
-      <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase">Result</div>
-      <div className="font-mono text-[11px] text-[var(--color-text-dim)]">{rStates.length} states, {rTransitions.length} transitions</div>
-      {extra && <div className="font-mono text-[11px] text-[var(--color-accept)]">{extra}</div>}
-      <div className="flex-1 overflow-y-auto space-y-0.5">
+    <div className={`border-l border-[var(--color-accent)]/20 bg-[var(--bg-surface)]/50 px-3 py-2 flex flex-col gap-1.5 shrink-0 ${isMobile ? 'w-36' : 'w-48'}`}>
+      <div className="flex items-center justify-between">
+        <div className="font-mono text-[11px] tracking-widest text-[var(--color-accent)] uppercase font-medium">Result</div>
+        <div className="font-mono text-[10px] text-[var(--color-text-muted)]">{rStates.length}S · {rTransitions.length}T</div>
+      </div>
+      {extra && <div className="font-mono text-[11px] text-[var(--color-accept)] -mt-0.5">{extra}</div>}
+      <div className="flex-1 overflow-y-auto space-y-0.5 border border-[var(--color-border)] bg-[var(--bg-surface-sunken)] p-1.5">
         {rStates.map(s => (
           <div key={s.id} className="font-mono text-[11px] flex items-center gap-1">
             {s.isInitial && <span className="text-[var(--color-accent)]">→</span>}
             <span className={s.isAccepting ? 'text-[var(--color-accept)]' : 'text-[var(--color-text)]'}>{s.label}</span>
-            {s.isAccepting && <span className="text-[var(--color-accept)]">✓</span>}
+            {s.isAccepting && <span className="text-[var(--color-accept)]">●</span>}
           </div>
         ))}
       </div>
       <button
         onClick={onApply}
         disabled={applied}
-        className={`flex items-center justify-center gap-1 px-2 py-1.5 font-mono text-[11px] tracking-wider transition-colors ${
+        className={`flex items-center justify-center gap-1.5 px-2 py-2 font-mono text-[11px] tracking-wider transition-colors ${
           applied ? 'bg-[var(--color-accept)] text-[var(--bg-primary)]' : 'bg-[var(--color-accent)] text-[var(--bg-primary)] hover:opacity-90'
         }`}
       >
-        {applied ? <><Check size={12} /> APPLIED</> : 'APPLY'}
+        {applied ? <><Check size={12} /> APPLIED</> : <><ArrowRightLeft size={12} /> APPLY RESULT</>}
       </button>
     </div>
   );
@@ -547,18 +558,21 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           </div>
         )}
         <ArrowRightLeft size={12} className="text-[var(--color-accent)] ml-2 shrink-0" />
-        <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide flex-1 ml-2">
+        <span className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase ml-2 mr-1 shrink-0 hidden md:inline">CONVERT</span>
+        <div className="w-px h-4 bg-[var(--color-border)] mx-1 shrink-0 hidden md:block" />
+        <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide flex-1 ml-1">
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => switchTab(t.id)}
-              className={`px-2 py-1.5 font-mono text-[11px] tracking-wider whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1.5 font-mono text-[11px] tracking-wider whitespace-nowrap transition-colors relative ${
                 tab === t.id
-                  ? 'text-[var(--color-accent)] border-b border-[var(--color-accent)]'
+                  ? 'text-[var(--color-accent)]'
                   : 'text-[var(--color-text-dim)] hover:text-[var(--color-text)]'
               }`}
             >
               {isMobile ? t.short : t.label}
+              {tab === t.id && <span className="absolute bottom-0 left-1 right-1 h-[2px] bg-[var(--color-accent)]" />}
             </button>
           ))}
         </div>

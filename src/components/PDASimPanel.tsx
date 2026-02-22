@@ -88,7 +88,7 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
   return (
     <div
       className={`bg-[var(--bg-surface-raised)] border-t border-[var(--color-border)] shadow-panel flex flex-col shrink-0 select-none ${
-        isMobile ? '' : 'h-48'
+        isMobile ? '' : 'h-56'
       }`}
     >
       {/* Header */}
