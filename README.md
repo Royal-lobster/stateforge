@@ -1,9 +1,8 @@
 <div align="center">
 
-<!-- OG image as hero -->
-<img src="https://stateforge.vercel.app/opengraph-image" alt="StateForge" width="600" />
+<img src="public/icon.svg" alt="StateForge" width="120" />
 
-<br />
+<br /><br />
 
 **JFLAP for the modern web — build, simulate, and share automata in the browser.**
 
@@ -16,22 +15,23 @@ No install. No accounts. Just a URL.
 
 ---
 
-## Features
+## ✨ Features
 
-- **DFA & NFA** — visual editor with step-through simulation and batch string testing
-- **NFA → DFA** — subset construction, step-by-step or all-at-once
-- **DFA minimization** — table-filling algorithm with before/after view
-- **FA ↔ RegEx** — state elimination and Thompson's construction
-- **Grammar editor** — context-free grammars with syntax highlighting and auto-classification
-- **Grammar transforms** — ε-removal, unit-removal, CNF, GNF
-- **Pushdown automata** — PDA editor with live stack visualization
-- **Turing machines** — tape visualization with head tracking and speed control
-- **Mealy & Moore** — transducer simulation with output display
-- **L-Systems** — turtle graphics with iteration slider and fractal presets
-- **URL sharing** — the entire automaton encodes into the URL hash
-- **Import/export** — JFLAP `.jff` import, JSON export, PNG/SVG screenshots
+- 🔄 **DFA & NFA** — visual editor with step-through simulation and batch string testing
+- 🔀 **NFA → DFA** — subset construction, step-by-step or all-at-once
+- 📉 **DFA minimization** — table-filling algorithm with before/after view
+- 🔗 **FA ↔ RegEx** — state elimination and Thompson's construction
+- 📝 **Grammar editor** — context-free grammars with syntax highlighting and auto-classification
+- 🔧 **Grammar transforms** — ε-removal, unit-removal, CNF, GNF
+- 📚 **Pushdown automata** — PDA editor with live stack visualization
+- 🖥️ **Turing machines** — tape visualization with head tracking and speed control
+- ⚙️ **Mealy & Moore** — transducer simulation with output display
+- 🌿 **L-Systems** — turtle graphics with iteration slider and fractal presets
+- 🏋️ **Pumping lemma** — interactive game proving languages aren't regular/context-free
+- 🔗 **URL sharing** — the entire automaton encodes into the URL hash
+- 📂 **Import/export** — JFLAP `.jff` import, JSON export, PNG/SVG screenshots
 
-## Tech stack
+## 🛠️ Tech Stack
 
 - **Next.js** (static site, client-side only)
 - **TypeScript**
@@ -41,7 +41,7 @@ No install. No accounts. Just a URL.
 - **lucide-react** (icons)
 - **lz-string** (URL compression)
 
-## Getting started
+## 🚀 Getting Started
 
 ```bash
 git clone https://github.com/Royal-lobster/stateforge.git
@@ -52,7 +52,7 @@ pnpm dev
 
 Open [localhost:3000](http://localhost:3000) and start building automata.
 
-## Architecture
+## 📁 Architecture
 
 ```
 src/
@@ -61,7 +61,7 @@ src/
 ├── hooks/          # Custom React hooks
 ├── store.ts        # Zustand store (single source of truth)
 ├── types.ts        # TypeScript types
-├── url.ts          # URL encode/decode (lz-string)
+├── url.ts          # URL encode/decode (binary varint + lz-string)
 ├── conversions.ts  # NFA→DFA, minimization, RE conversions
 ├── grammar.ts      # Grammar parsing, transforms, CYK
 ├── pda.ts          # PDA simulation
@@ -69,12 +69,10 @@ src/
 └── mealy-moore.ts  # Mealy/Moore machine simulation
 ```
 
-## Docs
+## 📖 Docs
 
-Full documentation is built into the app at [stateforge.vercel.app/docs](https://stateforge.vercel.app/docs).
+Full documentation at [stateforge.vercel.app/docs](https://stateforge.vercel.app/docs).
 
-## License
+## 📄 License
 
 MIT
-
-</div>

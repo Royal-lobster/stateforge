@@ -1,0 +1,17 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="16" fill="#0a0a0a"/>
+  <!-- Arrow into initial state -->
+  <path d="M10 60 L28 60" stroke="#22d3ee" stroke-width="3"/>
+  <path d="M24 54 L32 60 L24 66" stroke="#22d3ee" stroke-width="2.5" fill="none"/>
+  <!-- State q0 -->
+  <circle cx="50" cy="60" r="16" stroke="#22d3ee" stroke-width="3" fill="none"/>
+  <!-- Transition arrow -->
+  <path d="M66 60 L82 60" stroke="#22d3ee" stroke-width="3"/>
+  <path d="M78 54 L86 60 L78 66" stroke="#22d3ee" stroke-width="2.5" fill="none"/>
+  <!-- State q1 (accepting — double circle) -->
+  <circle cx="102" cy="60" r="16" stroke="#22d3ee" stroke-width="3" fill="none"/>
+  <circle cx="102" cy="60" r="11" stroke="#22d3ee" stroke-width="2" fill="none"/>
+  <!-- Self-loop on q0 -->
+  <path d="M42 46 C 36 20, 64 20, 58 46" stroke="#22d3ee" stroke-width="2.5" fill="none"/>
+  <path d="M56 49 L58 44 L53 44" stroke="#22d3ee" stroke-width="2" fill="none"/>
+</svg>
