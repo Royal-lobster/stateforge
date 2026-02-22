@@ -54,22 +54,45 @@ export function exportSVG(states_: State[], mode: Mode): string {
 
   // Inline CSS variables as actual colors for standalone SVG
   const colorMap: Record<string, string> = {
-    'var(--color-accent)': '#6366f1',
-    'var(--color-border)': '#2a2a3e',
-    'var(--bg-surface)': '#12121a',
-    'var(--color-text)': '#e2e2e8',
-    'var(--color-text-dim)': '#8888a0',
-    'var(--color-grid)': '#1a1a2e',
-    'var(--bg-primary)': '#0a0a0f',
+    'var(--color-accent)': '#22d3ee',
+    'var(--color-accent-dim)': '#155e75',
+    'var(--color-border)': '#1e1e1e',
+    'var(--bg-surface)': '#111111',
+    'var(--bg-surface-raised)': '#161616',
+    'var(--bg-surface-sunken)': '#0c0c0c',
+    'var(--color-text)': '#d4d4d4',
+    'var(--color-text-bright)': '#f0f0f0',
+    'var(--color-text-dim)': '#888888',
+    'var(--color-text-muted)': '#555555',
+    'var(--color-grid)': '#161616',
+    'var(--bg-primary)': '#0a0a0a',
+    'var(--bg-canvas)': '#080808',
     'var(--color-reject)': '#ef4444',
     'var(--color-accept)': '#22c55e',
     'var(--color-sim-active)': '#eab308',
   };
 
   function inlineColors(el: Element) {
-    for (const attr of ['fill', 'stroke', 'color']) {
+    for (const attr of ['fill', 'stroke', 'color', 'stop-color']) {
       const val = el.getAttribute(attr);
-      if (val && colorMap[val]) el.setAttribute(attr, colorMap[val]);
+      if (val) {
+        // Handle var() references
+        const match = val.match(/var\(([^)]+)\)/);
+        if (match && colorMap[`var(${match[1]})`]) {
+          el.setAttribute(attr, colorMap[`var(${match[1]})`]);
+        } else if (colorMap[val]) {
+          el.setAttribute(attr, colorMap[val]);
+        }
+      }
+    }
+    // Also handle style attributes
+    const style = el.getAttribute('style');
+    if (style) {
+      let newStyle = style;
+      for (const [varRef, hex] of Object.entries(colorMap)) {
+        newStyle = newStyle.replaceAll(varRef, hex);
+      }
+      el.setAttribute('style', newStyle);
     }
     for (const child of el.children) inlineColors(child);
   }
@@ -85,19 +108,33 @@ export function exportSVG(states_: State[], mode: Mode): string {
 }
 
 export function downloadSVG(states: State[], mode: Mode) {
-  const svgStr = exportSVG(states, mode);
-  const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `stateforge-${mode}.svg`;
-  a.click();
-  URL.revokeObjectURL(url);
+  try {
+    const svgStr = exportSVG(states, mode);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stateforge-${mode}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error('SVG export failed:', e);
+    alert('SVG export failed. See console for details.');
+  }
 }
 
 /* ── PNG Export ─────────────────────────────────────────── */
 export function downloadPNG(states: State[], mode: Mode) {
-  const svgStr = exportSVG(states, mode);
+  let svgStr: string;
+  try {
+    svgStr = exportSVG(states, mode);
+  } catch (e) {
+    console.error('PNG export failed:', e);
+    alert('PNG export failed. See console for details.');
+    return;
+  }
 
   // Parse dimensions from the SVG
   const parser = new DOMParser();
@@ -128,7 +165,9 @@ export function downloadPNG(states: State[], mode: Mode) {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `stateforge-${mode}.png`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
     }, 'image/png');
   };

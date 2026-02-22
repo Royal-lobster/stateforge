@@ -18,8 +18,8 @@ export default function Minimap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
 
-  // Hide when ≤ 3 states
-  if (states.length <= 3) return null;
+  // Hide when too few states
+  if (states.length < 2) return null;
 
   // Compute bounds of all states
   const xs = states.map(s => s.x);
