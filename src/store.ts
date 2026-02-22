@@ -42,6 +42,13 @@ interface StoreState {
   // Snap
   snapToGrid: boolean;
 
+  // Conversion highlighting
+  conversionHighlight: {
+    highlightedStates: Set<string>;   // state IDs to highlight on canvas
+    highlightedTransitions: Set<string>; // transition IDs to highlight
+    label?: string;                   // tooltip/label for current step
+  } | null;
+
   // Panels
   showSidebar: boolean;
   showSimPanel: boolean;
@@ -94,6 +101,9 @@ interface StoreState {
 
   // Actions - snap
   toggleSnapToGrid: () => void;
+
+  // Actions - conversion highlight
+  setConversionHighlight: (h: StoreState['conversionHighlight']) => void;
 
   // Actions - panels
   toggleSidebar: () => void;
@@ -186,6 +196,8 @@ export const useStore = create<StoreState>()(
     multiRunResults: [],
 
     snapToGrid: false,
+
+    conversionHighlight: null,
 
     showSidebar: true,
     showSimPanel: true,
@@ -647,6 +659,7 @@ export const useStore = create<StoreState>()(
     },
 
     toggleSnapToGrid: () => set({ snapToGrid: !get().snapToGrid }),
+    setConversionHighlight: (h) => set({ conversionHighlight: h }),
     toggleSidebar: () => set({ showSidebar: !get().showSidebar }),
     toggleSimPanel: () => set({ showSimPanel: !get().showSimPanel }),
   }))

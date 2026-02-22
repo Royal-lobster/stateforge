@@ -512,6 +512,167 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
           </div>
         )}
 
+        {/* SLR(1) tab */}
+        {activeTab === 'slr1' && (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
+              <button onClick={handleSLR1} className="px-2 py-1 font-mono text-[11px] bg-[var(--bg-surface-sunken)] text-[var(--color-text-dim)] hover:text-[var(--color-accent)]">Build Table</button>
+              {slr1Table && (
+                <>
+                  <span className="font-mono text-[11px] text-[var(--color-text-dim)] shrink-0">INPUT</span>
+                  <input
+                    value={parseInput}
+                    onChange={e => { setParseInput(e.target.value); setSlr1ParseResult(null); }}
+                    className="flex-1 bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] text-[var(--color-text)] font-mono text-xs px-2 py-1 outline-none focus:border-[var(--color-accent)]"
+                    placeholder="String to parse..."
+                  />
+                  <button onClick={handleSLR1Parse} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><Play size={14} /></button>
+                  <button onClick={() => setSlr1ParseResult(null)} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
+                </>
+              )}
+            </div>
+            <div className="flex-1 overflow-auto px-3 py-2">
+              {!slr1Table ? (
+                <div className="font-mono text-xs text-[var(--color-text-dim)] space-y-1">
+                  <p>SLR(1) shift-reduce parser.</p>
+                  <p>Click &quot;Build Table&quot; to compute LR(0) item sets and ACTION/GOTO table.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Conflicts */}
+                  {slr1Table.conflicts.length > 0 && (
+                    <div>
+                      <div className="font-mono text-[11px] tracking-widest text-[var(--color-reject)] uppercase mb-1">
+                        Conflicts ({slr1Table.conflicts.length})
+                      </div>
+                      {slr1Table.conflicts.map((c, i) => (
+                        <div key={i} className="font-mono text-[11px] text-[var(--color-reject)]">{c}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Item sets */}
+                  <div>
+                    <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+                      LR(0) Item Sets ({slr1Table.itemSets.length})
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                      {slr1Table.itemSets.map(set => (
+                        <div key={set.id} className="bg-[var(--bg-surface-sunken)] border border-[var(--color-border)] p-1.5">
+                          <div className="font-mono text-[11px] text-[var(--color-accent)] mb-0.5">I{set.id}</div>
+                          {set.items.map((item, j) => {
+                            const prod = slr1Table.augmentedProductions[item.prodIndex];
+                            const before = prod.body.slice(0, item.dot).join(' ');
+                            const after = prod.body.slice(item.dot).join(' ');
+                            return (
+                              <div key={j} className="font-mono text-[11px] text-[var(--color-text)]">
+                                {prod.head} → {before}<span className="text-[var(--color-accent)]">•</span>{after}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ACTION/GOTO table */}
+                  <div>
+                    <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">ACTION / GOTO Table</div>
+                    <div className="overflow-x-auto">
+                      {(() => {
+                        const terms = [...getTerminals(grammar), '$'].sort();
+                        const nts = [...getNonTerminals(grammar)].sort();
+                        return (
+                          <table className="border-collapse font-mono text-[11px]">
+                            <thead>
+                              <tr>
+                                <th className="border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-text-dim)]">State</th>
+                                {terms.map(t => (
+                                  <th key={t} className="border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-text-dim)]">{t}</th>
+                                ))}
+                                {nts.map(nt => (
+                                  <th key={nt} className="border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-accent)]">{nt}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {slr1Table.itemSets.map(set => (
+                                <tr key={set.id}>
+                                  <td className="border border-[var(--color-border)] px-1.5 py-0.5 text-[var(--color-text-dim)]">{set.id}</td>
+                                  {terms.map(t => {
+                                    const actions = slr1Table.action.get(set.id)?.get(t) || [];
+                                    const hasConflict = actions.length > 1;
+                                    const text = actions.map(a => {
+                                      if (a.type === 'shift') return `s${a.state}`;
+                                      if (a.type === 'reduce') return `r${a.prodIndex}`;
+                                      return 'acc';
+                                    }).join('/');
+                                    return (
+                                      <td key={t} className="border border-[var(--color-border)] px-1.5 py-0.5 text-center" style={hasConflict ? { color: 'var(--color-reject)', fontWeight: 'bold' } : undefined}>
+                                        <span className={hasConflict ? '' : 'text-[var(--color-text)]'}>{text || '-'}</span>
+                                      </td>
+                                    );
+                                  })}
+                                  {nts.map(nt => {
+                                    const g = slr1Table.goto.get(set.id)?.get(nt);
+                                    return (
+                                      <td key={nt} className="border border-[var(--color-border)] px-1.5 py-0.5 text-center text-[var(--color-text)]">
+                                        {g !== undefined ? g : '-'}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Parse result */}
+                  {slr1ParseResult && (
+                    <div className="space-y-2">
+                      <div className="font-mono text-sm font-bold" style={{ color: slr1ParseResult.accepted ? 'var(--color-accept)' : 'var(--color-reject)' }}>
+                        {slr1ParseResult.accepted ? 'ACCEPTED' : 'REJECTED'}
+                      </div>
+                      <div>
+                        <div className="font-mono text-[11px] tracking-widest text-[var(--color-text-dim)] uppercase mb-1">
+                          Parse Steps ({slr1ParseResult.steps.length})
+                        </div>
+                        <div className="overflow-x-auto max-h-[200px] overflow-y-auto">
+                          <table className="border-collapse font-mono text-[11px] w-full">
+                            <thead>
+                              <tr className="text-[var(--color-text-dim)]">
+                                <td className="pr-2 pb-1">#</td>
+                                <td className="pr-2 pb-1">State Stack</td>
+                                <td className="pr-2 pb-1">Symbol Stack</td>
+                                <td className="pr-2 pb-1">Input</td>
+                                <td className="pb-1">Action</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {slr1ParseResult.steps.map((step, i) => (
+                                <tr key={i} className="text-[var(--color-text)]">
+                                  <td className="pr-2 text-[var(--color-text-dim)]">{i + 1}</td>
+                                  <td className="pr-2">{step.stateStack.join(' ')}</td>
+                                  <td className="pr-2">{step.symbolStack.join(' ')}</td>
+                                  <td className="pr-2">{step.remaining}</td>
+                                  <td className="text-[var(--color-accent)]">{step.action}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Brute force tab */}
         {activeTab === 'brute' && (
           <div className="flex-1 flex flex-col overflow-hidden">

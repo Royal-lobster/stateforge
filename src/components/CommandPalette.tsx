@@ -30,7 +30,7 @@ function fuzzyMatch(query: string, text: string): boolean {
   return qi === q.length;
 }
 
-export default function CommandPalette({ onModeChange }: { onModeChange: (mode: string) => void }) {
+export default function CommandPalette({ onModeChange, onPumpingLemma }: { onModeChange: (mode: string) => void; onPumpingLemma?: () => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -75,6 +75,9 @@ export default function CommandPalette({ onModeChange }: { onModeChange: (mode: 
     { id: 'exp-png', label: 'Export PNG', icon: <Image size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export-png')) },
     { id: 'exp-svg', label: 'Export SVG', icon: <Code size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:export-svg')) },
     { id: 'exp-import', label: 'Import File', shortcut: '⌘O', icon: <Upload size={14} />, category: 'Export', action: () => window.dispatchEvent(new CustomEvent('stateforge:import')) },
+
+    // Games
+    ...(onPumpingLemma ? [{ id: 'game-pumping', label: 'Pumping Lemma Game', icon: <Zap size={14} />, category: 'Game', action: () => onPumpingLemma() }] : []),
   ];
 
   const filtered = query

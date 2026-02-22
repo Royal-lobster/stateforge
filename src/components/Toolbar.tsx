@@ -6,7 +6,7 @@ import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Maximize2,
   ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github, FileText,
-  ChevronDown, Menu, Image, FileCode, Copy, Magnet,
+  ChevronDown, Menu, Image, FileCode, Copy, Magnet, Zap,
 } from 'lucide-react';
 import { downloadSVG, downloadPNG, copyTikZ } from '@/lib/export';
 import { encodeAutomaton } from '@/url';
@@ -170,10 +170,11 @@ interface ToolbarProps {
   lsystemMode?: boolean;
   saved?: boolean;
   onShortcuts?: () => void;
+  onPumpingLemma?: () => void;
 }
 
 /* ── Main Toolbar ────────────────────────────────────────── */
-export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, grammarMode, lsystemMode, saved, onShortcuts }: ToolbarProps) {
+export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, grammarMode, lsystemMode, saved, onShortcuts, onPumpingLemma }: ToolbarProps) {
   const tool = useStore(s => s.tool);
   const mode = useStore(s => s.mode);
   const undoStack = useStore(s => s.undoStack);
@@ -499,6 +500,16 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
             <ArrowRightLeft size={14} />
             CONVERT
           </button>
+          {onPumpingLemma && (
+            <button
+              onClick={onPumpingLemma}
+              title="Pumping Lemma Game"
+              className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] tracking-wider text-[var(--color-text-dim)] hover:text-[var(--color-accent)] transition-colors shrink-0"
+            >
+              <Zap size={14} />
+              PUMP
+            </button>
+          )}
         </>
       )}
 

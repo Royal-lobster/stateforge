@@ -87,6 +87,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const mode = useStore(s => s.mode);
   const simCurrentStates = useStore(s => s.simCurrentStates);
   const simStatus = useStore(s => s.simStatus);
+  const conversionHighlight = useStore(s => s.conversionHighlight);
   const snapToGrid = useStore(s => s.snapToGrid);
 
   const addState = useStore(s => s.addState);
@@ -598,10 +599,12 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             const isSelected = selectedIds.has(s.id);
             const isSimActive = simCurrentStates.has(s.id);
             const isAcceptedFinal = simStatus === 'accepted' && isSimActive;
+            const isConvHighlighted = conversionHighlight?.highlightedStates.has(s.id);
 
             let strokeColor = 'var(--color-border)';
             let fillColor = 'var(--bg-surface)';
-            if (isSimActive && simStatus === 'stepping') { strokeColor = 'var(--color-sim-active)'; fillColor = 'rgba(234, 179, 8, 0.15)'; }
+            if (isConvHighlighted) { strokeColor = 'var(--color-accent)'; fillColor = 'rgba(99, 102, 241, 0.18)'; }
+            else if (isSimActive && simStatus === 'stepping') { strokeColor = 'var(--color-sim-active)'; fillColor = 'rgba(234, 179, 8, 0.15)'; }
             else if (isAcceptedFinal) { strokeColor = 'var(--color-accept)'; fillColor = 'rgba(34, 197, 94, 0.15)'; }
             else if (isSelected) { strokeColor = 'var(--color-accent)'; }
 

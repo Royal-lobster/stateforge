@@ -16,6 +16,7 @@ import MealyMoorePanel from './MealyMoorePanel';
 import LSystem from './LSystem';
 import Gallery from './Gallery';
 import CommandPalette from './CommandPalette';
+import PumpingLemma from './PumpingLemma';
 import { X } from 'lucide-react';
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
   const [showGrammar, setShowGrammar] = useState(false);
   const [showLSystem, setShowLSystem] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showPumpingLemma, setShowPumpingLemma] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [initialGrammarText, setInitialGrammarText] = useState<string | undefined>(undefined);
@@ -196,6 +198,7 @@ export default function App() {
     lsystemMode: showLSystem,
     saved,
     onShortcuts: () => setShowShortcuts(true),
+    onPumpingLemma: () => setShowPumpingLemma(true),
   };
 
   const shortcuts = [
@@ -242,7 +245,8 @@ export default function App() {
 
   const overlays = (
     <>
-      <CommandPalette onModeChange={handleModeChange} />
+      <CommandPalette onModeChange={handleModeChange} onPumpingLemma={() => setShowPumpingLemma(true)} />
+      {showPumpingLemma && <PumpingLemma onClose={() => setShowPumpingLemma(false)} />}
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none">
