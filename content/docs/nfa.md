@@ -1,6 +1,6 @@
 # NFA — Nondeterministic Finite Automaton
 
-A **Nondeterministic Finite Automaton** extends the DFA model by allowing multiple possible transitions from a single state on the same input symbol—including transitions on no input at all (ε-transitions). NFAs are a cornerstone of formal language theory: they recognize exactly the regular languages, just like DFAs, but are often far more concise and intuitive to construct.
+A **Nondeterministic Finite Automaton** extends the DFA model by allowing multiple possible transitions from a single state on the same input symbol—including transitions on no input at all (ε-transitions). NFAs recognize exactly the regular languages, just like DFAs, but are often more concise to construct.
 
 ---
 

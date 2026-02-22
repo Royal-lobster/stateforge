@@ -138,7 +138,7 @@ input, pop → push
 
 ### Stack Symbol Conventions
 
-- **Z** — The initial bottom-of-stack marker. Every PDA in StateForge starts with `Z` on the stack. It serves as a sentinel so you can detect when the stack is "empty" (only `Z` remains).
+- **Z** — The initial bottom-of-stack marker. Every PDA in StateForge starts with `Z` on the stack. It's a sentinel — when you see `Z` on top, the stack is logically empty.
 - **ε** — Represents "nothing." As pop: don't check the stack. As push: don't push anything. As input: don't consume any character.
 
 ### Push Convention

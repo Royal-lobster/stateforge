@@ -16,24 +16,24 @@ No install. No accounts. Just a URL.
 
 ---
 
-## ✨ Features
+## Features
 
-- **🔀 DFA & NFA** — Visual editor with full simulation, step-through, and multi-string testing
-- **📥 NFA → DFA Conversion** — Subset construction with animated step-by-step or side-by-side view
-- **📐 DFA Minimization** — Table-filling algorithm with before/after comparison
-- **🔄 FA ↔ RegEx** — State elimination and Thompson's construction
-- **📝 Grammar Editor** — Context-free grammars with syntax highlighting and type classification
-- **🔧 Grammar Transforms** — Remove ε/unit productions, CNF, GNF conversions
-- **📚 Pushdown Automata** — PDA editor with real-time stack visualization
-- **🖥️ Turing Machines** — Tape visualization with head tracking and animation speed control
-- **⚙️ Mealy & Moore Machines** — Output on transitions or states with live output display
-- **🌿 L-Systems** — Turtle graphics with iteration depth slider and fractal presets
-- **🔗 URL Sharing** — Entire automaton encodes into the URL hash — the link *is* the file
-- **📄 Import/Export** — JFLAP `.jff` import, JSON export, PNG/SVG screenshots
+- **DFA & NFA** — visual editor with step-through simulation and batch string testing
+- **NFA → DFA** — subset construction, step-by-step or all-at-once
+- **DFA minimization** — table-filling algorithm with before/after view
+- **FA ↔ RegEx** — state elimination and Thompson's construction
+- **Grammar editor** — context-free grammars with syntax highlighting and auto-classification
+- **Grammar transforms** — ε-removal, unit-removal, CNF, GNF
+- **Pushdown automata** — PDA editor with live stack visualization
+- **Turing machines** — tape visualization with head tracking and speed control
+- **Mealy & Moore** — transducer simulation with output display
+- **L-Systems** — turtle graphics with iteration slider and fractal presets
+- **URL sharing** — the entire automaton encodes into the URL hash
+- **Import/export** — JFLAP `.jff` import, JSON export, PNG/SVG screenshots
 
-## 🛠️ Tech Stack
+## Tech stack
 
-- **Next.js** (static export, no server)
+- **Next.js** (static site, client-side only)
 - **TypeScript**
 - **Tailwind CSS**
 - **Zustand** (state management + undo/redo)
@@ -41,7 +41,7 @@ No install. No accounts. Just a URL.
 - **lucide-react** (icons)
 - **lz-string** (URL compression)
 
-## 🚀 Getting Started
+## Getting started
 
 ```bash
 git clone https://github.com/Royal-lobster/stateforge.git
@@ -52,7 +52,7 @@ pnpm dev
 
 Open [localhost:3000](http://localhost:3000) and start building automata.
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 src/
@@ -69,11 +69,11 @@ src/
 └── mealy-moore.ts  # Mealy/Moore machine simulation
 ```
 
-## 📖 Docs
+## Docs
 
 Full documentation is built into the app at [stateforge.vercel.app/docs](https://stateforge.vercel.app/docs).
 
-## 📜 License
+## License
 
 MIT
 
