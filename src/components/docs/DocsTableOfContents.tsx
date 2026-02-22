@@ -50,10 +50,9 @@ export function DocsTableOfContents() {
     return () => observer.disconnect();
   }, [headings]);
 
-  if (headings.length === 0) return null;
-
   return (
     <nav className="hidden xl:block w-52 shrink-0 sticky top-0 h-screen overflow-y-auto py-10 px-4 border-l border-[var(--color-border)]/50">
+      {headings.length === 0 ? null : <>
       <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-4 font-semibold">
         On this page
       </div>
@@ -79,6 +78,7 @@ export function DocsTableOfContents() {
           </a>
         ))}
       </div>
+      </>}
     </nav>
   );
 }
