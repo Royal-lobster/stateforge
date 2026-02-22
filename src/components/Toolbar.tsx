@@ -6,8 +6,9 @@ import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Maximize2,
   ArrowRightLeft, BookOpen, TreePine, Home, Download, Upload, Github, FileText,
-  ChevronDown, Menu,
+  ChevronDown, Menu, Image, FileCode, Copy,
 } from 'lucide-react';
+import { downloadSVG, downloadPNG, copyTikZ } from '@/lib/export';
 import { encodeAutomaton } from '@/url';
 import type { State, Transition, Mode } from '@/types';
 import Tooltip from './Tooltip';
@@ -92,6 +93,68 @@ function ModeDropdown({ mode, grammarMode, lsystemMode, onModeChange }: {
             ))}
           </div>
         </>
+      )}
+    </div>
+  );
+}
+
+/* ── Export Dropdown ──────────────────────────────────────── */
+function ExportDropdown({ states, transitions, mode, onExportJSON }: {
+  states: any[];
+  transitions: any[];
+  mode: string;
+  onExportJSON: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2000);
+  };
+
+  const items = [
+    { label: 'JSON', icon: <FileText size={12} />, action: () => { onExportJSON(); setOpen(false); } },
+    { label: 'SVG', icon: <FileCode size={12} />, action: () => { downloadSVG(states, mode as any); setOpen(false); } },
+    { label: 'PNG', icon: <Image size={12} />, action: () => { downloadPNG(states, mode as any); setOpen(false); } },
+    { label: 'LaTeX', icon: <Copy size={12} />, action: async () => {
+      const ok = await copyTikZ(states, transitions, mode as any);
+      showToast(ok ? 'TikZ copied!' : 'Copy failed');
+      setOpen(false);
+    }},
+  ];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] transition-colors"
+        title="Export (⌘E)"
+      >
+        <Download size={16} />
+        <ChevronDown size={10} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute top-full right-0 mt-1 z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[130px] animate-scale-in">
+            {items.map(item => (
+              <button
+                key={item.label}
+                onClick={item.action}
+                className="w-full text-left px-3 py-2 font-mono text-xs tracking-wider flex items-center gap-2 text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      {toast && (
+        <div className="absolute top-full right-0 mt-1 z-50 bg-[var(--color-accent)] text-[var(--bg-primary)] px-3 py-1.5 font-mono text-xs whitespace-nowrap animate-scale-in">
+          {toast}
+        </div>
       )}
     </div>
   );
@@ -310,7 +373,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
             <ToolBtn onClick={autoLayout} title="Layout" className={mb}>
               <LayoutGrid size={15} />
             </ToolBtn>
-            <ToolBtn onClick={clearAll} title="Clear" className={mb}>
+            <ToolBtn onClick={() => { if (window.confirm('Clear all states and transitions?')) clearAll(); }} title="Clear" className={mb}>
               <RotateCcw size={15} />
             </ToolBtn>
 
@@ -371,7 +434,7 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L" className="p-1.5">
             <LayoutGrid size={16} />
           </ToolBtn>
-          <ToolBtn onClick={clearAll} title="Clear All" shortcut="⇧⌘X" className="p-1.5">
+          <ToolBtn onClick={() => { if (window.confirm('Clear all states and transitions?')) clearAll(); }} title="Clear All" shortcut="⇧⌘X" className="p-1.5">
             <RotateCcw size={16} />
           </ToolBtn>
 

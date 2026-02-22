@@ -1,5 +1,8 @@
 import type { State, Transition, PDATransitionEntry } from './types';
 
+/** Initial stack symbol — by convention the PDA stack starts with 'Z'. */
+const INITIAL_STACK_SYMBOL = 'Z';
+
 // ── PDA Transition Parsing ──
 
 /**
@@ -70,7 +73,7 @@ export function pdaInit(
 
   const startConfig: PDAConfig = {
     stateId: initial.id,
-    stack: ['Z'],  // initial stack symbol
+    stack: [INITIAL_STACK_SYMBOL],
     inputPos: 0,
     id: _configId++,
     parentId: null,

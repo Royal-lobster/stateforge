@@ -32,7 +32,10 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
 
   if (!showSimPanel) return null;
 
+  const hasInitial = states.some(s => s.isInitial);
+
   const handleStart = () => {
+    if (!hasInitial) return;
     const s = tmInit(states, input);
     setSim(s);
   };
@@ -65,7 +68,6 @@ export default function TMSimPanel({ isMobile }: { isMobile: boolean }) {
   }, [sim]);
 
   const stateMap = new Map(states.map(s => [s.id, s]));
-  const hasInitial = states.some(s => s.isInitial);
 
   const statusColor = !sim ? 'var(--color-text-muted)'
     : sim.status === 'accepted' ? 'var(--color-accept)'

@@ -87,8 +87,8 @@ export function classifyGrammar(grammar: Grammar): GrammarType {
   let isCS = true;
 
   for (const p of grammar.productions) {
-    // CF: head must be single non-terminal
-    if (p.head.length !== 1 || !isNonTerminal(p.head)) {
+    // CF: head must be a single non-terminal (e.g. 'S', '<expr>')
+    if (!isNonTerminal(p.head) || p.head.split(/\s+/).length !== 1) {
       isCF = false;
       isRegular = false;
     }

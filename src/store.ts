@@ -238,10 +238,20 @@ export const useStore = create<StoreState>()(
     toggleInitial: (id) => {
       const s = get();
       s.pushUndo();
-      set({
-        states: s.states.map(st => ({ ...st, isInitial: st.id === id ? !st.isInitial : false })),
-        redoStack: [],
-      });
+      const target = s.states.find(st => st.id === id);
+      if (target?.isInitial) {
+        // Already initial — just toggle it off, don't touch others
+        set({
+          states: s.states.map(st => st.id === id ? { ...st, isInitial: false } : st),
+          redoStack: [],
+        });
+      } else {
+        // Make this state initial, clear others (exactly one initial)
+        set({
+          states: s.states.map(st => ({ ...st, isInitial: st.id === id })),
+          redoStack: [],
+        });
+      }
     },
 
     toggleAccepting: (id) => {
@@ -513,6 +523,8 @@ export const useStore = create<StoreState>()(
         return;
       }
       const ch = s.simRemaining[0];
+      // Intentionally uses NFA step logic for DFA too — DFA states are a subset of NFA,
+      // so the same algorithm works. Determinism is enforced via validation errors in Properties.
       const next = stepNFA(s.simCurrentStates, ch, s.transitions);
       if (next.size === 0) {
         set({ simStatus: 'rejected', simCurrentStates: new Set(), simConsumed: s.simConsumed + ch, simRemaining: s.simRemaining.slice(1) });

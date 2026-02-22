@@ -10,6 +10,7 @@ interface SerializedAutomaton {
 export function encodeAutomaton(states: State[], transitions: Transition[], mode: Mode): string {
   const data: SerializedAutomaton = {
     s: states.map(s => ({ i: s.id, l: s.label, x: Math.round(s.x), y: Math.round(s.y), n: s.isInitial, a: s.isAccepting })),
+    // PDA transitions survive round-trip: push/pop info is encoded in symbols[] labels (e.g. "a, Z → AZ")
     t: transitions.map(t => ({ i: t.id, f: t.from, o: t.to, s: t.symbols })),
     m: mode,
   };

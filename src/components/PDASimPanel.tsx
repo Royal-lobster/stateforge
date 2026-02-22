@@ -20,7 +20,10 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
 
   if (!showSimPanel) return null;
 
+  const hasInitial = states.some(s => s.isInitial);
+
   const handleStart = () => {
+    if (!hasInitial) return;
     const sim = pdaInit(states, transitions, input, acceptMode);
     setSimState(sim);
     setStepCount(0);
@@ -46,7 +49,6 @@ export default function PDASimPanel({ isMobile }: { isMobile: boolean }) {
   };
 
   const stateMap = new Map(states.map(s => [s.id, s]));
-  const hasInitial = states.some(s => s.isInitial);
 
   const isAccepted = simState ? simState.accepted.length > 0 : false;
   const isDone = simState?.done ?? false;

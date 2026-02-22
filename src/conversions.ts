@@ -836,7 +836,7 @@ function wrapIfNeeded(re: string): string {
 function simplifyRegex(re: string): string {
   let s = re;
   // Remove redundant ε in concatenation: εX → X, Xε → X (but not standalone ε)
-  s = s.replace(/ε(?=[^|$])/g, '');
+  s = s.replace(/ε(?=[^|])/g, '');
   s = s.replace(/(?<=[^|])ε/g, '');
   // Clean up empty alternatives
   s = s.replace(/\|\|+/g, '|');
