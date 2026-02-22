@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '@/lib/store';
 import type { State, Transition } from '@/lib/types';
+import SymbolPalette from './SymbolPalette';
+import { useSymbolShortcuts } from '@/hooks/useSymbolShortcuts';
 
 const STATE_RADIUS = 28;
 const GRID_SIZE = 20;
@@ -156,6 +158,8 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const [boxSelect, setBoxSelect] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [editInput, setEditInput] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+  const handleEditInputChange = useSymbolShortcuts(setEditInput);
   const [stateEditInput, setStateEditInput] = useState('');
   const [showMobileContextMenu, setShowMobileContextMenu] = useState(false);
   const [mobileContextStateId, setMobileContextStateId] = useState<string | null>(null);
@@ -727,8 +731,9 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         if (t.from === t.to) { lx = from.x * zoom + pan.x; ly = (from.y - STATE_RADIUS - 35) * zoom + pan.y; }
         else { lx = ((from.x + to.x) / 2) * zoom + pan.x; ly = ((from.y + to.y) / 2) * zoom + pan.y - 20; }
         return (
-          <div className="absolute" style={{ left: lx - 60, top: ly - 12 }}>
-            <input autoFocus className="bg-[var(--bg-surface-sunken)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[140px] outline-none" value={editInput} onChange={e => setEditInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} onBlur={commitTransitionEdit} placeholder={mode === 'pda' ? 'a, Z → AZ' : mode === 'tm' ? 'a → b, R' : mode === 'mealy' ? 'a/0' : 'a, b'} />
+          <div className="absolute flex items-center gap-0" style={{ left: lx - 60, top: ly - 12 }}>
+            <input ref={editInputRef} autoFocus className="bg-[var(--bg-surface-sunken)] border border-[var(--color-accent)] text-[var(--color-text)] px-2 py-1 text-xs font-mono w-[140px] outline-none" value={editInput} onChange={handleEditInputChange} onKeyDown={e => { if (e.key === 'Enter') commitTransitionEdit(); if (e.key === 'Escape') setEditingTransition(null); }} onBlur={commitTransitionEdit} placeholder={mode === 'pda' ? 'a, Z → AZ' : mode === 'tm' ? 'a → b, R' : mode === 'mealy' ? 'a/0' : 'a, b'} />
+            <SymbolPalette inputRef={editInputRef} />
           </div>
         );
       })()}

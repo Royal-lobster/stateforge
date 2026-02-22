@@ -4,6 +4,8 @@ import { useState, useRef, useCallback } from 'react';
 import { useStore } from '@/lib/store';
 import { Play, StepForward, FastForward, RotateCcw, ListChecks, GripHorizontal, Zap } from 'lucide-react';
 import Tooltip from './Tooltip';
+import SymbolPalette from './SymbolPalette';
+import { useSymbolShortcuts } from '@/hooks/useSymbolShortcuts';
 
 export default function SimPanel({ isMobile }: { isMobile: boolean }) {
   const showSimPanel = useStore(s => s.showSimPanel);
