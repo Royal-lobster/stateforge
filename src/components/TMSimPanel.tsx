@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useStore } from '@/store';
+import { useStore } from '@/lib/store';
 import {
   tmInit, tmStep, tmFastRun, tapeToString,
   type TMSimState,
-} from '@/tm';
+} from '@/lib/tm';
 import {
   Play, StepForward, FastForward, RotateCcw, GripHorizontal,
   Gauge, Zap,

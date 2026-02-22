@@ -60,17 +60,18 @@ Open [localhost:3000](http://localhost:3000) and start building automata.
 
 ```
 src/
-├── app/            # Next.js app router (layout, page, OG image)
-├── components/     # Canvas, Toolbar, Sidebar, SimPanel, etc.
-├── hooks/          # Custom React hooks
-├── store.ts        # Zustand store (single source of truth)
-├── types.ts        # TypeScript types
-├── url.ts          # URL encode/decode (binary varint + lz-string)
-├── conversions.ts  # NFA→DFA, minimization, RE conversions
-├── grammar.ts      # Grammar parsing, transforms, CYK
-├── pda.ts          # PDA simulation
-├── tm.ts           # Turing machine simulation
-└── mealy-moore.ts  # Mealy/Moore machine simulation
+├── app/                # Next.js app router (layout, page, OG image)
+├── components/         # Canvas, Toolbar, Sidebar, SimPanel, etc.
+├── hooks/              # Custom React hooks
+└── lib/                # Core logic (no React dependencies)
+    ├── store.ts        # Zustand store (single source of truth)
+    ├── types.ts        # TypeScript types
+    ├── url.ts          # URL encode/decode (binary varint + lz-string)
+    ├── conversions.ts  # NFA→DFA, minimization, RE conversions
+    ├── grammar.ts      # Grammar parsing, transforms, CYK
+    ├── pda.ts          # PDA simulation
+    ├── tm.ts           # Turing machine simulation
+    └── mealy-moore.ts  # Mealy/Moore machine simulation
 ```
 
 ## 📖 Docs

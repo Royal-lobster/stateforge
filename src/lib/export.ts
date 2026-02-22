@@ -1,4 +1,4 @@
-import type { State, Transition, Mode } from '@/types';
+import type { State, Transition, Mode } from '@/lib/types';
 
 const STATE_RADIUS = 28;
 const PADDING = 60;

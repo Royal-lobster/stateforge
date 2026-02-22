@@ -9,8 +9,8 @@ import {
   buildSLR1Table, parseSLR1,
   type TransformResult, type CYKResult, type LL1Result,
   type SLR1Table, type SLR1ParseStep,
-} from '@/grammar';
-import type { Grammar, GrammarType } from '@/types';
+} from '@/lib/grammar';
+import type { Grammar, GrammarType } from '@/lib/types';
 import ParseTreeView from './ParseTree';
 import {
   Play, RotateCcw,

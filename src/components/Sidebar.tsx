@@ -1,8 +1,8 @@
 'use client';
 
-import { useStore } from '@/store';
+import { useStore } from '@/lib/store';
 import { Circle, ArrowRight, Hash, X, Share2, LayoutGrid, RotateCcw, Download, Upload, ChevronRight } from 'lucide-react';
-import { encodeAutomaton } from '@/url';
+import { encodeAutomaton } from '@/lib/url';
 
 export default function Sidebar({ isMobile }: { isMobile: boolean }) {
   const states = useStore(s => s.states);

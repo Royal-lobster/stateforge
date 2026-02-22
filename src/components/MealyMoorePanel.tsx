@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useStore } from '@/store';
-import { mealyRun, mooreRun, type MealySimState, type MooreSimState } from '@/mealy-moore';
+import { useStore } from '@/lib/store';
+import { mealyRun, mooreRun, type MealySimState, type MooreSimState } from '@/lib/mealy-moore';
 import { StepForward, FastForward, RotateCcw, Zap } from 'lucide-react';
 import Tooltip from './Tooltip';
 

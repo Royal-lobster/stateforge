@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useStore } from '@/store';
-import { pdaInit, pdaStep, pdaFastRun, type PDASimState } from '@/pda';
+import { useStore } from '@/lib/store';
+import { pdaInit, pdaStep, pdaFastRun, type PDASimState } from '@/lib/pda';
 import {
   Play, StepForward, FastForward, RotateCcw, Zap,
 } from 'lucide-react';

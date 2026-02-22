@@ -1,7 +1,7 @@
 'use client';
 
-import { useStore } from '@/store';
-import type { State, Transition, Mode } from '@/types';
+import { useStore } from '@/lib/store';
+import type { State, Transition, Mode } from '@/lib/types';
 import {
   CircleDot, GitBranch, Layers, Cpu,
   ArrowRight, Plus, Zap, Settings,
