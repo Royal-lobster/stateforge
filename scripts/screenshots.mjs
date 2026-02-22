@@ -3,7 +3,6 @@ import { mkdirSync } from 'fs';
 
 const DIR = 'public/docs';
 mkdirSync(DIR, { recursive: true });
-
 const BASE = 'http://localhost:3456';
 
 async function main() {
@@ -14,168 +13,98 @@ async function main() {
     colorScheme: 'dark',
   });
 
-  // Helper: load a gallery example
   async function loadExample(page, name) {
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(600);
-    const card = page.locator(`text=${name}`);
-    if (await card.isVisible()) {
+    // Clear state FIRST, then navigate fresh
+    await page.evaluate(() => {
+      localStorage.clear();
+      window.location.hash = '';
+    });
+    await page.goto(BASE, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
+    // Try clicking the example
+    const card = page.locator(`button:has-text("${name}")`).first();
+    try {
+      await card.waitFor({ state: 'visible', timeout: 5000 });
       await card.click();
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(1200);
+    } catch {
+      console.log(`   ⚠ example "${name}" not found`);
     }
   }
 
-  // Helper: screenshot an element with padding
-  async function cropEl(page, selector, file, { pad = 0 } = {}) {
-    const el = page.locator(selector).first();
-    if (!(await el.isVisible())) {
-      console.log(`   ⚠ selector not visible: ${selector}`);
-      return;
+  async function openSimPanel(page) {
+    // Toggle sim panel if not visible — press Ctrl+.
+    const simPanel = page.locator('div.shadow-panel').first();
+    if (!(await simPanel.isVisible().catch(() => false))) {
+      await page.keyboard.press('Control+.');
+      await page.waitForTimeout(400);
     }
-    const box = await el.boundingBox();
-    if (!box) return;
-    await page.screenshot({
-      path: `${DIR}/${file}`,
-      clip: {
-        x: Math.max(0, box.x - pad),
-        y: Math.max(0, box.y - pad),
-        width: box.width + pad * 2,
-        height: box.height + pad * 2,
-      },
-    });
+  }
+
+  async function openSidebar(page) {
+    await page.keyboard.press('/');
+    await page.waitForTimeout(400);
   }
 
   const shots = [
+    // ── Gallery / Homepage ──
     {
       name: 'gallery',
-      desc: 'Gallery page',
       fn: async (page) => {
         await page.evaluate(() => localStorage.clear());
         await page.reload({ waitUntil: 'networkidle' });
         await page.waitForTimeout(800);
-        // Full page shot — gallery IS the full page
         await page.screenshot({ path: `${DIR}/gallery.png` });
       },
     },
+
+    // ── Canvas + States ──
     {
       name: 'canvas-dfa',
-      desc: 'Canvas with DFA states and transitions',
       fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        // Full page but we'll use it — canvas fills most of the viewport
+        await loadExample(page, 'Even 0s');
         await page.screenshot({ path: `${DIR}/canvas-dfa.png` });
       },
     },
+
+    // ── Toolbar ──
     {
       name: 'toolbar',
-      desc: 'Toolbar close-up',
       fn: async (page) => {
         await loadExample(page, 'Ends with ab');
-        // The toolbar is the first child — top bar
+        // First child row of the app
         const toolbar = page.locator('div.shrink-0.select-none').first();
-        await toolbar.screenshot({ path: `${DIR}/toolbar.png` });
+        if (await toolbar.isVisible()) {
+          await toolbar.screenshot({ path: `${DIR}/toolbar.png` });
+        }
       },
     },
+
+    // ── Transitions close-up (curved + self-loop + labels) ──
     {
-      name: 'sidebar',
-      desc: 'Properties sidebar with formal definition',
+      name: 'transitions',
       fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        // Sidebar is the rightmost panel
-        const sidebar = page.locator('[class*="w-64"]').first();
-        if (await sidebar.isVisible()) {
-          await sidebar.screenshot({ path: `${DIR}/sidebar.png` });
-        } else {
-          // Try wider selector
-          await cropEl(page, 'div:has(> div:has-text("FORMAL DEFINITION"))', 'sidebar.png', { pad: 4 });
+        await loadExample(page, 'Even 0s');
+        // This example has self-loops and bidirectional edges — crop the canvas area
+        const canvas = page.locator('[data-canvas]').first();
+        if (await canvas.isVisible()) {
+          await canvas.screenshot({ path: `${DIR}/transitions.png` });
         }
       },
     },
-    {
-      name: 'sim-idle',
-      desc: 'Simulation panel — idle state with hints',
-      fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        // Bottom sim panel
-        const sim = page.locator('div.shadow-panel:has(button[aria-label="Start"])').first();
-        if (await sim.isVisible()) {
-          await sim.screenshot({ path: `${DIR}/sim-idle.png` });
-        }
-      },
-    },
-    {
-      name: 'sim-accepted',
-      desc: 'Simulation — string accepted',
-      fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        const input = page.locator('input[placeholder="Enter string..."]');
-        if (await input.isVisible()) {
-          await input.fill('0110');
-          await page.waitForTimeout(200);
-          const btn = page.locator('button[aria-label="Fast Run"]');
-          if (await btn.isVisible()) await btn.click();
-          await page.waitForTimeout(500);
-        }
-        const sim = page.locator('div.shadow-panel:has(button[aria-label="Start"])').first();
-        if (await sim.isVisible()) {
-          await sim.screenshot({ path: `${DIR}/sim-accepted.png` });
-        }
-      },
-    },
-    {
-      name: 'sim-rejected',
-      desc: 'Simulation — string rejected',
-      fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        const input = page.locator('input[placeholder="Enter string..."]');
-        if (await input.isVisible()) {
-          await input.fill('0');
-          await page.waitForTimeout(200);
-          const btn = page.locator('button[aria-label="Fast Run"]');
-          if (await btn.isVisible()) await btn.click();
-          await page.waitForTimeout(500);
-        }
-        const sim = page.locator('div.shadow-panel:has(button[aria-label="Start"])').first();
-        if (await sim.isVisible()) {
-          await sim.screenshot({ path: `${DIR}/sim-rejected.png` });
-        }
-      },
-    },
-    {
-      name: 'multi-run',
-      desc: 'Multi-run batch results',
-      fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        const multiBtn = page.locator('button:text("Multi")');
-        if (await multiBtn.isVisible()) await multiBtn.click();
-        await page.waitForTimeout(200);
-        const textarea = page.locator('textarea');
-        if (await textarea.isVisible()) {
-          await textarea.fill('00\n010\n0000\n1\n01\n1100');
-          const runAll = page.locator('button:text("RUN ALL")');
-          if (await runAll.isVisible()) await runAll.click();
-          await page.waitForTimeout(500);
-        }
-        const sim = page.locator('div.shadow-panel:has(button[aria-label="Reset"])').first();
-        if (await sim.isVisible()) {
-          await sim.screenshot({ path: `${DIR}/multi-run.png` });
-        }
-      },
-    },
+
+    // ── Context Menu ──
     {
       name: 'context-menu',
-      desc: 'Right-click context menu',
       fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
-        // Right-click on canvas where state should be
+        await loadExample(page, 'Even 0s');
         const svg = page.locator('svg').first();
         const box = await svg.boundingBox();
         if (box) {
-          await page.mouse.click(box.x + box.width * 0.35, box.y + box.height * 0.4, { button: 'right' });
+          // Right-click on roughly where a state should be
+          await page.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.5, { button: 'right' });
           await page.waitForTimeout(400);
         }
-        // Crop around the context menu + nearby canvas
         const menu = page.locator('div.animate-scale-in').first();
         if (await menu.isVisible()) {
           const menuBox = await menu.boundingBox();
@@ -183,52 +112,238 @@ async function main() {
             await page.screenshot({
               path: `${DIR}/context-menu.png`,
               clip: {
-                x: Math.max(0, menuBox.x - 80),
-                y: Math.max(0, menuBox.y - 80),
-                width: menuBox.width + 160,
-                height: menuBox.height + 160,
+                x: Math.max(0, menuBox.x - 100),
+                y: Math.max(0, menuBox.y - 100),
+                width: menuBox.width + 200,
+                height: menuBox.height + 200,
               },
             });
           }
         }
       },
     },
+
+    // ── Properties Sidebar ──
+    {
+      name: 'sidebar',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        await openSidebar(page);
+        // Sidebar is the w-64 panel on the right
+        const sidebar = page.locator('div.overflow-hidden.select-none div.w-64').first();
+        if (await sidebar.isVisible().catch(() => false)) {
+          await sidebar.screenshot({ path: `${DIR}/sidebar.png` });
+        } else {
+          // Fallback: crop right portion of screen
+          await page.screenshot({
+            path: `${DIR}/sidebar.png`,
+            clip: { x: 1280 - 256, y: 40, width: 256, height: 680 },
+          });
+        }
+      },
+    },
+
+    // ── DFA/NFA Sim: Idle ──
+    {
+      name: 'sim-idle',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        await openSimPanel(page);
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/sim-idle.png` });
+        }
+      },
+    },
+
+    // ── DFA/NFA Sim: Accepted ──
+    {
+      name: 'sim-accepted',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        await openSimPanel(page);
+        const input = page.locator('input[placeholder*="Enter"]').first();
+        if (await input.isVisible()) {
+          await input.fill('0110');
+          await page.waitForTimeout(200);
+          // Click fast-forward
+          const ffwd = page.locator('button:has(svg)').nth(3); // 4th button in controls
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(600);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/sim-accepted.png` });
+        }
+      },
+    },
+
+    // ── DFA/NFA Sim: Rejected ──
+    {
+      name: 'sim-rejected',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        await openSimPanel(page);
+        const input = page.locator('input[placeholder*="Enter"]').first();
+        if (await input.isVisible()) {
+          await input.fill('010');
+          await page.waitForTimeout(200);
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(600);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/sim-rejected.png` });
+        }
+      },
+    },
+
+    // ── Multi-run ──
+    {
+      name: 'multi-run',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        await openSimPanel(page);
+        const multiBtn = page.locator('button:has-text("Multi")');
+        if (await multiBtn.isVisible()) await multiBtn.click();
+        await page.waitForTimeout(300);
+        const textarea = page.locator('textarea');
+        if (await textarea.isVisible()) {
+          await textarea.fill('00\n010\n0000\n1\n01\n1100');
+          const runAll = page.locator('button:has-text("RUN ALL")');
+          if (await runAll.isVisible()) await runAll.click();
+          await page.waitForTimeout(500);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/multi-run.png` });
+        }
+      },
+    },
+
+    // ── PDA Sim ──
+    {
+      name: 'pda-sim',
+      fn: async (page) => {
+        await loadExample(page, 'a^n b^n');
+        await openSimPanel(page);
+        const input = page.locator('input[placeholder*="Enter"]').first();
+        if (await input.isVisible()) {
+          await input.fill('aaabbb');
+          await page.waitForTimeout(200);
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(600);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/pda-sim.png` });
+        }
+      },
+    },
+
+    // ── TM Sim ──
+    {
+      name: 'tm-sim',
+      fn: async (page) => {
+        await loadExample(page, 'Binary Increment');
+        await openSimPanel(page);
+        const input = page.locator('input[placeholder*="Enter"]').first();
+        if (await input.isVisible()) {
+          await input.fill('1011');
+          await page.waitForTimeout(200);
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(600);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/tm-sim.png` });
+        }
+      },
+    },
+
+    // ── Mealy/Moore Sim ──
+    {
+      name: 'mealy-sim',
+      fn: async (page) => {
+        await loadExample(page, 'Parity Bit');
+        await openSimPanel(page);
+        const input = page.locator('input[placeholder*="Enter"]').first();
+        if (await input.isVisible()) {
+          await input.fill('10110');
+          await page.waitForTimeout(200);
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(600);
+        }
+        const sim = page.locator('div.shadow-panel').first();
+        if (await sim.isVisible()) {
+          await sim.screenshot({ path: `${DIR}/mealy-sim.png` });
+        }
+      },
+    },
+
+    // ── Conversions Panel ──
+    {
+      name: 'conversions',
+      fn: async (page) => {
+        await loadExample(page, 'Contains 01');
+        // Open convert panel
+        const convertBtn = page.locator('button:has-text("CONVERT")');
+        if (await convertBtn.isVisible()) {
+          await convertBtn.click();
+          await page.waitForTimeout(400);
+        }
+        // Full page with convert panel visible
+        await page.screenshot({ path: `${DIR}/conversions.png` });
+      },
+    },
+
+    // ── Grammar Editor ──
+    {
+      name: 'grammar-editor',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s'); // load anything first
+        // Switch to CFG mode — press 7
+        await page.keyboard.press('7');
+        await page.waitForTimeout(600);
+        // Type a grammar
+        const textarea = page.locator('textarea').first();
+        if (await textarea.isVisible()) {
+          await textarea.fill('S → aSb | ε');
+          await page.waitForTimeout(300);
+        }
+        await page.screenshot({ path: `${DIR}/grammar-editor.png` });
+      },
+    },
+
+    // ── L-System ──
+    {
+      name: 'l-system',
+      fn: async (page) => {
+        await loadExample(page, 'Even 0s');
+        // Switch to L-SYS mode — press 8
+        await page.keyboard.press('8');
+        await page.waitForTimeout(1000);
+        await page.screenshot({ path: `${DIR}/l-system.png` });
+      },
+    },
+
+    // ── Keyboard Shortcuts ──
     {
       name: 'shortcuts',
-      desc: 'Keyboard shortcuts modal',
       fn: async (page) => {
-        await loadExample(page, 'Even number of 0s');
+        await loadExample(page, 'Even 0s');
         await page.keyboard.press('?');
         await page.waitForTimeout(400);
-        // Crop the modal
         const modal = page.locator('div.animate-scale-in').first();
         if (await modal.isVisible()) {
           await modal.screenshot({ path: `${DIR}/shortcuts.png` });
         }
       },
     },
-    {
-      name: 'conversions',
-      desc: 'Conversions panel',
-      fn: async (page) => {
-        await loadExample(page, 'Contains 01');
-        const convertBtn = page.locator('button:text("CONVERT")');
-        if (await convertBtn.isVisible()) await convertBtn.click();
-        await page.waitForTimeout(400);
-        // Crop the convert panel overlay
-        const panel = page.locator('div:has(> button:text("NFA → DFA"))').first();
-        if (await panel.isVisible()) {
-          await panel.screenshot({ path: `${DIR}/conversions.png` });
-        } else {
-          // Fallback: full page
-          await page.screenshot({ path: `${DIR}/conversions.png` });
-        }
-      },
-    },
   ];
 
   for (const shot of shots) {
-    console.log(`📸 ${shot.name}: ${shot.desc}`);
+    console.log(`📸 ${shot.name}`);
     const page = await ctx.newPage();
     await page.goto(BASE, { waitUntil: 'networkidle' });
     try {
