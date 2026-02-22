@@ -6,7 +6,9 @@ import {
   removeEpsilonProductions, removeUnitProductions, removeUselessSymbols,
   toCNF, toGNF,
   cykParse, ll1Parse, bruteForceParse,
+  buildSLR1Table, parseSLR1,
   type TransformResult, type CYKResult, type LL1Result,
+  type SLR1Table, type SLR1ParseStep,
 } from '@/grammar';
 import type { Grammar, GrammarType } from '@/types';
 import ParseTreeView from './ParseTree';
@@ -39,7 +41,7 @@ F → (E) | a`,
 export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobile: boolean; initialGrammarText?: string }) {
   const [grammarText, setGrammarText] = useState(initialGrammarText || EXAMPLE_GRAMMARS[0].text);
   const [parseInput, setParseInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'transform' | 'cyk' | 'll1' | 'brute'>('transform');
+  const [activeTab, setActiveTab] = useState<'transform' | 'cyk' | 'll1' | 'slr1' | 'brute'>('transform');
   const [activeTransform, setActiveTransform] = useState<string | null>(null);
 
   // Transform results
@@ -52,6 +54,8 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
   const [ll1Result, setLl1Result] = useState<LL1Result | null>(null);
   const [ll1StepIdx, setLl1StepIdx] = useState(-1);
   const [bruteResult, setBruteResult] = useState<{ accepted: boolean; derivation: string[] } | null>(null);
+  const [slr1Table, setSlr1Table] = useState<SLR1Table | null>(null);
+  const [slr1ParseResult, setSlr1ParseResult] = useState<{ steps: SLR1ParseStep[]; accepted: boolean } | null>(null);
 
   // Sync grammar text to URL for sharing
   useEffect(() => {
@@ -124,6 +128,18 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
     setLl1StepIdx(-1);
   };
 
+  const handleSLR1 = useCallback(() => {
+    const table = buildSLR1Table(grammar);
+    setSlr1Table(table);
+    setSlr1ParseResult(null);
+  }, [grammar]);
+
+  const handleSLR1Parse = useCallback(() => {
+    if (!slr1Table) return;
+    const result = parseSLR1(slr1Table, parseInput);
+    setSlr1ParseResult(result);
+  }, [slr1Table, parseInput]);
+
   const handleBrute = () => {
     const result = bruteForceParse(grammar, parseInput);
     setBruteResult(result);
@@ -133,6 +149,7 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
     setCykResult(null); setCykStepIdx(-1);
     setLl1Result(null); setLl1StepIdx(-1);
     setBruteResult(null);
+    setSlr1Table(null); setSlr1ParseResult(null);
   };
 
   const transforms = [
@@ -193,6 +210,7 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
             { id: 'transform', label: 'Transforms', icon: Wand2 },
             { id: 'cyk', label: 'CYK', icon: Table },
             { id: 'll1', label: 'LL(1)', icon: Table },
+            { id: 'slr1', label: 'SLR(1)', icon: Table },
             { id: 'brute', label: 'Brute Force', icon: Play },
           ] as const).map(t => (
             <button

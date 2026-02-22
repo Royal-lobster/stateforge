@@ -981,6 +981,315 @@ export function ll1Parse(grammar: Grammar, input: string): LL1Result {
 }
 
 // ════════════════════════════════════════════════════
+// ── SLR(1) Parser ──
+// ════════════════════════════════════════════════════
+
+export interface LR0Item {
+  prodIndex: number;  // index into augmented grammar productions
+  dot: number;        // position of dot in body
+}
+
+export interface LR0ItemSet {
+  items: LR0Item[];
+  id: number;
+}
+
+export type SLR1Action =
+  | { type: 'shift'; state: number }
+  | { type: 'reduce'; prodIndex: number }
+  | { type: 'accept' };
+
+export interface SLR1Table {
+  action: Map<number, Map<string, SLR1Action[]>>;  // state -> terminal/$ -> actions (multiple = conflict)
+  goto: Map<number, Map<string, number>>;           // state -> non-terminal -> state
+  itemSets: LR0ItemSet[];
+  augmentedProductions: { head: string; body: string[] }[];
+  conflicts: string[];
+}
+
+export interface SLR1ParseStep {
+  stateStack: number[];
+  symbolStack: string[];
+  remaining: string;
+  action: string;
+}
+
+export interface SLR1Result {
+  table: SLR1Table;
+  parseSteps: SLR1ParseStep[];
+  accepted: boolean;
+}
+
+function itemKey(item: LR0Item): string {
+  return `${item.prodIndex}:${item.dot}`;
+}
+
+function itemSetKey(items: LR0Item[]): string {
+  return items.map(itemKey).sort().join('|');
+}
+
+export function computeLR0Items(grammar: Grammar): { itemSets: LR0ItemSet[]; augProds: { head: string; body: string[] }[] } {
+  // Augment grammar: add S' → S
+  const augStart = grammar.startSymbol + "'";
+  const augProds: { head: string; body: string[] }[] = [
+    { head: augStart, body: [grammar.startSymbol] },
+    ...grammar.productions.map(p => ({ head: p.head, body: p.body[0] === 'ε' ? [] : [...p.body] })),
+  ];
+
+  function closure(items: LR0Item[]): LR0Item[] {
+    const result = [...items];
+    const seen = new Set(items.map(itemKey));
+    let i = 0;
+    while (i < result.length) {
+      const item = result[i++];
+      const prod = augProds[item.prodIndex];
+      if (item.dot < prod.body.length) {
+        const sym = prod.body[item.dot];
+        if (isNonTerminal(sym)) {
+          for (let p = 0; p < augProds.length; p++) {
+            if (augProds[p].head === sym) {
+              const newItem: LR0Item = { prodIndex: p, dot: 0 };
+              const key = itemKey(newItem);
+              if (!seen.has(key)) {
+                seen.add(key);
+                result.push(newItem);
+              }
+            }
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  function gotoSet(items: LR0Item[], symbol: string): LR0Item[] {
+    const kernel: LR0Item[] = [];
+    for (const item of items) {
+      const prod = augProds[item.prodIndex];
+      if (item.dot < prod.body.length && prod.body[item.dot] === symbol) {
+        kernel.push({ prodIndex: item.prodIndex, dot: item.dot + 1 });
+      }
+    }
+    return kernel.length > 0 ? closure(kernel) : [];
+  }
+
+  // Build canonical collection
+  const startItems = closure([{ prodIndex: 0, dot: 0 }]);
+  const itemSets: LR0ItemSet[] = [{ items: startItems, id: 0 }];
+  const setMap = new Map<string, number>();
+  setMap.set(itemSetKey(startItems), 0);
+
+  // Collect all grammar symbols
+  const allSymbols = new Set<string>();
+  for (const p of augProds) {
+    for (const s of p.body) allSymbols.add(s);
+  }
+
+  let idx = 0;
+  while (idx < itemSets.length) {
+    const current = itemSets[idx++];
+    for (const sym of allSymbols) {
+      const g = gotoSet(current.items, sym);
+      if (g.length === 0) continue;
+      const key = itemSetKey(g);
+      if (!setMap.has(key)) {
+        const newId = itemSets.length;
+        setMap.set(key, newId);
+        itemSets.push({ items: g, id: newId });
+      }
+    }
+  }
+
+  // We need goto info, so re-derive it during table building
+  return { itemSets, augProds };
+}
+
+export function buildSLR1Table(grammar: Grammar): SLR1Table {
+  const { itemSets, augProds } = computeLR0Items(grammar);
+  const firstSets = computeFirst(grammar);
+  const followSets = computeFollow(grammar, firstSets);
+
+  const augStart = grammar.startSymbol + "'";
+  // Add follow for augmented start
+  followSets.set(augStart, new Set(['$']));
+
+  const action = new Map<number, Map<string, SLR1Action[]>>();
+  const gotoTable = new Map<number, Map<string, number>>();
+  const conflicts: string[] = [];
+
+  for (const set of itemSets) {
+    action.set(set.id, new Map());
+    gotoTable.set(set.id, new Map());
+  }
+
+  // Collect all symbols
+  const allSymbols = new Set<string>();
+  for (const p of augProds) {
+    for (const s of p.body) allSymbols.add(s);
+  }
+
+  // Compute goto transitions for each state
+  function gotoSetItems(items: LR0Item[], symbol: string): LR0Item[] {
+    const kernel: LR0Item[] = [];
+    for (const item of items) {
+      const prod = augProds[item.prodIndex];
+      if (item.dot < prod.body.length && prod.body[item.dot] === symbol) {
+        kernel.push({ prodIndex: item.prodIndex, dot: item.dot + 1 });
+      }
+    }
+    // closure
+    const result = [...kernel];
+    const seen = new Set(kernel.map(itemKey));
+    let i = 0;
+    while (i < result.length) {
+      const it = result[i++];
+      const prod = augProds[it.prodIndex];
+      if (it.dot < prod.body.length) {
+        const s = prod.body[it.dot];
+        if (isNonTerminal(s)) {
+          for (let p = 0; p < augProds.length; p++) {
+            if (augProds[p].head === s) {
+              const ni: LR0Item = { prodIndex: p, dot: 0 };
+              const k = itemKey(ni);
+              if (!seen.has(k)) { seen.add(k); result.push(ni); }
+            }
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  // Find target state for a goto set
+  function findState(items: LR0Item[]): number {
+    const key = itemSetKey(items);
+    for (const s of itemSets) {
+      if (itemSetKey(s.items) === key) return s.id;
+    }
+    return -1;
+  }
+
+  function addAction(state: number, symbol: string, act: SLR1Action) {
+    const row = action.get(state)!;
+    if (!row.has(symbol)) row.set(symbol, []);
+    const existing = row.get(symbol)!;
+    // Check for duplicates
+    const isDup = existing.some(a =>
+      a.type === act.type &&
+      (a.type === 'shift' && act.type === 'shift' ? a.state === act.state :
+       a.type === 'reduce' && act.type === 'reduce' ? a.prodIndex === act.prodIndex :
+       a.type === 'accept')
+    );
+    if (!isDup) existing.push(act);
+  }
+
+  for (const set of itemSets) {
+    for (const item of set.items) {
+      const prod = augProds[item.prodIndex];
+
+      if (item.dot < prod.body.length) {
+        // Shift or goto
+        const sym = prod.body[item.dot];
+        const targetItems = gotoSetItems(set.items, sym);
+        if (targetItems.length === 0) continue;
+        const targetState = findState(targetItems);
+        if (targetState === -1) continue;
+
+        if (isTerminal(sym)) {
+          addAction(set.id, sym, { type: 'shift', state: targetState });
+        } else {
+          gotoTable.get(set.id)!.set(sym, targetState);
+        }
+      } else {
+        // Reduce or accept
+        if (item.prodIndex === 0) {
+          // S' → S . => accept on $
+          addAction(set.id, '$', { type: 'accept' });
+        } else {
+          const follow = followSets.get(prod.head);
+          if (follow) {
+            for (const t of follow) {
+              addAction(set.id, t, { type: 'reduce', prodIndex: item.prodIndex });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Detect conflicts
+  for (const [state, row] of action) {
+    for (const [sym, actions] of row) {
+      if (actions.length > 1) {
+        const types = actions.map(a => {
+          if (a.type === 'shift') return `s${a.state}`;
+          if (a.type === 'reduce') return `r${a.prodIndex}`;
+          return 'acc';
+        });
+        const hasShift = actions.some(a => a.type === 'shift');
+        const reduces = actions.filter(a => a.type === 'reduce');
+        if (hasShift && reduces.length > 0) {
+          conflicts.push(`Shift-reduce conflict in state ${state} on '${sym}': ${types.join(' / ')}`);
+        }
+        if (reduces.length > 1) {
+          conflicts.push(`Reduce-reduce conflict in state ${state} on '${sym}': ${types.join(' / ')}`);
+        }
+      }
+    }
+  }
+
+  return { action, goto: gotoTable, itemSets, augmentedProductions: augProds, conflicts };
+}
+
+export function parseSLR1(table: SLR1Table, input: string): { steps: SLR1ParseStep[]; accepted: boolean } {
+  const steps: SLR1ParseStep[] = [];
+  const stateStack = [0];
+  const symbolStack: string[] = ['$'];
+  const inputArr = [...input, '$'];
+  let pos = 0;
+  const maxSteps = 500;
+
+  for (let step = 0; step < maxSteps; step++) {
+    const state = stateStack[stateStack.length - 1];
+    const sym = inputArr[pos];
+    const remaining = inputArr.slice(pos).join('');
+
+    const actions = table.action.get(state)?.get(sym);
+    if (!actions || actions.length === 0) {
+      steps.push({ stateStack: [...stateStack], symbolStack: [...symbolStack], remaining, action: `Error: no action for state ${state}, '${sym}'` });
+      return { steps, accepted: false };
+    }
+
+    const act = actions[0]; // Use first action (in case of conflict)
+
+    if (act.type === 'shift') {
+      steps.push({ stateStack: [...stateStack], symbolStack: [...symbolStack], remaining, action: `Shift ${act.state}` });
+      stateStack.push(act.state);
+      symbolStack.push(sym);
+      pos++;
+    } else if (act.type === 'reduce') {
+      const prod = table.augmentedProductions[act.prodIndex];
+      const bodyLen = prod.body.length;
+      steps.push({ stateStack: [...stateStack], symbolStack: [...symbolStack], remaining, action: `Reduce ${prod.head} → ${prod.body.length > 0 ? prod.body.join(' ') : 'ε'}` });
+      for (let i = 0; i < bodyLen; i++) { stateStack.pop(); symbolStack.pop(); }
+      symbolStack.push(prod.head);
+      const topState = stateStack[stateStack.length - 1];
+      const gotoState = table.goto.get(topState)?.get(prod.head);
+      if (gotoState === undefined) {
+        steps.push({ stateStack: [...stateStack], symbolStack: [...symbolStack], remaining, action: `Error: no GOTO for state ${topState}, '${prod.head}'` });
+        return { steps, accepted: false };
+      }
+      stateStack.push(gotoState);
+    } else if (act.type === 'accept') {
+      steps.push({ stateStack: [...stateStack], symbolStack: [...symbolStack], remaining, action: 'Accept!' });
+      return { steps, accepted: true };
+    }
+  }
+
+  return { steps, accepted: false };
+}
+
+// ════════════════════════════════════════════════════
 // ── Brute force parser ──
 // ════════════════════════════════════════════════════
 
