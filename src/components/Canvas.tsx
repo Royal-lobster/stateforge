@@ -27,22 +27,37 @@ function getTransitionAt(wx: number, wy: number, transitions: Transition[], stat
     const to = stateMap.get(t.to);
     if (!from || !to) continue;
     if (t.from === t.to) {
-      // Hit area: self-loop label area above state (offset for stacked loops)
+      // Hit area: self-loop arc and label area above state
       const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
       const selfIdx = selfLoops.indexOf(t);
       const loopR = 18 + selfIdx * 18;
       const cx = from.x, cy = from.y - STATE_RADIUS - loopR * 1.5;
       const dx = wx - cx, dy = wy - cy;
-      if (dx * dx + dy * dy < 1200) return t;
+      if (dx * dx + dy * dy < 1600) return t;
       continue;
     }
+    // Account for curve offset on bidirectional edges
+    const curveOff = getEdgeCurveOffset(t, transitions);
     const ax = from.x, ay = from.y, bx = to.x, by = to.y;
     const abx = bx - ax, aby = by - ay;
-    const apx = wx - ax, apy = wy - ay;
-    const t2 = Math.max(0, Math.min(1, (apx * abx + apy * aby) / (abx * abx + aby * aby)));
-    const px = ax + t2 * abx, py = ay + t2 * aby;
-    const dist = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
-    if (dist < 12) return t;
+    const len = Math.sqrt(abx * abx + aby * aby);
+    if (len === 0) continue;
+    // Normal vector for curve offset
+    const nx = -aby / len, ny = abx / len;
+    // Sample points along the (possibly curved) path
+    const samples = 8;
+    let minDist = Infinity;
+    for (let i = 0; i <= samples; i++) {
+      const p = i / samples;
+      // Quadratic bezier: P = (1-t)²A + 2(1-t)tC + t²B where C is midpoint + offset
+      const mx = (ax + bx) / 2 + nx * curveOff;
+      const my = (ay + by) / 2 + ny * curveOff;
+      const px = (1 - p) * (1 - p) * ax + 2 * (1 - p) * p * mx + p * p * bx;
+      const py = (1 - p) * (1 - p) * ay + 2 * (1 - p) * p * my + p * p * by;
+      const d = Math.sqrt((wx - px) ** 2 + (wy - py) ** 2);
+      if (d < minDist) minDist = d;
+    }
+    if (minDist < 14) return t;
   }
   return null;
 }
@@ -335,7 +350,11 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
       return;
     }
     const hitTrans = getTransitionAt(w.x, w.y, transitions, states);
-    if (hitTrans) { setSelected(new Set([hitTrans.id])); setEditingTransition(hitTrans.id); return; }
+    if (hitTrans) {
+      if (e.shiftKey) toggleSelected(hitTrans.id);
+      else setSelected(new Set([hitTrans.id]));
+      return;
+    }
     if (!e.shiftKey) clearSelection();
     setBoxSelect({ startX: sx, startY: sy, endX: sx, endY: sy });
   }, [tool, states, transitions, pan, zoom, spaceHeld, selectedIds, addState, setTransitionDraft, toggleSelected, setSelected, clearSelection, setContextMenu, setEditingTransition]);
@@ -381,10 +400,27 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         const sy2 = s.y * zoom + pan.y;
         if (sx2 >= minX && sx2 <= maxX && sy2 >= minY && sy2 <= maxY) selected.add(s.id);
       }
+      // Also select transitions whose midpoint is in the box
+      const stateMap = new Map(states.map(s => [s.id, s]));
+      for (const t of transitions) {
+        const from = stateMap.get(t.from);
+        const to = stateMap.get(t.to);
+        if (!from || !to) continue;
+        const mx = ((from.x + to.x) / 2) * zoom + pan.x;
+        const my = ((from.y + to.y) / 2) * zoom + pan.y;
+        if (t.from === t.to) {
+          // Self-loop: midpoint is above the state
+          const selfY = (from.y - STATE_RADIUS - 30) * zoom + pan.y;
+          const selfX = from.x * zoom + pan.x;
+          if (selfX >= minX && selfX <= maxX && selfY >= minY && selfY <= maxY) selected.add(t.id);
+        } else {
+          if (mx >= minX && mx <= maxX && my >= minY && my <= maxY) selected.add(t.id);
+        }
+      }
       setSelected(selected);
       setBoxSelect(null);
     }
-  }, [isPanning, transitionDraft, dragState, boxSelect, states, zoom, pan, getWorldPos, addTransition, setTransitionDraft, setSelected]);
+  }, [isPanning, transitionDraft, dragState, boxSelect, states, transitions, zoom, pan, getWorldPos, addTransition, setTransitionDraft, setSelected]);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
