@@ -345,6 +345,24 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
       if (hitState) setTransitionDraft({ fromId: hitState.id, x: w.x, y: w.y });
       return;
     }
+    // Check transitions FIRST so labels/arrows near states can be selected
+    const hitTrans = getTransitionAt(w.x, w.y, transitions, states);
+    if (hitTrans && !hitState) {
+      if (e.shiftKey) toggleSelected(hitTrans.id);
+      else setSelected(new Set([hitTrans.id]));
+      return;
+    }
+    // For self-loops and nearby transitions, prefer the transition if click is closer to it
+    if (hitTrans && hitState) {
+      // Check if click is in the label/arc area (above the state for self-loops)
+      const from = states.find(s => s.id === hitTrans.from);
+      if (from && hitTrans.from === hitTrans.to && w.y < from.y - STATE_RADIUS * 0.5) {
+        // Click is above the state — user is clicking the self-loop
+        if (e.shiftKey) toggleSelected(hitTrans.id);
+        else setSelected(new Set([hitTrans.id]));
+        return;
+      }
+    }
     if (hitState) {
       if (e.shiftKey) toggleSelected(hitState.id);
       else if (!selectedIds.has(hitState.id)) setSelected(new Set([hitState.id]));
@@ -353,7 +371,6 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
       setDragState({ id: hitState.id, startX: e.clientX, startY: e.clientY, origPositions, pushed: false });
       return;
     }
-    const hitTrans = getTransitionAt(w.x, w.y, transitions, states);
     if (hitTrans) {
       if (e.shiftKey) toggleSelected(hitTrans.id);
       else setSelected(new Set([hitTrans.id]));
@@ -406,21 +423,36 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
         const sy2 = s.y * zoom + pan.y;
         if (sx2 >= minX && sx2 <= maxX && sy2 >= minY && sy2 <= maxY) selected.add(s.id);
       }
-      // Also select transitions whose midpoint is in the box
+      // Also select transitions if any point along the path is in the box
       const stateMap = new Map(states.map(s => [s.id, s]));
       for (const t of transitions) {
         const from = stateMap.get(t.from);
         const to = stateMap.get(t.to);
         if (!from || !to) continue;
-        const mx = ((from.x + to.x) / 2) * zoom + pan.x;
-        const my = ((from.y + to.y) / 2) * zoom + pan.y;
         if (t.from === t.to) {
-          // Self-loop: midpoint is above the state
-          const selfY = (from.y - STATE_RADIUS - 30) * zoom + pan.y;
-          const selfX = from.x * zoom + pan.x;
-          if (selfX >= minX && selfX <= maxX && selfY >= minY && selfY <= maxY) selected.add(t.id);
+          // Self-loop: check arc area above the state
+          const selfLoops = transitions.filter(t2 => t2.from === t.from && t2.to === t.to);
+          const selfIdx = selfLoops.indexOf(t);
+          const loopR = 18 + selfIdx * 18;
+          const cx = from.x * zoom + pan.x;
+          const cy = (from.y - STATE_RADIUS - loopR * 1.5) * zoom + pan.y;
+          if (cx >= minX && cx <= maxX && cy >= minY && cy <= maxY) selected.add(t.id);
         } else {
-          if (mx >= minX && mx <= maxX && my >= minY && my <= maxY) selected.add(t.id);
+          // Sample points along the (possibly curved) path
+          const curveOff = getEdgeCurveOffset(t, transitions);
+          const ax = from.x, ay = from.y, bx = to.x, by = to.y;
+          const abx = bx - ax, aby = by - ay;
+          const len = Math.sqrt(abx * abx + aby * aby);
+          const nx = len > 0 ? -aby / len : 0;
+          const ny = len > 0 ? abx / len : 0;
+          const cmx = (ax + bx) / 2 + nx * curveOff;
+          const cmy = (ay + by) / 2 + ny * curveOff;
+          for (let i = 0; i <= 8; i++) {
+            const p = i / 8;
+            const px = ((1 - p) * (1 - p) * ax + 2 * (1 - p) * p * cmx + p * p * bx) * zoom + pan.x;
+            const py = ((1 - p) * (1 - p) * ay + 2 * (1 - p) * p * cmy + p * p * by) * zoom + pan.y;
+            if (px >= minX && px <= maxX && py >= minY && py <= maxY) { selected.add(t.id); break; }
+          }
         }
       }
       setSelected(selected);

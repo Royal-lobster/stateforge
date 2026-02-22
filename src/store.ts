@@ -290,10 +290,12 @@ export const useStore = create<StoreState>()(
 
     addTransition: (from, to) => {
       const s = get();
-      // For DFA/NFA/Mealy/Moore, if transition exists, open it for editing instead of blocking
-      // PDA/TM allow multiple transitions between same states
-      // DFA/NFA/Mealy/Moore: open existing transition for editing (add symbols there)
-      if (s.mode !== 'pda' && s.mode !== 'tm') {
+      // If a transition between these states already exists, open it for editing
+      // (users can add more symbols there). This applies to all modes except PDA/TM
+      // which allow genuinely separate transitions (different pop/push/read/write).
+      // Self-loops always allow creating new transitions so users can have
+      // separate labeled edges for clarity.
+      if (s.mode !== 'pda' && s.mode !== 'tm' && from !== to) {
         const existing = s.transitions.find(t => t.from === from && t.to === to);
         if (existing) {
           set({ editingTransitionId: existing.id, tool: 'pointer' });
