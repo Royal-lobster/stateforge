@@ -524,12 +524,16 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
           <pattern id="grid" width={GRID_SIZE} height={GRID_SIZE} patternUnits="userSpaceOnUse">
-            <circle cx={GRID_SIZE} cy={GRID_SIZE} r="0.5" fill="var(--color-grid)" />
+            <path d={`M ${GRID_SIZE} 0 L 0 0 0 ${GRID_SIZE}`} fill="none" stroke="var(--color-grid)" strokeWidth="0.5" />
+          </pattern>
+          <pattern id="grid-major" width={GRID_SIZE * 5} height={GRID_SIZE * 5} patternUnits="userSpaceOnUse">
+            <rect width={GRID_SIZE * 5} height={GRID_SIZE * 5} fill="url(#grid)" />
+            <path d={`M ${GRID_SIZE * 5} 0 L 0 0 0 ${GRID_SIZE * 5}`} fill="none" stroke="var(--color-grid)" strokeWidth="1" />
           </pattern>
         </defs>
 
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-          <rect x={-10000} y={-10000} width={20000} height={20000} fill="url(#grid)" />
+          <rect x={-10000} y={-10000} width={20000} height={20000} fill="url(#grid-major)" />
 
           {/* Transitions */}
           {transitions.map(t => {
