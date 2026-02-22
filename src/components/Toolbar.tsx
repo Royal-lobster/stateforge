@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useStore } from '@/store';
+import { useStore } from '@/lib/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
   LayoutGrid, Share2, PanelBottom, PanelRight, RotateCcw, Maximize2,
@@ -9,8 +9,8 @@ import {
   ChevronDown, Menu, Image, FileCode, Copy, Zap,
 } from 'lucide-react';
 import { downloadSVG, downloadPNG, copyTikZ } from '@/lib/export';
-import { encodeAutomaton } from '@/url';
-import type { State, Transition, Mode } from '@/types';
+import { encodeAutomaton } from '@/lib/url';
+import type { State, Transition, Mode } from '@/lib/types';
 import Tooltip from './Tooltip';
 
 /* ── Reusable button ─────────────────────────────────────── */

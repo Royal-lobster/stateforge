@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useStore } from '@/store';
-import { encodeAutomaton, decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/url';
+import { useStore } from '@/lib/store';
+import { encodeAutomaton, decodeAutomaton, loadFromLocalStorage, saveToLocalStorage } from '@/lib/url';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import Toolbar from './Toolbar';
 import Canvas from './Canvas';

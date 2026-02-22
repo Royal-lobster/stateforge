@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { useStore } from '@/store';
+import { useStore } from '@/lib/store';
 import { Play, StepForward, FastForward, RotateCcw, ListChecks, GripHorizontal, Zap } from 'lucide-react';
 import Tooltip from './Tooltip';
 

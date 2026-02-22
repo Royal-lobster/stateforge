@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useStore } from '@/store';
+import { useStore } from '@/lib/store';
 import {
   nfaToDFA, minimizeDFA, reToNFA, faToRegex, faToGrammar, combineDFA,
   type NFAToDFAResult, type MinimizationResult, type REToNFAResult,
   type FAToREResult, type FAToGrammarResult, type CombineResult, type CombineOp,
-} from '@/conversions';
+} from '@/lib/conversions';
 import {
   X, Play, Pause, StepForward, FastForward, RotateCcw,
   ArrowRightLeft, Check, GripHorizontal,

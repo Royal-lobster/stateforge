@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import type { ParseTreeNode } from '@/types';
+import type { ParseTreeNode } from '@/lib/types';
 
 // ── Layout constants ──
 const NODE_H = 24;

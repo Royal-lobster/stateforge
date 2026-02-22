@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useStore } from '@/store';
-import type { State, Transition } from '@/types';
+import { useStore } from '@/lib/store';
+import type { State, Transition } from '@/lib/types';
 
 const STATE_RADIUS = 28;
 const GRID_SIZE = 20;

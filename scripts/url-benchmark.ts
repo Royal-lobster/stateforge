@@ -8,8 +8,8 @@ import lzstring from 'lz-string';
 import {
   encodeAutomaton,
   decodeAutomaton,
-} from '../src/url';
-import type { State, Transition, Mode } from '../src/types';
+} from '../src/lib/url';
+import type { State, Transition, Mode } from '../src/lib/types';
 
 // We need internal helpers for benchmarking — re-export isn't worth it,
 // so we duplicate the legacy encoder here for comparison.
