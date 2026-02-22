@@ -5,7 +5,7 @@ import { DocsPrevNext } from '@/components/docs/DocsPrevNext';
 
 export default function DocsPage() {
   const content = fs.readFileSync(
-    path.join(process.cwd(), 'content/docs/modes.md'),
+    path.join(process.cwd(), 'content/docs/tm.md'),
     'utf-8'
   );
   return (

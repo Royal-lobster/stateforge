@@ -22,7 +22,12 @@ export const docsNav = [
   {
     group: 'Automata',
     items: [
-      { href: '/docs/modes', label: 'Automaton Modes', match: '/docs/modes' },
+      { href: '/docs/dfa', label: 'DFA', match: '/docs/dfa' },
+      { href: '/docs/nfa', label: 'NFA', match: '/docs/nfa' },
+      { href: '/docs/pda', label: 'PDA', match: '/docs/pda' },
+      { href: '/docs/tm', label: 'Turing Machine', match: '/docs/tm' },
+      { href: '/docs/mealy', label: 'Mealy Machine', match: '/docs/mealy' },
+      { href: '/docs/moore', label: 'Moore Machine', match: '/docs/moore' },
     ],
   },
   {
@@ -49,7 +54,12 @@ export const docsPagesOrdered = [
   { href: '/docs/canvas', label: 'Canvas & States' },
   { href: '/docs/transitions', label: 'Transitions' },
   { href: '/docs/simulation', label: 'Simulation' },
-  { href: '/docs/modes', label: 'Automaton Modes' },
+  { href: '/docs/dfa', label: 'DFA' },
+  { href: '/docs/nfa', label: 'NFA' },
+  { href: '/docs/pda', label: 'PDA' },
+  { href: '/docs/tm', label: 'Turing Machine' },
+  { href: '/docs/mealy', label: 'Mealy Machine' },
+  { href: '/docs/moore', label: 'Moore Machine' },
   { href: '/docs/conversions', label: 'Conversions' },
   { href: '/docs/grammar', label: 'Grammar Editor' },
   { href: '/docs/l-systems', label: 'L-Systems' },
