@@ -11,6 +11,10 @@ No install. No accounts. Just a URL.
 [![Live Demo](https://img.shields.io/badge/Live-stateforge.vercel.app-22d3ee?style=flat-square)](https://stateforge.vercel.app)
 [![License](https://img.shields.io/github/license/Royal-lobster/stateforge?style=flat-square&color=22d3ee)](LICENSE)
 
+<br />
+
+<img src="screenshot.png" alt="StateForge editor showing a DFA that accepts strings with an even number of zeros" width="800" />
+
 </div>
 
 ---
