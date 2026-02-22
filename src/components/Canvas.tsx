@@ -88,7 +88,6 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
   const simCurrentStates = useStore(s => s.simCurrentStates);
   const simStatus = useStore(s => s.simStatus);
   const conversionHighlight = useStore(s => s.conversionHighlight);
-  const snapToGrid = useStore(s => s.snapToGrid);
 
   const addState = useStore(s => s.addState);
   const moveStates = useStore(s => s.moveStates);

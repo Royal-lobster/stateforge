@@ -39,9 +39,6 @@ interface StoreState {
   simRemaining: string;
   multiRunResults: MultiRunResult[];
 
-  // Snap
-  snapToGrid: boolean;
-
   // Conversion highlighting
   conversionHighlight: {
     highlightedStates: Set<string>;   // state IDs to highlight on canvas
@@ -99,9 +96,6 @@ interface StoreState {
   simFastRun: () => void;
   simReset: () => void;
   simMultiRun: (inputs: string[]) => void;
-
-  // Actions - snap
-  toggleSnapToGrid: () => void;
 
   // Actions - conversion highlight
   setConversionHighlight: (h: StoreState['conversionHighlight']) => void;
@@ -196,7 +190,6 @@ export const useStore = create<StoreState>()(
     simRemaining: '',
     multiRunResults: [],
 
-    snapToGrid: false,
 
     conversionHighlight: null,
 
@@ -245,31 +238,24 @@ export const useStore = create<StoreState>()(
     },
 
     moveState: (id, x, y) => {
-      const snap = get().snapToGrid;
-      const nx = snap ? Math.round(x / 20) * 20 : x;
-      const ny = snap ? Math.round(y / 20) * 20 : y;
-      set({ states: get().states.map(st => st.id === id ? { ...st, x: nx, y: ny } : st) });
+      set({ states: get().states.map(st => st.id === id ? { ...st, x, y } : st) });
     },
 
     moveStates: (ids, dx, dy) => {
-      const snap = get().snapToGrid;
       set({
         states: get().states.map(st => {
           if (!ids.includes(st.id)) return st;
-          const nx = st.x + dx;
-          const ny = st.y + dy;
-          return { ...st, x: snap ? Math.round(nx / 20) * 20 : nx, y: snap ? Math.round(ny / 20) * 20 : ny };
+          return { ...st, x: st.x + dx, y: st.y + dy };
         }),
       });
     },
 
     setStatePositions: (positions) => {
-      const snap = get().snapToGrid;
       set({
         states: get().states.map(st => {
           const pos = positions.get(st.id);
           if (!pos) return st;
-          return { ...st, x: snap ? Math.round(pos.x / 20) * 20 : pos.x, y: snap ? Math.round(pos.y / 20) * 20 : pos.y };
+          return { ...st, x: pos.x, y: pos.y };
         }),
       });
     },
@@ -670,7 +656,6 @@ export const useStore = create<StoreState>()(
       set({ multiRunResults: results });
     },
 
-    toggleSnapToGrid: () => set({ snapToGrid: !get().snapToGrid }),
     setConversionHighlight: (h) => set({ conversionHighlight: h }),
     toggleSidebar: () => set({ showSidebar: !get().showSidebar }),
     toggleSimPanel: () => set({ showSimPanel: !get().showSimPanel }),
