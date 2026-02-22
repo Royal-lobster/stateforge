@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useStore } from '@/store';
 import {
   nfaToDFA, minimizeDFA, reToNFA, faToRegex, faToGrammar, combineDFA,
@@ -8,7 +8,7 @@ import {
   type FAToREResult, type FAToGrammarResult, type CombineResult, type CombineOp,
 } from '@/conversions';
 import {
-  X, Play, StepForward, FastForward, RotateCcw,
+  X, Play, Pause, StepForward, FastForward, RotateCcw,
   ArrowRightLeft, Check, GripHorizontal,
 } from 'lucide-react';
 
@@ -29,9 +29,16 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
   const mode = useStore(s => s.mode);
   const loadAutomaton = useStore(s => s.loadAutomaton);
   const setMode = useStore(s => s.setMode);
+  const setConversionHighlight = useStore(s => s.setConversionHighlight);
+  const conversionHighlightLabel = useStore(s => s.conversionHighlight?.label);
 
   const [tab, setTab] = useState<ConversionType>('nfa2dfa');
   const [mobileExpanded, setMobileExpanded] = useState(false);
+
+  // Auto-play state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playSpeed, setPlaySpeed] = useState(500); // ms
+  const playTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // NFA → DFA state
   const [nfaResult, setNfaResult] = useState<NFAToDFAResult | null>(null);
@@ -58,7 +65,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
 
   // Combine state
   const [combineOp, setCombineOp] = useState<CombineOp>('union');
-  const [combineReB, setCombineReB] = useState(''); // RE string for second automaton
+  const [combineReB, setCombineReB] = useState('');
   const [combineResult, setCombineResult] = useState<CombineResult | null>(null);
   const [combineStepIdx, setCombineStepIdx] = useState(-1);
   const [combineApplied, setCombineApplied] = useState(false);
@@ -72,7 +79,167 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     if (dy < -40) setMobileExpanded(false);
   }, []);
 
+  // ── Highlight sync ──
+  // Update store highlights whenever step changes
+  useEffect(() => {
+    if (tab === 'nfa2dfa' && nfaResult && nfaStepIdx >= 0) {
+      const step = nfaResult.steps[nfaStepIdx];
+      if (step) {
+        // Find NFA state IDs in the current subset being processed
+        const highlightedStates = new Set<string>();
+        // The subsetKey maps to NFA state IDs via subsetMap... but subsetMap maps DFA id -> NFA ids
+        // We need to find the DFA state whose label matches subsetLabel, then get its NFA states
+        for (const [dfaId, nfaIds] of nfaResult.subsetMap) {
+          const dfaState = nfaResult.states.find(s => s.id === dfaId);
+          if (dfaState && dfaState.label === step.subsetLabel) {
+            // Highlight the NFA states in this subset on the canvas
+            for (const nid of nfaIds) highlightedStates.add(nid);
+            break;
+          }
+        }
+        setConversionHighlight({
+          highlightedStates,
+          highlightedTransitions: new Set<string>(),
+          label: `δ(${step.subsetLabel}, ${step.symbol}) = ${step.resultLabel}`,
+        });
+      }
+    } else if (tab === 'minimize' && minResult && minStepIdx >= 0) {
+      const step = minResult.steps[minStepIdx];
+      if (step) {
+        // Find state IDs by label
+        const highlightedStates = new Set<string>();
+        for (const s of states) {
+          if (s.label === step.stateA || s.label === step.stateB) {
+            highlightedStates.add(s.id);
+          }
+        }
+        setConversionHighlight({
+          highlightedStates,
+          highlightedTransitions: new Set<string>(),
+          label: `✗ (${step.stateA}, ${step.stateB}) — ${step.reason}`,
+        });
+      }
+    } else if (tab === 're2nfa' && reResult && reStepIdx >= 0 && !reResult.error) {
+      const step = reResult.steps[reStepIdx];
+      if (step) {
+        // Highlight the start and end states of the current fragment
+        const highlightedStates = new Set<string>();
+        for (const s of reResult.states) {
+          if (s.label === step.startLabel || s.label === step.endLabel) {
+            highlightedStates.add(s.id);
+          }
+        }
+        setConversionHighlight({
+          highlightedStates,
+          highlightedTransitions: new Set<string>(),
+          label: step.description,
+        });
+      }
+    } else if (tab === 'fa2re' && fareResult && fareStepIdx >= 0) {
+      const step = fareResult.steps[fareStepIdx];
+      if (step) {
+        // Highlight the state being eliminated
+        const highlightedStates = new Set<string>();
+        for (const s of states) {
+          if (s.label === step.eliminatedState) {
+            highlightedStates.add(s.id);
+          }
+        }
+        setConversionHighlight({
+          highlightedStates,
+          highlightedTransitions: new Set<string>(),
+          label: `Eliminate ${step.eliminatedState} (${step.edgesUpdated} edges updated)`,
+        });
+      }
+    } else if (tab === 'combine' && combineResult && combineStepIdx >= 0) {
+      const step = combineResult.steps[combineStepIdx];
+      if (step) {
+        setConversionHighlight({
+          highlightedStates: new Set<string>(),
+          highlightedTransitions: new Set<string>(),
+          label: `δ(${step.pairLabel}, ${step.symbol}) = ${step.resultLabel}`,
+        });
+      }
+    } else {
+      setConversionHighlight(null);
+    }
+  }, [tab, nfaResult, nfaStepIdx, minResult, minStepIdx, reResult, reStepIdx, fareResult, fareStepIdx, combineResult, combineStepIdx, states, setConversionHighlight]);
+
+  // Clean up highlights on unmount
+  useEffect(() => {
+    return () => { setConversionHighlight(null); };
+  }, [setConversionHighlight]);
+
+  // ── Auto-play logic ──
+  const stopPlay = useCallback(() => {
+    setIsPlaying(false);
+    if (playTimerRef.current) {
+      clearInterval(playTimerRef.current);
+      playTimerRef.current = null;
+    }
+  }, []);
+
+  // Get current step info for auto-play
+  const getCurrentMaxSteps = useCallback(() => {
+    if (tab === 'nfa2dfa' && nfaResult) return nfaResult.steps.length;
+    if (tab === 'minimize' && minResult) return minResult.steps.length;
+    if (tab === 're2nfa' && reResult && !reResult.error) return reResult.steps.length;
+    if (tab === 'fa2re' && fareResult) return fareResult.steps.length;
+    if (tab === 'combine' && combineResult) return combineResult.steps.length;
+    return 0;
+  }, [tab, nfaResult, minResult, reResult, fareResult, combineResult]);
+
+  const getCurrentStepIdx = useCallback(() => {
+    if (tab === 'nfa2dfa') return nfaStepIdx;
+    if (tab === 'minimize') return minStepIdx;
+    if (tab === 're2nfa') return reStepIdx;
+    if (tab === 'fa2re') return fareStepIdx;
+    if (tab === 'combine') return combineStepIdx;
+    return -1;
+  }, [tab, nfaStepIdx, minStepIdx, reStepIdx, fareStepIdx, combineStepIdx]);
+
+  const advanceStep = useCallback(() => {
+    if (tab === 'nfa2dfa') setNfaStepIdx(p => p + 1);
+    else if (tab === 'minimize') setMinStepIdx(p => p + 1);
+    else if (tab === 're2nfa') setReStepIdx(p => p + 1);
+    else if (tab === 'fa2re') setFareStepIdx(p => p + 1);
+    else if (tab === 'combine') setCombineStepIdx(p => p + 1);
+  }, [tab]);
+
+  // Use refs for auto-play to avoid stale closures
+  const stepIdxRef = useRef(-1);
+  const maxStepsRef = useRef(0);
+  useEffect(() => { stepIdxRef.current = getCurrentStepIdx(); }, [getCurrentStepIdx]);
+  useEffect(() => { maxStepsRef.current = getCurrentMaxSteps(); }, [getCurrentMaxSteps]);
+
+  const startPlay = useCallback(() => {
+    const max = maxStepsRef.current;
+    if (max === 0) return;
+    setIsPlaying(true);
+    playTimerRef.current = setInterval(() => {
+      // Read from refs for fresh values
+      const cur = stepIdxRef.current;
+      const maxNow = maxStepsRef.current;
+      if (cur >= maxNow - 1) {
+        stopPlay();
+        return;
+      }
+      advanceStep();
+    }, playSpeed);
+  }, [playSpeed, advanceStep, stopPlay]);
+
+  // Stop play when speed changes or tab changes
+  useEffect(() => { stopPlay(); }, [playSpeed, tab, stopPlay]);
+
+  // Stop play when reaching the end
+  useEffect(() => {
+    if (isPlaying && getCurrentStepIdx() >= getCurrentMaxSteps() - 1) {
+      stopPlay();
+    }
+  }, [isPlaying, getCurrentStepIdx, getCurrentMaxSteps, stopPlay]);
+
   const resetAll = () => {
+    stopPlay();
     setNfaResult(null); setNfaStepIdx(-1); setNfaApplied(false);
     setMinResult(null); setMinStepIdx(-1); setMinApplied(false);
     setReResult(null); setReStepIdx(-1); setReApplied(false);
@@ -98,8 +265,9 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
 
     return (
       <>
-        {renderControls(canRun, run, stepFwd, ffwd, () => { setNfaResult(null); setNfaStepIdx(-1); setNfaApplied(false); },
-          !canRun ? 'Switch to NFA mode first' : undefined)}
+        {renderControls(canRun, run, stepFwd, ffwd, () => { stopPlay(); setNfaResult(null); setNfaStepIdx(-1); setNfaApplied(false); },
+          !canRun ? 'Switch to NFA mode first' : undefined,
+          nfaResult !== null && nfaStepIdx < nfaResult.steps.length - 1)}
         <div className="flex-1 flex overflow-hidden">
           {!nfaResult ? (
             <div className="flex-1 flex items-center justify-center">
@@ -116,10 +284,10 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 {visibleSteps.length === 0 && <p className="font-mono text-[11px] text-[var(--color-text-dim)]">Press ⏩ to step through...</p>}
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
-                    <div key={i} className={`font-mono text-xs flex items-center gap-1 py-0.5 ${i === nfaStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                    <div key={i} className={`font-mono text-xs flex items-center gap-1 py-0.5 transition-all duration-200 ${i === nfaStepIdx ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/5 -mx-1 px-1' : 'text-[var(--color-text-dim)]'}`}>
                       <span className="text-[11px] w-5 shrink-0">{i + 1}.</span>
                       <span>δ({step.subsetLabel}, {step.symbol}) = {step.resultLabel}</span>
-                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1">NEW</span>}
+                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1 animate-pulse">NEW</span>}
                     </div>
                   ))}
                 </div>
@@ -145,8 +313,9 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
 
     return (
       <>
-        {renderControls(canRun, run, stepFwd, ffwd, () => { setMinResult(null); setMinStepIdx(-1); setMinApplied(false); },
-          !canRun ? 'Switch to DFA mode first' : undefined)}
+        {renderControls(canRun, run, stepFwd, ffwd, () => { stopPlay(); setMinResult(null); setMinStepIdx(-1); setMinApplied(false); },
+          !canRun ? 'Switch to DFA mode first' : undefined,
+          minResult !== null && minStepIdx < minResult.steps.length - 1)}
         <div className="flex-1 flex overflow-hidden">
           {!minResult ? (
             <div className="flex-1 flex items-center justify-center">
@@ -168,7 +337,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 )}
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
-                    <div key={i} className={`font-mono text-xs py-0.5 ${i === minStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                    <div key={i} className={`font-mono text-xs py-0.5 transition-all duration-200 ${i === minStepIdx ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/5 -mx-1 px-1' : 'text-[var(--color-text-dim)]'}`}>
                       <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       <span className="text-[var(--color-reject)]">✗ </span>
                       ({step.stateA}, {step.stateB})
@@ -201,6 +370,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
       }
     };
     const visibleSteps = reResult ? reResult.steps.slice(0, reStepIdx + 1) : [];
+    const canPlay = reResult !== null && !reResult.error && reStepIdx < reResult.steps.length - 1;
 
     return (
       <>
@@ -215,8 +385,13 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           <div className="flex items-center gap-0.5">
             <button onClick={run} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
             <button onClick={stepFwd} disabled={!canRun || (reResult !== null && reStepIdx >= reResult.steps.length - 1)} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
-            <button onClick={ffwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><FastForward size={14} /></button>
-            <button onClick={() => { setReResult(null); setReStepIdx(-1); setReApplied(false); }} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
+            {isPlaying ? (
+              <button onClick={stopPlay} className="p-1 text-[var(--color-accent)]"><Pause size={14} /></button>
+            ) : (
+              <button onClick={() => { if (!reResult) run(); startPlay(); }} disabled={!canPlay && !canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30" title="Auto-play"><FastForward size={14} /></button>
+            )}
+            <button onClick={ffwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30" title="Jump to end"><FastForward size={14} className="opacity-60" /></button>
+            <button onClick={() => { stopPlay(); setReResult(null); setReStepIdx(-1); setReApplied(false); }} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden">
@@ -239,7 +414,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
-                    <div key={i} className={`font-mono text-xs py-0.5 ${i === reStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                    <div key={i} className={`font-mono text-xs py-0.5 transition-all duration-200 ${i === reStepIdx ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/5 -mx-1 px-1' : 'text-[var(--color-text-dim)]'}`}>
                       <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       {step.description}
                     </div>
@@ -266,8 +441,9 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
 
     return (
       <>
-        {renderControls(canRun, run, stepFwd, ffwd, () => { setFareResult(null); setFareStepIdx(-1); },
-          !canRun ? 'Build an automaton first' : undefined)}
+        {renderControls(canRun, run, stepFwd, ffwd, () => { stopPlay(); setFareResult(null); setFareStepIdx(-1); },
+          !canRun ? 'Build an automaton first' : undefined,
+          fareResult !== null && fareStepIdx < fareResult.steps.length - 1)}
         <div className="flex-1 flex overflow-hidden">
           {!fareResult ? (
             <div className="flex-1 flex items-center justify-center">
@@ -283,7 +459,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
-                    <div key={i} className={`font-mono text-xs py-0.5 ${i === fareStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                    <div key={i} className={`font-mono text-xs py-0.5 transition-all duration-200 ${i === fareStepIdx ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/5 -mx-1 px-1' : 'text-[var(--color-text-dim)]'}`}>
                       <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       Eliminate <span className="text-[var(--color-reject)]">{step.eliminatedState}</span>
                       <span className="text-[11px] ml-2">({step.edgesUpdated} edges updated)</span>
@@ -368,6 +544,7 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
     onFfwd: () => void,
     onReset: () => void,
     warning?: string,
+    canAutoPlay?: boolean,
   ) => (
     <div className="px-3 py-1.5 border-b border-[var(--color-border)] flex items-center gap-2">
       {warning && <span className="font-mono text-[11px] text-[var(--color-reject)]">{warning}</span>}
@@ -379,6 +556,15 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
         <button onClick={onStep} disabled={!canRun} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors">
           <StepForward size={12} /> Step
         </button>
+        {isPlaying ? (
+          <button onClick={stopPlay} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-accent)] bg-[var(--color-accent)]/10 transition-colors">
+            <Pause size={12} /> Pause
+          </button>
+        ) : (
+          <button onClick={() => { if (getCurrentMaxSteps() === 0) onRun(); setTimeout(startPlay, 50); }} disabled={!canRun && !canAutoPlay} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors" title="Auto-play steps">
+            <Play size={12} /><Play size={10} className="-ml-2.5" /> Auto
+          </button>
+        )}
         <button onClick={onFfwd} disabled={!canRun} className="flex items-center gap-1 px-2 py-1 font-mono text-[11px] text-[var(--color-text-dim)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 disabled:opacity-30 transition-colors">
           <FastForward size={12} /> All
         </button>
@@ -434,7 +620,6 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
         setCombineResult(r); setCombineStepIdx(-1); setCombineApplied(false);
         return;
       }
-      // Build DFA B from RE: RE → NFA → DFA
       const nfa = reToNFA(combineReB.trim());
       if (nfa.error || nfa.states.length === 0) return;
       const dfa = nfaToDFA(nfa.states, nfa.transitions);
@@ -495,8 +680,13 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
           <div className="flex items-center gap-0.5 ml-auto">
             <button onClick={run} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><Play size={14} /></button>
             <button onClick={stepFwd} disabled={!canRun || (combineResult !== null && combineStepIdx >= combineResult.steps.length - 1)} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><StepForward size={14} /></button>
-            <button onClick={ffwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><FastForward size={14} /></button>
-            <button onClick={() => { setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
+            {isPlaying ? (
+              <button onClick={stopPlay} className="p-1 text-[var(--color-accent)]"><Pause size={14} /></button>
+            ) : (
+              <button onClick={() => { if (!combineResult) run(); setTimeout(startPlay, 50); }} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30" title="Auto-play"><FastForward size={14} /></button>
+            )}
+            <button onClick={ffwd} disabled={!canRun} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)] disabled:opacity-30"><FastForward size={14} className="opacity-60" /></button>
+            <button onClick={() => { stopPlay(); setCombineResult(null); setCombineStepIdx(-1); setCombineApplied(false); }} className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-accent)]"><RotateCcw size={14} /></button>
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden">
@@ -515,10 +705,10 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
                 </div>
                 <div className="space-y-0.5">
                   {visibleSteps.map((step, i) => (
-                    <div key={i} className={`font-mono text-xs py-0.5 ${i === combineStepIdx ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-dim)]'}`}>
+                    <div key={i} className={`font-mono text-xs py-0.5 transition-all duration-200 ${i === combineStepIdx ? 'text-[var(--color-accent)] bg-[var(--color-accent)]/5 -mx-1 px-1' : 'text-[var(--color-text-dim)]'}`}>
                       <span className="text-[11px] w-5 inline-block">{i + 1}.</span>
                       δ({step.pairLabel}, {step.symbol}) = {step.resultLabel}
-                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1">NEW</span>}
+                      {step.isNew && <span className="text-[11px] text-[var(--color-accent)] ml-1 animate-pulse">NEW</span>}
                     </div>
                   ))}
                 </div>
@@ -576,10 +766,35 @@ export default function ConvertPanel({ isMobile, onClose }: { isMobile: boolean;
             </button>
           ))}
         </div>
+
+        {/* Speed slider */}
+        <div className="flex items-center gap-1 mr-1 shrink-0">
+          <span className="font-mono text-[9px] text-[var(--color-text-dim)]">⚡</span>
+          <input
+            type="range"
+            min={100}
+            max={1500}
+            step={100}
+            value={1600 - playSpeed}
+            onChange={e => setPlaySpeed(1600 - Number(e.target.value))}
+            className="w-12 h-1 accent-[var(--color-accent)] cursor-pointer"
+            title={`Speed: ${playSpeed}ms per step`}
+          />
+        </div>
+
         <button onClick={onClose} className="p-2 text-[var(--color-text-dim)] hover:text-[var(--color-text)] shrink-0">
           <X size={14} />
         </button>
       </div>
+
+      {/* Step label banner */}
+      {conversionHighlightLabel && (
+        <div className="px-3 py-1 bg-[var(--color-accent)]/10 border-b border-[var(--color-accent)]/20">
+          <span className="font-mono text-[11px] text-[var(--color-accent)]">
+            {conversionHighlightLabel}
+          </span>
+        </div>
+      )}
 
       {/* Tab content */}
       <div className="flex flex-col flex-1 overflow-hidden">
