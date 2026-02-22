@@ -61,7 +61,7 @@ export default function GrammarEditor({ isMobile, initialGrammarText }: { isMobi
   useEffect(() => {
     const timer = setTimeout(() => {
       if (grammarText.trim()) {
-        const { encodeGrammar } = require('@/url');
+        const { encodeGrammar } = require('@/lib/url');
         const hash = encodeGrammar(grammarText);
         window.history.replaceState(null, '', `#${hash}`);
       }
