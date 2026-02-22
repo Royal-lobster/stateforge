@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '@/store';
 import {
   MousePointer2, Plus, ArrowRight, Trash2, Undo2, Redo2,
@@ -107,6 +107,7 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
 }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -124,9 +125,13 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
     }},
   ];
 
+  // Get button position for fixed dropdown
+  const rect = btnRef.current?.getBoundingClientRect();
+
   return (
     <div className="relative">
       <button
+        ref={btnRef}
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1 p-1.5 text-[var(--color-text-dim)] hover:text-[var(--color-text)] hover:bg-[var(--bg-hover)] transition-colors"
         title="Export (⌘E)"
@@ -137,7 +142,10 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute top-full right-0 mt-1 z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[130px] animate-scale-in">
+          <div
+            className="fixed z-50 bg-[var(--bg-surface-raised)] border border-[var(--color-border)] shadow-panel min-w-[130px] animate-scale-in"
+            style={rect ? { top: rect.bottom + 4, right: window.innerWidth - rect.right } : {}}
+          >
             {items.map(item => (
               <button
                 key={item.label}
@@ -152,7 +160,10 @@ function ExportDropdown({ states, transitions, mode, onExportJSON }: {
         </>
       )}
       {toast && (
-        <div className="absolute top-full right-0 mt-1 z-50 bg-[var(--color-accent)] text-[var(--bg-primary)] px-3 py-1.5 font-mono text-xs whitespace-nowrap animate-scale-in">
+        <div
+          className="fixed z-50 bg-[var(--color-accent)] text-[var(--bg-primary)] px-3 py-1.5 font-mono text-xs whitespace-nowrap animate-scale-in"
+          style={rect ? { top: rect.bottom + 4, right: window.innerWidth - rect.right } : {}}
+        >
           {toast}
         </div>
       )}
