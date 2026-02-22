@@ -544,6 +544,10 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             const to = stateMap.get(t.to);
             if (!from || !to) return null;
             const isSelected = selectedIds.has(t.id);
+            const isConvTrans = conversionHighlight?.highlightedTransitions.has(t.id);
+            const tStroke = isConvTrans ? 'var(--color-accent)' : isSelected ? 'var(--color-accent)' : 'var(--color-border)';
+            const tWidth = (isConvTrans || isSelected) ? 2 : 1.5;
+            const tMarker = (isConvTrans || isSelected) ? 'url(#arrowhead)' : 'url(#arrowhead-dim)';
             const curveOff = getEdgeCurveOffset(t, transitions);
 
             if (t.from === t.to) {
@@ -555,7 +559,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
               const spread = 12 + selfIdx * 4;
               return (
                 <g key={t.id}>
-                  <path d={`M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
+                  <path d={`M ${cx - spread} ${cy - STATE_RADIUS + 2} C ${cx - spread - 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread + 18} ${cy - STATE_RADIUS - loopR * 2}, ${cx + spread} ${cy - STATE_RADIUS + 2}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
                   <text x={cx} y={cy - STATE_RADIUS - loopR * 1.5} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
                 </g>
               );
@@ -578,9 +582,9 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
             return (
               <g key={t.id}>
                 {curveOff > 0 ? (
-                  <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
+                  <path d={`M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`} fill="none" stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
                 ) : (
-                  <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={isSelected ? 'var(--color-accent)' : 'var(--color-border)'} strokeWidth={isSelected ? 2 : 1.5} markerEnd={isSelected ? 'url(#arrowhead)' : 'url(#arrowhead-dim)'} />
+                  <line x1={startX} y1={startY} x2={endX} y2={endY} stroke={tStroke} strokeWidth={tWidth} markerEnd={tMarker} />
                 )}
                 <text x={labelX} y={labelY - 4} textAnchor="middle" dominantBaseline="middle" className="canvas-label" fill="var(--color-text)" fontSize="12">{t.symbols.join(', ')}</text>
               </g>
@@ -612,7 +616,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
               <g key={s.id}>
                 {s.isInitial && <line x1={s.x - STATE_RADIUS - 30} y1={s.y} x2={s.x - STATE_RADIUS - 2} y2={s.y} stroke="var(--color-accent)" strokeWidth={2} markerEnd="url(#arrowhead)" />}
                 {s.isAccepting && <rect x={s.x - STATE_RADIUS - 4} y={s.y - STATE_RADIUS - 4} width={(STATE_RADIUS + 4) * 2} height={(STATE_RADIUS + 4) * 2} fill="none" stroke={strokeColor} strokeWidth={1} />}
-                <rect x={s.x - STATE_RADIUS} y={s.y - STATE_RADIUS} width={STATE_RADIUS * 2} height={STATE_RADIUS * 2} fill={fillColor} stroke={strokeColor} strokeWidth={isSelected || isSimActive ? 2 : 1.5} filter={isSelected ? 'url(#glow)' : undefined} />
+                <rect x={s.x - STATE_RADIUS} y={s.y - STATE_RADIUS} width={STATE_RADIUS * 2} height={STATE_RADIUS * 2} fill={fillColor} stroke={strokeColor} strokeWidth={isSelected || isSimActive || isConvHighlighted ? 2 : 1.5} filter={isSelected || isConvHighlighted ? 'url(#glow)' : undefined} />
                 <text x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" className="canvas-label" fill="var(--color-text)" fontSize={s.label.length > 6 ? Math.max(9, Math.floor(84 / s.label.length)) : 14} fontWeight={600}>{s.label.length > 10 ? s.label.slice(0, 9) + '…' : s.label}</text>
               </g>
             );
