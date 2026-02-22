@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/icon.svg" alt="StateForge" width="120" />
+<img src="public/icon.svg" alt="StateForge" width="400" />
 
-<br /><br />
+# StateForge
 
 **JFLAP for the modern web — build, simulate, and share automata in the browser.**
 
