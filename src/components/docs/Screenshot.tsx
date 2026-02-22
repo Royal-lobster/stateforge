@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { X as XIcon } from 'lucide-react';
+import { imageDimensions } from './image-dimensions';
 
 export function Screenshot({ id, description, src }: { id: string; description: string; src?: string }) {
+  const dims = src ? imageDimensions[src] : undefined;
   const [lightbox, setLightbox] = useState(false);
 
   if (!src) {
@@ -21,7 +23,15 @@ export function Screenshot({ id, description, src }: { id: string; description: 
     <>
       <figure id={`screenshot-${id}`} className="my-6 group cursor-pointer" onClick={() => setLightbox(true)}>
         <div className="border border-[var(--color-border)] bg-[var(--bg-surface-sunken)] overflow-hidden relative">
-          <img src={src} alt={description} className="w-full block" loading="lazy" />
+          <img
+            src={src}
+            alt={description}
+            width={dims?.width}
+            height={dims?.height}
+            className="w-full block"
+            style={dims ? { aspectRatio: `${dims.width} / ${dims.height}` } : undefined}
+            loading="lazy"
+          />
           <div className="absolute inset-0 bg-[var(--color-accent)]/0 group-hover:bg-[var(--color-accent)]/5 transition-colors flex items-center justify-center">
             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-accent)] font-mono text-xs tracking-wider bg-[var(--bg-primary)]/80 px-3 py-1.5 border border-[var(--color-accent)]/30">CLICK TO EXPAND</span>
           </div>

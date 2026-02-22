@@ -1,0 +1,20 @@
+/** Auto-generated image dimensions for layout shift prevention */
+export const imageDimensions: Record<string, { width: number; height: number }> = {
+  "/docs/canvas-dfa.png": { width: 2560, height: 1440 },
+  "/docs/context-menu.png": { width: 2560, height: 1440 },
+  "/docs/conversions.png": { width: 2560, height: 1440 },
+  "/docs/gallery.png": { width: 2560, height: 1440 },
+  "/docs/grammar-editor.png": { width: 2560, height: 1440 },
+  "/docs/l-system.png": { width: 2560, height: 1440 },
+  "/docs/mealy-sim.png": { width: 2560, height: 448 },
+  "/docs/multi-run.png": { width: 2560, height: 448 },
+  "/docs/pda-sim.png": { width: 2560, height: 448 },
+  "/docs/shortcuts.png": { width: 768, height: 1152 },
+  "/docs/sidebar.png": { width: 512, height: 920 },
+  "/docs/sim-accepted.png": { width: 2560, height: 448 },
+  "/docs/sim-idle.png": { width: 2560, height: 448 },
+  "/docs/sim-rejected.png": { width: 2560, height: 448 },
+  "/docs/tm-sim.png": { width: 2560, height: 448 },
+  "/docs/toolbar.png": { width: 2560, height: 72 },
+  "/docs/transitions.png": { width: 2048, height: 920 },
+};
