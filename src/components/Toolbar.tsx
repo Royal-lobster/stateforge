@@ -188,6 +188,8 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
   const autoLayout = useStore(s => s.autoLayout);
   const clearAll = useStore(s => s.clearAll);
   const zoomToFit = useStore(s => s.zoomToFit);
+  const snapToGrid = useStore(s => s.snapToGrid);
+  const toggleSnapToGrid = useStore(s => s.toggleSnapToGrid);
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const toggleSimPanel = useStore(s => s.toggleSimPanel);
   const loadAutomaton = useStore(s => s.loadAutomaton);
@@ -433,6 +435,9 @@ export default function Toolbar({ isMobile, onConvert, onModeChange, onGallery, 
           </ToolBtn>
           <ToolBtn onClick={autoLayout} title="Auto Layout" shortcut="⇧⌘L" className="p-1.5">
             <LayoutGrid size={16} />
+          </ToolBtn>
+          <ToolBtn active={snapToGrid} onClick={toggleSnapToGrid} title="Snap to Grid" shortcut="⌘G" className="p-1.5">
+            <Magnet size={16} />
           </ToolBtn>
           <ToolBtn onClick={() => { if (window.confirm('Clear all states and transitions?')) clearAll(); }} title="Clear All" shortcut="⇧⌘X" className="p-1.5">
             <RotateCcw size={16} />

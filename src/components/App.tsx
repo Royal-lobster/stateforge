@@ -34,6 +34,7 @@ export default function App() {
   const toggleSidebar = useStore(s => s.toggleSidebar);
   const toggleSimPanel = useStore(s => s.toggleSimPanel);
   const addTrapState = useStore(s => s.addTrapState);
+  const toggleSnapToGrid = useStore(s => s.toggleSnapToGrid);
   const simStart = useStore(s => s.simStart);
   const simStep = useStore(s => s.simStep);
   const simFastRun = useStore(s => s.simFastRun);
@@ -132,6 +133,7 @@ export default function App() {
         if (key === '.') { e.preventDefault(); toggleSimPanel(); return; }
         if (key === '/') { e.preventDefault(); toggleSidebar(); return; }
         if (key === 'm' && !shift) { e.preventDefault(); setShowConvert(v => !v); return; }
+        if (key === 'g' && !shift) { e.preventDefault(); toggleSnapToGrid(); return; }
         if (key === 'a' && !inInput) { e.preventDefault(); setSelected(new Set(states.map(s => s.id))); return; }
         if (key === '0') { e.preventDefault(); simReset(); showToast('Sim Reset'); return; }
         if (key === '1') { e.preventDefault(); zoomToFit(); return; }
