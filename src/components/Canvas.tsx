@@ -92,6 +92,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
 
   const addState = useStore(s => s.addState);
   const moveStates = useStore(s => s.moveStates);
+  const setStatePositions = useStore(s => s.setStatePositions);
   const deleteState = useStore(s => s.deleteState);
   const renameState = useStore(s => s.renameState);
   const toggleInitial = useStore(s => s.toggleInitial);
@@ -112,7 +113,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
 
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [dragState, setDragState] = useState<{ id: string; startX: number; startY: number; pushed: boolean } | null>(null);
+  const [dragState, setDragState] = useState<{ id: string; startX: number; startY: number; origPositions: Map<string, {x: number; y: number}>; pushed: boolean } | null>(null);
   const [boxSelect, setBoxSelect] = useState<{ startX: number; startY: number; endX: number; endY: number } | null>(null);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [editInput, setEditInput] = useState('');
@@ -349,7 +350,9 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
     if (hitState) {
       if (e.shiftKey) toggleSelected(hitState.id);
       else if (!selectedIds.has(hitState.id)) setSelected(new Set([hitState.id]));
-      setDragState({ id: hitState.id, startX: e.clientX, startY: e.clientY, pushed: false });
+      const draggedIds = selectedIds.has(hitState.id) ? [...selectedIds].filter(id => states.some(s => s.id === id)) : [hitState.id];
+      const origPositions = new Map(draggedIds.map(id => { const s = states.find(s => s.id === id)!; return [id, { x: s.x, y: s.y }]; }));
+      setDragState({ id: hitState.id, startX: e.clientX, startY: e.clientY, origPositions, pushed: false });
       return;
     }
     const hitTrans = getTransitionAt(w.x, w.y, transitions, states);
@@ -366,13 +369,15 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
     if (isPanning) { setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y }); return; }
     if (transitionDraft) { const w = getWorldPos(e); setTransitionDraft({ ...transitionDraft, x: w.x, y: w.y }); return; }
     if (dragState) {
-      const dx = (e.clientX - dragState.startX) / zoom;
-      const dy = (e.clientY - dragState.startY) / zoom;
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      const totalDx = (e.clientX - dragState.startX) / zoom;
+      const totalDy = (e.clientY - dragState.startY) / zoom;
+      if (Math.abs(totalDx) > 2 || Math.abs(totalDy) > 2) {
         if (!dragState.pushed) { pushUndo(); setDragState({ ...dragState, pushed: true }); }
-        const draggedIds = selectedIds.has(dragState.id) ? [...selectedIds].filter(id => states.some(s => s.id === id)) : [dragState.id];
-        moveStates(draggedIds, dx, dy);
-        setDragState({ ...dragState, startX: e.clientX, startY: e.clientY, pushed: true });
+        const newPositions = new Map<string, {x: number; y: number}>();
+        dragState.origPositions.forEach((orig, id) => {
+          newPositions.set(id, { x: orig.x + totalDx, y: orig.y + totalDy });
+        });
+        setStatePositions(newPositions);
       }
       return;
     }
@@ -380,7 +385,7 @@ export default function Canvas({ isMobile }: { isMobile: boolean }) {
       const rect = containerRef.current!.getBoundingClientRect();
       setBoxSelect({ ...boxSelect, endX: e.clientX - rect.left, endY: e.clientY - rect.top });
     }
-  }, [isPanning, panStart, transitionDraft, dragState, boxSelect, pan, zoom, getWorldPos, setTransitionDraft, moveStates, pushUndo, selectedIds, states, setPan]);
+  }, [isPanning, panStart, transitionDraft, dragState, boxSelect, pan, zoom, getWorldPos, setTransitionDraft, moveStates, setStatePositions, pushUndo, selectedIds, states, setPan]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (isPanning) { setIsPanning(false); return; }

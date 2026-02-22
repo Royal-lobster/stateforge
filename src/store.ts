@@ -59,6 +59,7 @@ interface StoreState {
   renameState: (id: string, label: string) => void;
   moveState: (id: string, x: number, y: number) => void;
   moveStates: (ids: string[], dx: number, dy: number) => void;
+  setStatePositions: (positions: Map<string, {x: number; y: number}>) => void;
   toggleInitial: (id: string) => void;
   toggleAccepting: (id: string) => void;
   addTransition: (from: string, to: string) => void;
@@ -258,6 +259,17 @@ export const useStore = create<StoreState>()(
           const nx = st.x + dx;
           const ny = st.y + dy;
           return { ...st, x: snap ? Math.round(nx / 20) * 20 : nx, y: snap ? Math.round(ny / 20) * 20 : ny };
+        }),
+      });
+    },
+
+    setStatePositions: (positions) => {
+      const snap = get().snapToGrid;
+      set({
+        states: get().states.map(st => {
+          const pos = positions.get(st.id);
+          if (!pos) return st;
+          return { ...st, x: snap ? Math.round(pos.x / 20) * 20 : pos.x, y: snap ? Math.round(pos.y / 20) * 20 : pos.y };
         }),
       });
     },
