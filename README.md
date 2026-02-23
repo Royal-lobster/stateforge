@@ -81,3 +81,5 @@ Full documentation at [stateforge.vercel.app/docs](https://stateforge.vercel.app
 ## 📄 License
 
 MIT
+
+<!-- last deploy: 2026-02-23 -->
